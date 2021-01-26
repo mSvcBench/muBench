@@ -3,7 +3,7 @@ from __future__ import print_function
 import json
 import logging
 from threading import Thread
-from flask import Flask
+from flask import Flask, make_response
 from flask import Response
 from flask import json
 import sys
@@ -11,6 +11,7 @@ import traceback
 import time
 from MicroServiceAbstraction.InternalJobExecutor import run_internal_job
 from MicroServiceAbstraction.ExternalJobExecutor import run_external_jobs_REST
+import random
 
 # Only for TEST
 service_mesh = {"s1": [{"seq_len": 3,
@@ -42,11 +43,6 @@ flask_port = 8080  # application port
 # Requests in python
 # req = requests.get(uri, headers=new_headers, stream=True)
 # response_headers = dict(req.headers)
-
-
-def execute_external_job_REST(param):
-    print("ESEGUO GLI EXTERNAL JOB, param-->", param)
-    time.sleep(10)
 
 
 class HttpThread(Thread):
@@ -82,7 +78,15 @@ class HttpThread(Thread):
                 external_jobs(service_mesh[ID])
             print("*************** EXTERNAL JOB FINISHED! ***************")
 
-            return json.dumps(service_mesh[ID]), 200
+            # Make response with size E[Y] = B
+            # KB -> 1024**1
+            # MB -> 1024**2
+            # GB -> 1024**3
+            bandwidth_load = random.expovariate(1/JOB_PARAMS["B"])
+            num_chars = 1024 ** 2 * bandwidth_load
+            body = '0' * int(num_chars)
+            return make_response(body)
+            # return json.dumps(service_mesh[ID]), 200
             # return json.dumps({"message": "Bad username or password"}), 401
         except Exception as er:
             print(traceback.format_exc())
