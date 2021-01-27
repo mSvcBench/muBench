@@ -29,11 +29,21 @@ service_mesh = {"s1": [{"seq_len": 3,
                 }
 
 
+# CPU load for t seconds -> c: exp negative with average C
+# Response length  -> b: exp negative with average B
+WORK_MODEL = {"s1": {"url": "/api/v1",
+                     "image": "python:latest",
+                     "params": {"c": 100, "b": 5}
+                     },
+              "s2": {"url": "/api/v1",
+                     "image": "python:latest",
+                     "params": {"c": 100, "b": 6}
+                     }
+              }
+
 ID = "s1"  # Service ID
 
-# CPU load for t seconds -> t: exp negative with average T
-# Response bandwidth  -> b: exp negative with average B
-JOB_PARAMS = {"T": 5, "B": 10}
+# WORK_MODEL = {"c": 5, "b": 10}
 REQUEST_METHOD = "REST"
 
 # Flask settings
@@ -48,7 +58,6 @@ flask_port = 8080  # application port
 class HttpThread(Thread):
     app = Flask(__name__)
 
-
     def __init__(self):
         Thread.__init__(self)
 
@@ -60,8 +69,9 @@ class HttpThread(Thread):
         self.app.run(host=flask_host, port=flask_port)
         print("Thread '" + self.name + "closed")
 
-    @app.route('/simulation', methods=['GET'])
-    def start_simulation():
+    # PATH BRUTTO E NOME FUNZIONE BRUTTO
+    @app.route(f"{WORK_MODEL[ID]['url']}", methods=['GET'])
+    def start_worker():
         try:
             HttpThread.app.logger.info('request received')
             # Inutile solo per fare alcuni test sulla questione multi-thread
@@ -69,7 +79,7 @@ class HttpThread(Thread):
 
             # Execute the internal job
             print("*************** INTERNAL JOB ***************")
-            run_internal_job(JOB_PARAMS)
+            run_internal_job(WORK_MODEL[ID]["params"])
             print("*************** INTERNAL JOB FINISHED! ***************")
 
             # Execute the external jobs
@@ -82,8 +92,8 @@ class HttpThread(Thread):
             # KB -> 1024**1
             # MB -> 1024**2
             # GB -> 1024**3
-            bandwidth_load = random.expovariate(1/JOB_PARAMS["B"])
-            num_chars = 1024 ** 2 * bandwidth_load
+            bandwidth_load = random.expovariate(1/WORK_MODEL[ID]["params"]["b"])
+            num_chars = 1024 * bandwidth_load
             body = '0' * int(num_chars)
             return make_response(body)
             # return json.dumps(service_mesh[ID]), 200
@@ -93,9 +103,7 @@ class HttpThread(Thread):
             return json.dumps({"message": "Error"}), 500
 
 
-
 if __name__ == '__main__':
-    # global T, B, ID
 
     # Get parameters from env
     # parameters = os.environ["LOGNAME"]
@@ -109,7 +117,13 @@ if __name__ == '__main__':
         sys.exit(0)
 
     # Function
-
     http_thread = HttpThread()
-
     http_thread.start()
+    # TODO
+    # try:
+    #     http_thread = HttpThread()
+    #     http_thread.start()
+    # except KeyboardInterrupt:
+    #     print('^C received, shutting down the web server')
+
+
