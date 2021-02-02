@@ -15,10 +15,8 @@ class InternalJobExecutor(threading.Thread):
     # Modificare cpt_test, non mi importa del tempo di esecuzione, mi importa della complessità del calcolo
     # cosi da capire se il ritardo e' dovuto al carico della cpu o no
     def internal_job(self):
-        print("PERDO TEMPO ESEGUENDO INTERNAL JOB, E[Xcomplessita]= %s, E[Ybanda]= %s" % (self.params["c"], self.params["b"]))
-        # Negative Exponential Distribution with E[X] = 1/λ, T = 1/λ -> E[X] = T
+        print("JOB: Complessita = %s, E[Y_banda] = %s" % (self.params["c"], self.params["b"]))
         cpu_load = self.params["c"]
-        # finish_time = datetime.now() + timedelta(milliseconds=cpu_load)
         cnt = 0
         for i in compute_pi(cpu_load):
             cnt += 1
