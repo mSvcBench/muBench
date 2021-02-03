@@ -4,69 +4,17 @@ import json
 import logging
 from threading import Thread
 from flask import Flask, make_response
-from flask import Response
 from flask import json
-import sys
 import traceback
-import time
 from InternalJobExecutor import run_internal_job
 from ExternalJobExecutor import run_external_jobs_REST
 import sys
 # from MicroServiceAbstraction.ExternalJobExecutorClass import *
 import random
-from pprint import pprint
 import os
-import TestVar as TsVar
-
-'''
-# Only for TEST
-service_mesh = {"s1": [{"seq_len": 3,
-                        "services": ["s2", "s3"]
-                        },
-                        {"seq_len": 1,
-                        "services": ["s3"]
-                        }
-                       ],
-                "s2": [],
-                "s3": [{"seq_len": 1,
-                        "services": ["s4"]}],
-                "s4": [],
-                "s5": []
-                }
+from pprint import pprint
 
 
-# CPU load for t seconds -> c: exp negative with average C
-# Response length  -> b: exp negative with average B
-WORK_MODEL = {"s1": {"url": "http://localhost:9001",
-                     "path": "/api/v1",
-                     "image": "python:latest",
-                     "params": {"c": 101, "b": 1}
-                     },
-              "s2": {"url": "http://localhost:9002",
-                     "path": "/api/v1",
-                     "image": "python:latest",
-                     "params": {"c": 102, "b": 2}
-                     },
-              "s3": {"url": "http://localhost:9003",
-                     "path": "/api/v1",
-                     "image": "python:latest",
-                     "params": {"c": 103, "b": 3}
-                     },
-              "s4": {"url": "http://localhost:9004",
-                     "path": "/api/v1",
-                     "image": "python:latest",
-                     "params": {"c": 104, "b": 4}
-                     },
-              "s5": {"url": "http://localhost:9005",
-                     "path": "/api/v1",
-                     "image": "python:latest",
-                     "params": {"c": 105, "b": 5}
-                     }
-              }
-'''
-
-ID = "s1"  # Service ID
-# ID = sys.argv[1]  # Service ID
 # try:
 #     filepath = "/etc/podinfo/labels"
 #     with open(filepath) as fp:
@@ -82,18 +30,28 @@ ID = "s1"  # Service ID
 # except Exception as err:
 #     print("ERROR: in read ID from app label")
 
-# ID = os.environ["APP"]
 
-service_mesh = TsVar.service_mesh
-WORK_MODEL = TsVar.WORK_MODEL
+def read_config_files():
+    with open('/etc/config/mesh') as f:
+        mesh = json.load(f)
 
+    with open('/etc/config/model') as f:
+        model = json.load(f)
+
+    return mesh, model
+
+
+# Configuration Variable
+# ID = "s1"  # Service ID
+ID = os.environ["APP"]
+service_mesh, work_model = read_config_files()
+pprint(work_model)
 
 REQUEST_METHOD = "REST"
 
 # Flask settings
 flask_host = "0.0.0.0"
 flask_port = 8080  # application port
-# flask_port = WORK_MODEL[ID]["url"].split(":")[-1]  # application port
 
 
 class HttpThread(Thread):
@@ -111,24 +69,26 @@ class HttpThread(Thread):
         self.app.run(host=flask_host, port=flask_port)
         print("Thread '" + self.name + "closed")
 
-    @app.route(f"{WORK_MODEL[ID]['path']}", methods=['GET'])
+    @app.route("/update", methods=['GET'])
+    def update():
+        print("updatePath")
+        return json.dumps("Update Function Not Implemented Yet! :("), 200
+
+
+    @app.route(f"{work_model[ID]['path']}", methods=['GET'])
     def start_worker():
         try:
-            HttpThread.app.logger.info('request received')
-
-            # Inutile solo per fare alcuni test sulla questione multi-thread
-            # param = request.args.get('p')
+            HttpThread.app.logger.info('Request Received')
 
             # Execute the internal job
-            print("*************** INTERNAL JOB ***************")
-            run_internal_job(WORK_MODEL[ID]["params"])
+            print("*************** INTERNAL JOB STARTED ***************")
+            run_internal_job(work_model[ID]["params"])
             print("############### INTERNAL JOB FINISHED! ###############")
 
             # Execute the external jobs
-            print("*************** EXTERNAL JOB ***************")
-
+            print("*************** EXTERNAL JOB STARTED ***************")
             if len(service_mesh[ID]) > 0:
-                service_error_dict = external_jobs(service_mesh[ID], WORK_MODEL)
+                service_error_dict = external_jobs(service_mesh[ID], work_model)
                 pprint(service_error_dict)
                 if len(service_error_dict):
                     HttpThread.app.logger.error("Error in request external services")
@@ -139,23 +99,18 @@ class HttpThread(Thread):
             # KB -> 1024**1
             # MB -> 1024**2
             # GB -> 1024**3
-            # bandwidth_load = 13
-            bandwidth_load = random.expovariate(1/WORK_MODEL[ID]["params"]["b"])
-            num_chars = 1024 * bandwidth_load
+            bandwidth_load = random.expovariate(1/work_model[ID]["params"]["b"])
+            print("E[bandwidth] = 1/%d ---> Response size = %d KB" % (work_model[ID]["params"]["b"], bandwidth_load))
+            num_chars = 1024 * bandwidth_load  # Response in KB
             body = 'L' * int(num_chars)
             return make_response(body)
             # return json.dumps(service_mesh[ID]), 200
-            # return json.dumps({"message": "Bad username or password"}), 401
-        except Exception as er:
+        except Exception as err:
             print(traceback.format_exc())
             return json.dumps({"message": "Error"}), 500
 
 
 if __name__ == '__main__':
-
-    # Get parameters from env
-    # parameters = os.environ["LOGNAME"]
-    # print("LOGNAME: %s" %parameters)
 
     if REQUEST_METHOD == "REST":
         # Function association
@@ -170,13 +125,3 @@ if __name__ == '__main__':
 
     http_thread.join()
 
-    # try:
-    #     http_thread = HttpThread()
-    #     http_thread.start()
-    # except KeyboardInterrupt:
-    #     print('^C received, shutting down the web server')
-
-
-# import requests
-# time.sleep(2)
-# requests.get("http://localhost:8080/api/v1")

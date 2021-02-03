@@ -12,10 +12,9 @@ class InternalJobExecutor(threading.Thread):
 
     def run(self):
         self.internal_job()
-    # Modificare cpt_test, non mi importa del tempo di esecuzione, mi importa della complessità del calcolo
-    # cosi da capire se il ritardo e' dovuto al carico della cpu o no
+
     def internal_job(self):
-        print("JOB: Complessita = %s, E[Y_banda] = %s" % (self.params["c"], self.params["b"]))
+        print("JOB: complexity = %s" % self.params["c"])
         cpu_load = self.params["c"]
         cnt = 0
         for i in compute_pi(cpu_load):
