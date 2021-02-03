@@ -1,0 +1,63 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: s5-dep
+  labels:
+    zone: default
+    app: s5
+  annotations:
+    qualcosa: qualchevalore
+spec:
+  selector:
+    matchLabels:
+      app: s5-pod
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: s5-pod
+    spec:
+      containers:
+        - name: s5-pod
+          image: lucapetrucci/microservice:latest
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: podinfo
+              mountPath: /etc/podinfo
+            - mountPath: /app/TestVar.py
+              readOnly: true
+              name: test-var
+              subPath: TestVar.py
+          env:
+            - name: APP
+              value: s5
+      volumes:
+        - name: podinfo
+          downwardAPI:
+            items:
+              - path: "labels"
+                fieldRef:
+                  fieldPath: metadata.labels
+              - path: "annotations"
+                fieldRef:
+                  fieldPath: metadata.annotations
+        - name: test-var
+          configMap:
+            name: microservices-configmap
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: s5
+  labels:
+    app: s5-pod
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 8080
+    nodePort:
+    name: input
+  selector:
+    app: s5-pod

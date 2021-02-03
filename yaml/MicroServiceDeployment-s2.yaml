@@ -1,0 +1,63 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: s2-dep
+  labels:
+    zone: default
+    app: s2
+  annotations:
+    qualcosa: qualchevalore
+spec:
+  selector:
+    matchLabels:
+      app: s2-pod
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: s2-pod
+    spec:
+      containers:
+        - name: s2-pod
+          image: lucapetrucci/microservice:latest
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: podinfo
+              mountPath: /etc/podinfo
+            - mountPath: /app/TestVar.py
+              readOnly: true
+              name: test-var
+              subPath: TestVar.py
+          env:
+            - name: APP
+              value: s2
+      volumes:
+        - name: podinfo
+          downwardAPI:
+            items:
+              - path: "labels"
+                fieldRef:
+                  fieldPath: metadata.labels
+              - path: "annotations"
+                fieldRef:
+                  fieldPath: metadata.annotations
+        - name: test-var
+          configMap:
+            name: microservices-configmap
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: s2
+  labels:
+    app: s2-pod
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 8080
+    nodePort:
+    name: input
+  selector:
+    app: s2-pod
