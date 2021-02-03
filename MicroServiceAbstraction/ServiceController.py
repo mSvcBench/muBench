@@ -45,8 +45,6 @@ def read_config_files():
 # ID = "s1"  # Service ID
 ID = os.environ["APP"]
 service_mesh, work_model = read_config_files()
-pprint(work_model)
-
 REQUEST_METHOD = "REST"
 
 # Flask settings

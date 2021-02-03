@@ -26,10 +26,8 @@ spec:
           volumeMounts:
             - name: podinfo
               mountPath: /etc/podinfo
-            - mountPath: /app/TestVar.py
-              readOnly: true
-              name: test-var
-              subPath: TestVar.py
+            - name: config-volume
+              mountPath: /etc/config
           env:
             - name: APP
               value: s1
@@ -44,9 +42,14 @@ spec:
               - path: "annotations"
                 fieldRef:
                   fieldPath: metadata.annotations
-        - name: test-var
+        - name: config-volume
           configMap:
             name: microservices-configmap
+            items:
+            - key: service-mesh
+              path: mesh
+            - key: work-model
+              path: model
 ---
 apiVersion: v1
 kind: Service

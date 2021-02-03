@@ -2,48 +2,47 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: microservices-configmap
+  namespace: default
 data:
-  TestVar.py: |
-    service_mesh = {"s1": [{"seq_len": 2,
-                            "services": ["s2", "s3"]
-                            },
-                            {"seq_len": 1,
-                            "services": ["s3"]
-                            }
-                           ],
-                    "s2": [],
-                    "s3": [{"seq_len": 1,
-                            "services": ["s4"]}],
-                    "s4": [],
-                    "s5": []
-                    }
+  service-mesh: |-
+    {"s1": [{"seq_len": 1,
+      "services": ["s2", "s3"]
+    },
+      {"seq_len": 1,
+        "services": ["s3"]
+      }
+    ],
+      "s2": [],
+      "s3": [{"seq_len": 1,
+        "services": ["s4"]}],
+      "s4": [],
+      "s5": []
+    }
 
-
-    # CPU load for t seconds -> c: exp negative with average C
-    # Response length  -> b: exp negative with average B
-    WORK_MODEL = {"s1": {"url": "http://s1.default.svc.cluster.local",
-                         "path": "/api/v1",
-                         "image": "lucapetrucci/microservice:latest",
-                         "params": {"c": 101, "b": 1}
-                         },
-                  "s2": {"url": "http://s2.default.svc.cluster.local",
-                         "path": "/api/v1",
-                         "image": "lucapetrucci/microservice:latest",
-                         "params": {"c": 102, "b": 2}
-                         },
-                  "s3": {"url": "http://s3.default.svc.cluster.local",
-                         "path": "/api/v1",
-                         "image": "lucapetrucci/microservice:latest",
-                         "params": {"c": 103, "b": 3}
-                         },
-                  "s4": {"url": "http://s4.default.svc.cluster.local",
-                         "path": "/api/v1",
-                         "image": "lucapetrucci/microservice:latest",
-                         "params": {"c": 104, "b": 4}
-                         },
-                  "s5": {"url": "http://s5.default.svc.cluster.local",
-                         "path": "/api/v1",
-                         "image": "lucapetrucci/microservice:latest",
-                         "params": {"c": 105, "b": 5}
-                         }
-                  }
+  work-model: |-
+    {"s1": {"url": "http://s1.default.svc.cluster.local",
+           "path": "/api/v1",
+           "image": "python:latest",
+           "params": {"c": 101, "b": 11}
+           },
+    "s2": {"url": "http://s2.default.svc.cluster.local",
+           "path": "/api/v1",
+           "image": "python:latest",
+           "params": {"c": 102, "b": 12}
+           },
+    "s3": {"url": "http://s3.default.svc.cluster.local",
+           "path": "/api/v1",
+           "image": "python:latest",
+           "params": {"c": 103, "b": 13}
+           },
+    "s4": {"url": "http://s4.default.svc.cluster.local",
+           "path": "/api/v1",
+           "image": "python:latest",
+           "params": {"c": 104, "b": 14}
+           },
+    "s5": {"url": "http://s5.default.svc.cluster.local",
+           "path": "/api/v1",
+           "image": "python:latest",
+           "params": {"c": 105, "b": 15}
+           }
+    }
