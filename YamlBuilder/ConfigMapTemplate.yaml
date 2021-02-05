@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: microservices-configmap
+  namespace: default
+data:
+  service-mesh: |-
+    {{SERVICE_MESH}}
+
+  work-model: |-
+    {{WORK_MODEL}}

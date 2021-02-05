@@ -2,6 +2,7 @@ apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
 kind: Deployment
 metadata:
   name: s4-dep
+  namespace: default
   labels:
     zone: default
     app: s4
@@ -54,6 +55,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: s4
+  namespace: default
   labels:
     app: s4-pod
 spec:

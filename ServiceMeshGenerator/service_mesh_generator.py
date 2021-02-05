@@ -1,5 +1,6 @@
 from igraph import *
 import json
+from pprint import pprint
 
 '''
 {
@@ -26,6 +27,7 @@ import json
 '''
 
 # graph_params_test = {"services_groups": 1, "vertices": 10, "power": 0.9, "edges_per_vertex": 1, "zero_appeal": 0.001}
+graph_params_test = {"services_groups": 1, "vertices": 10, "power": 1, "edges_per_vertex": 1, "zero_appeal": 10}
 
 
 def get_service_mesh(graph_params):
@@ -50,10 +52,11 @@ def get_service_mesh(graph_params):
             service_mesh[f"s{vertex}"] = service_list
 
     # print("THE MESH:\n", json.dumps(service_mesh))
+    return service_mesh
 
     # g.vs["label"] = list(range(graph_params["vertices"]))
     # print(g)
     # plot(g)
 
 
-# get_service_mesh(graph_params_test)
+# pprint(get_service_mesh(graph_params_test))

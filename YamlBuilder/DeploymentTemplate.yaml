@@ -1,26 +1,26 @@
 apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
 kind: Deployment
 metadata:
-  name: s1-dep
-  namespace: default
+  name: {{SERVICE_NAME}}-dep
+  namespace: {{NAMESPACE}}
   labels:
     zone: default
-    app: s1
+    app: {{SERVICE_NAME}}
   annotations:
     something: something
 spec:
   selector:
     matchLabels:
-      app: s1-pod
+      app: {{SERVICE_NAME}}-pod
   replicas: 1
   template:
     metadata:
       labels:
-        app: s1-pod
+        app: {{SERVICE_NAME}}-pod
     spec:
       containers:
-        - name: s1-pod
-          image: lucapetrucci/microservice:latest
+        - name: {{SERVICE_NAME}}-pod
+          image: {{IMAGE}}
           ports:
             - containerPort: 8080
           volumeMounts:
@@ -30,7 +30,7 @@ spec:
               mountPath: /etc/config
           env:
             - name: APP
-              value: s1
+              value: {{SERVICE_NAME}}
 #      terminationGracePeriodSeconds: 0
       volumes:
         - name: podinfo
@@ -54,10 +54,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: s1
-  namespace: default
+  name: {{SERVICE_NAME}}
+  namespace: {{NAMESPACE}}
   labels:
-    app: s1-pod
+    app: {{SERVICE_NAME}}-pod
 spec:
   type: NodePort
   ports:
@@ -66,4 +66,4 @@ spec:
     nodePort:
     name: input
   selector:
-    app: s1-pod
+    app: {{SERVICE_NAME}}-pod
