@@ -38,14 +38,17 @@ YAML_OUTPUT_FILE = "MicroServiceDeployment"
 NAMESPACE = "default"
 IMAGE = "lucapetrucci/microservice:latest"
 CLUSTER_DOMAIN = "cluster"
+PATH = "/api/v1"
 # var_to_be_replaced = {"{{string_in_template}}": "new_value", ...}
 var_to_be_replaced = {}
 
+
 # Add params to work_model json
 # http://s1.default.svc.cluster.local
-def add_param_to_work_model(model, name_space, cluster_domain, image):
+def add_param_to_work_model(model, path, name_space, cluster_domain, image):
     for service in model:
         model[service].update({"url": f"http://{service}.{name_space}.svc.{cluster_domain}.local"})
+        model[service].update({"path": path})
         model[service].update({"image": image})
         model[service].update({"namespace": name_space})
     print("Work Model Updated!")
@@ -75,7 +78,7 @@ def create_configmap_yaml(mesh, model):
 
     print("ConfigMap Created!")
 
-add_param_to_work_model(work_model, NAMESPACE, CLUSTER_DOMAIN, IMAGE)
+add_param_to_work_model(work_model, PATH, NAMESPACE, CLUSTER_DOMAIN, IMAGE)
 
 create_deployment_yaml_files(work_model, var_to_be_replaced)
 
