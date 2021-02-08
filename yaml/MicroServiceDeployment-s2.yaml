@@ -27,7 +27,7 @@ spec:
             - name: podinfo
               mountPath: /etc/podinfo
             - name: config-volume
-              mountPath: /etc/config
+              mountPath: /etc/MSconfig
           env:
             - name: APP
               value: s2
@@ -47,9 +47,9 @@ spec:
             name: microservices-configmap
             items:
             - key: service-mesh
-              path: mesh
+              path: servicemesh
             - key: work-model
-              path: model
+              path: workmodel
 ---
 apiVersion: v1
 kind: Service

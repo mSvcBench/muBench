@@ -9,7 +9,6 @@ itsdangerous==1.1.0
 Jinja2==2.11.2
 MarkupSafe==1.1.1
 PyJWT==1.7.1
-python-igraph==0.8.3
 requests==2.25.1
 six==1.15.0
 urllib3==1.26.2

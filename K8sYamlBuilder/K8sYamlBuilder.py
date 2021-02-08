@@ -67,19 +67,21 @@ def create_deployment_yaml_files(model, args):
             file.write(f)
     print("Deployment Created!")
 
-def create_configmap_yaml(mesh, model):
+def create_configmap_yaml(mesh, model, namespace):
     with open('ConfigMapTemplate.yaml', 'r') as file:
         f = file.read()
         f = f.replace("{{SERVICE_MESH}}", json.dumps(mesh))
         f = f.replace("{{WORK_MODEL}}", json.dumps(model))
+        f = f.replace("{{NAMESPACE}}", namespace)
 
     with open("yamls/ConfigMapMicroSevice.yaml", 'w') as file:
         file.write(f)
 
     print("ConfigMap Created!")
 
+
 add_param_to_work_model(work_model, PATH, NAMESPACE, CLUSTER_DOMAIN, IMAGE)
 
 create_deployment_yaml_files(work_model, var_to_be_replaced)
 
-create_configmap_yaml(service_mesh, work_model)
+create_configmap_yaml(service_mesh, work_model, NAMESPACE)

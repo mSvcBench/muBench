@@ -30,21 +30,22 @@ from pprint import pprint
 # except Exception as err:
 #     print("ERROR: in read ID from app label")
 
-
 def read_config_files():
-    with open('/etc/config/mesh') as f:
-        mesh = json.load(f)
+    with open('/etc/MSconfig/servicemesh') as f:
+        servicemesh = json.load(f)
 
-    with open('/etc/config/model') as f:
-        model = json.load(f)
+    with open('/etc/MSconfig/workmodel') as f:
+        workmodel = json.load(f)
 
-    return mesh, model
+    return servicemesh, workmodel
 
 
 # Configuration Variable
 # ID = "s1"  # Service ID
 ID = os.environ["APP"]
 service_mesh, work_model = read_config_files()
+my_service_mesh = service_mesh[ID]
+my_work_model = work_model[ID]
 REQUEST_METHOD = "REST"
 
 # Flask settings
@@ -72,21 +73,21 @@ class HttpThread(Thread):
         print("updatePath")
         return json.dumps("Update Function Not Implemented Yet! :("), 200
 
-
-    @app.route(f"{work_model[ID]['path']}", methods=['GET'])
+    # work_model modificare in my_work_model
+    @app.route(f"{my_work_model['path']}", methods=['GET'])
     def start_worker():
         try:
             HttpThread.app.logger.info('Request Received')
 
             # Execute the internal job
             print("*************** INTERNAL JOB STARTED ***************")
-            run_internal_job(work_model[ID]["params"])
+            run_internal_job(my_work_model["params"])
             print("############### INTERNAL JOB FINISHED! ###############")
 
             # Execute the external jobs
             print("*************** EXTERNAL JOB STARTED ***************")
-            if len(service_mesh[ID]) > 0:
-                service_error_dict = external_jobs(service_mesh[ID], work_model)
+            if len(my_service_mesh) > 0:
+                service_error_dict = external_jobs(my_service_mesh, work_model)
                 pprint(service_error_dict)
                 if len(service_error_dict):
                     HttpThread.app.logger.error("Error in request external services")
@@ -97,8 +98,8 @@ class HttpThread(Thread):
             # KB -> 1024**1
             # MB -> 1024**2
             # GB -> 1024**3
-            bandwidth_load = random.expovariate(1/work_model[ID]["params"]["b"])
-            print("E[bandwidth] = 1/%d ---> Response size = %d KB" % (work_model[ID]["params"]["b"], bandwidth_load))
+            bandwidth_load = random.expovariate(1/my_work_model["params"]["b"])
+            print("E[bandwidth] = 1/%d ---> Response size = %d KB" % (my_work_model["params"]["b"], bandwidth_load))
             num_chars = 1024 * bandwidth_load  # Response in KB
             body = 'L' * int(num_chars)
             return make_response(body)

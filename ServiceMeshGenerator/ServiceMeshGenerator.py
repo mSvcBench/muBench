@@ -11,7 +11,7 @@ from pprint import pprint
     },
     {
       "seq_len": 2,
-      "services": ["s5", "sLuca"]
+      "services": ["s5", "s3"]
     }
   ],
   "s2": [],
@@ -52,11 +52,11 @@ def get_service_mesh(graph_params):
             service_mesh[f"s{vertex}"] = service_list
 
     # print("THE MESH:\n", json.dumps(service_mesh))
-    return service_mesh
 
     # g.vs["label"] = list(range(graph_params["vertices"]))
     # print(g)
     # plot(g)
 
+    return service_mesh
 
 # pprint(get_service_mesh(graph_params_test))

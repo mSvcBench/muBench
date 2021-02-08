@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: microservices-configmap
-  namespace: default
+  namespace: {{NAMESPACE}}
 data:
   service-mesh: |-
     {{SERVICE_MESH}}
