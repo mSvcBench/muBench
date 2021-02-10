@@ -9,7 +9,7 @@ import traceback
 from InternalJobExecutor import run_internal_job
 from ExternalJobExecutor import run_external_jobs_REST
 import sys
-# from MicroServiceAbstraction.ExternalJobExecutorClass import *
+# from MicroServiceCellAbstraction.ExternalJobExecutorClass import *
 import random
 import os
 from pprint import pprint
