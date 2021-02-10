@@ -51,6 +51,8 @@ spec:
               path: servicemesh
             - key: work-model
               path: workmodel
+            - key: workload
+              path: workload
 ---
 apiVersion: v1
 kind: Service

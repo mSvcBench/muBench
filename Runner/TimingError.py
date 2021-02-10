@@ -7,6 +7,7 @@ class TimingError(Exception):
 
     def __str__(self):
         if self.message:
-            return 'TimingError, {0} '.format(self.message)
+            return "All Pool Threads are busy. It's impossible to respect the requests timing! " \
+                   ":( - Event_time: {0} ".format(self.message)
         else:
             return "All Pool Threads are busy. It's impossible to respect the requests timing! :("

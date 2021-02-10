@@ -32,6 +32,14 @@ work_model = {"s1": {"path": "/api/v1",
                      "params": {"c": 105, "b": 15}
                      }
               }
+
+
+workload = [{'services': {'s1': 1, 's2': 0.8}, 'time': 0},
+            {'services': {'s1': 1, 's2': 0.8, 's4': 0.5}, 'time': 2},
+            {'services': {'s2': 0.8}, 'time': 6},
+            {'services': {'s3': 0.3, "s4": 0.5}, 'time': 10},
+            {'services': {'s1': 1}, 'time': 15}]
+
 #########
 
 YAML_OUTPUT_FILE = "MicroServiceDeployment"
@@ -53,6 +61,7 @@ def add_param_to_work_model(model, path, name_space, cluster_domain, image):
         model[service].update({"namespace": name_space})
     print("Work Model Updated!")
 
+
 def create_deployment_yaml_files(model, args):
     for service in model:
         with open('DeploymentTemplate.yaml', 'r') as file:
@@ -67,11 +76,13 @@ def create_deployment_yaml_files(model, args):
             file.write(f)
     print("Deployment Created!")
 
-def create_configmap_yaml(mesh, model, namespace):
+
+def create_configmap_yaml(mesh, model, v_workload, namespace):
     with open('ConfigMapTemplate.yaml', 'r') as file:
         f = file.read()
         f = f.replace("{{SERVICE_MESH}}", json.dumps(mesh))
         f = f.replace("{{WORK_MODEL}}", json.dumps(model))
+        f = f.replace("{{WORKLOAD}}", json.dumps(v_workload))
         f = f.replace("{{NAMESPACE}}", namespace)
 
     with open("yamls/ConfigMapMicroSevice.yaml", 'w') as file:
@@ -84,4 +95,12 @@ add_param_to_work_model(work_model, PATH, NAMESPACE, CLUSTER_DOMAIN, IMAGE)
 
 create_deployment_yaml_files(work_model, var_to_be_replaced)
 
-create_configmap_yaml(service_mesh, work_model, NAMESPACE)
+runner_model = {'runner': {'image': 'lucapetrucci/runner-ssh:latest',
+                           'namespace': 'default',
+                           'path': '/start',
+                           'url': 'http://runner.default.svc.cluster.local'}}
+
+create_deployment_yaml_files(runner_model, var_to_be_replaced)
+
+
+create_configmap_yaml(service_mesh, work_model, workload, NAMESPACE)
