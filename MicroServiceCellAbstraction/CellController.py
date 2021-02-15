@@ -48,13 +48,6 @@ service_mesh, work_model = read_config_files()
 my_service_mesh = service_mesh[ID]
 my_work_model = work_model[ID]
 
-################################
-# Modifico my_work_model per i test
-# my_work_model["params"] = {'ave_luca': {"P": 0.3, "hellos_number": 13, "b": 42}}
-# pprint(my_work_model)
-# exit()
-################################
-
 REQUEST_METHOD = "REST"
 
 # Flask settings
@@ -109,7 +102,10 @@ class HttpThread(Thread):
                     return make_response(json.dumps({"message": "Error in same external services request"}), 500)
             print("############### EXTERNAL JOB FINISHED! ###############")
 
-            return make_response(body)
+            response = make_response(body)
+            response.mimetype = "text/plain"
+            return response
+            # return json.dumps(body), 200
             # return json.dumps(service_mesh[ID]), 200
         except Exception as err:
             print(traceback.format_exc())
