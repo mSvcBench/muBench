@@ -5,44 +5,43 @@ metadata:
   namespace: default
 data:
   service-mesh: |-
-    {"s1": [{"seq_len": 1,
-      "services": ["s2", "s3"]
-    },
-      {"seq_len": 1,
-        "services": ["s3"]
-      }
-    ],
-      "s2": [],
-      "s3": [{"seq_len": 1,
-        "services": ["s4"]}],
-      "s4": [],
-      "s5": []
+    {"s0": [{"seq_len": 1,
+            "services": ["s2", "s3"]
+            },
+           {"seq_len": 1,
+            "services": ["s3"]
+            }
+           ],
+    "s1": [],
+    "s2": [{"seq_len": 1,
+            "services": ["s4"]}],
+    "s3": [],
+    "s4": []
     }
 
   work-model: |-
-    {"s1": {"url": "http://s1.default.svc.cluster.local",
-           "path": "/api/v1",
-           "image": "python:latest",
-           "params": {"c": 101, "b": 11}
-           },
-    "s2": {"url": "http://s2.default.svc.cluster.local",
-           "path": "/api/v1",
-           "image": "python:latest",
-           "params": {"c": 102, "b": 12}
-           },
-    "s3": {"url": "http://s3.default.svc.cluster.local",
-           "path": "/api/v1",
-           "image": "python:latest",
-           "params": {"c": 103, "b": 13}
-           },
-    "s4": {"url": "http://s4.default.svc.cluster.local",
-           "path": "/api/v1",
-           "image": "python:latest",
-           "params": {"c": 104, "b": 14}
-           },
-    "s5": {"url": "http://s5.default.svc.cluster.local",
-           "path": "/api/v1",
-           "image": "python:latest",
-           "params": {"c": 105, "b": 15}
-           }
-    }
+    {'s0': {'image': 'lucapetrucci/microservice:latest',
+           'namespace': 'default',
+           'params': {'compute_pi': {'P': 1, 'b': 11, 'c': [101, 101]}},
+           'path': '/api/v1',
+           'url': 'http://s0.default.svc.cluster.local'},
+    's1': {'image': 'lucapetrucci/microservice:latest',
+           'namespace': 'default',
+           'params': {'compute_pi': {'P': 1, 'b': 11, 'c': [101, 101]}},
+           'path': '/api/v1',
+           'url': 'http://s1.default.svc.cluster.local'},
+    's2': {'image': 'lucapetrucci/microservice:latest',
+           'namespace': 'default',
+           'params': {'compute_pi': {'P': 1, 'b': 11, 'c': [101, 101]}},
+           'path': '/api/v1',
+           'url': 'http://s2.default.svc.cluster.local'},
+    's3': {'image': 'lucapetrucci/microservice:latest',
+           'namespace': 'default',
+           'params': {'compute_pi': {'P': 1, 'b': 11, 'c': [101, 101]}},
+           'path': '/api/v1',
+           'url': 'http://s3.default.svc.cluster.local'},
+    's4': {'image': 'lucapetrucci/microservice:latest',
+           'namespace': 'default',
+           'params': {'compute_pi': {'P': 1, 'b': 11, 'c': [101, 101]}},
+           'path': '/api/v1',
+           'url': 'http://s4.default.svc.cluster.local'}}

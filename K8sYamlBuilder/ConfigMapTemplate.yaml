@@ -9,6 +9,3 @@ data:
 
   work-model: |-
     {{WORK_MODEL}}
-
-  workload: |-
-    {{WORKLOAD}}

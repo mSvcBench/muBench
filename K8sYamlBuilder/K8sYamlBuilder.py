@@ -2,43 +2,26 @@ import json
 from pprint import pprint
 
 # Variabili di test
-service_mesh = {"s1": [{"seq_len": 1,
+service_mesh = {"s0": [{"seq_len": 1,
                         "services": ["s2", "s3"]
                         },
                        {"seq_len": 1,
                         "services": ["s3"]
                         }
                        ],
-                "s2": [],
-                "s3": [{"seq_len": 1,
+                "s1": [],
+                "s2": [{"seq_len": 1,
                         "services": ["s4"]}],
-                "s4": [],
-                "s5": []
+                "s3": [],
+                "s4": []
                 }
 
-work_model = {"s1": {"path": "/api/v1",
-                     "params": {"c": 101, "b": 11}
-                     },
-              "s2": {"path": "/api/v1",
-                     "params": {"c": 102, "b": 12}
-                     },
-              "s3": {"path": "/api/v1",
-                     "params": {"c": 103, "b": 13}
-                     },
-              "s4": {"path": "/api/v1",
-                     "params": {"c": 104, "b": 14}
-                     },
-              "s5": {"path": "/api/v1",
-                     "params": {"c": 105, "b": 15}
-                     }
-              }
+work_model = {'s0': {'params': {'ave_luca': {'P': 0.6, 'ave_number': 13, 'b': 42}}},
+              's1': {'params': {'compute_pi': {'P': 1, 'b': 11, 'c': [101, 101]}}},
+              's2': {'params': {'compute_pi': {'P': 1, 'b': 11, 'c': [101, 101]}}},
+              's3': {'params': {'compute_pi': {'P': 1, 'b': 11, 'c': [101, 101]}}},
+              's4': {'params': {'compute_pi': {'P': 1, 'b': 11, 'c': [101, 101]}}}}
 
-
-workload = [{'services': {'s1': 1, 's2': 0.8}, 'time': 0},
-            {'services': {'s1': 1, 's2': 0.8, 's4': 0.5}, 'time': 2},
-            {'services': {'s2': 0.8}, 'time': 6},
-            {'services': {'s3': 0.3, "s4": 0.5}, 'time': 10},
-            {'services': {'s1': 1}, 'time': 15}]
 
 #########
 
@@ -77,12 +60,11 @@ def create_deployment_yaml_files(model, args):
     print("Deployment Created!")
 
 
-def create_configmap_yaml(mesh, model, v_workload, namespace):
+def create_configmap_yaml(mesh, model, namespace):
     with open('ConfigMapTemplate.yaml', 'r') as file:
         f = file.read()
         f = f.replace("{{SERVICE_MESH}}", json.dumps(mesh))
         f = f.replace("{{WORK_MODEL}}", json.dumps(model))
-        f = f.replace("{{WORKLOAD}}", json.dumps(v_workload))
         f = f.replace("{{NAMESPACE}}", namespace)
 
     with open("yamls/ConfigMapMicroSevice.yaml", 'w') as file:
@@ -92,15 +74,8 @@ def create_configmap_yaml(mesh, model, v_workload, namespace):
 
 
 add_param_to_work_model(work_model, PATH, NAMESPACE, CLUSTER_DOMAIN, IMAGE)
+# pprint(work_model)
 
 create_deployment_yaml_files(work_model, var_to_be_replaced)
 
-runner_model = {'runner': {'image': 'lucapetrucci/runner-ssh:latest',
-                           'namespace': 'default',
-                           'path': '/start',
-                           'url': 'http://runner.default.svc.cluster.local'}}
-
-create_deployment_yaml_files(runner_model, var_to_be_replaced)
-
-
-create_configmap_yaml(service_mesh, work_model, workload, NAMESPACE)
+create_configmap_yaml(service_mesh, work_model, NAMESPACE)

@@ -28,6 +28,9 @@ spec:
               mountPath: /etc/podinfo
             - name: config-volume
               mountPath: /etc/MSconfig
+            - name: job-function-volume
+              mountPath: /app/JobFunctions.py
+              subPath: JobFunctions.py
           env:
             - name: APP
               value: {{SERVICE_NAME}}
@@ -50,6 +53,12 @@ spec:
               path: servicemesh
             - key: work-model
               path: workmodel
+        - name: job-function-volume
+          configMap:
+            name: jobfunction-configmap
+            items:
+              - key: JobFunction
+                path: JobFunctions.py
 ---
 apiVersion: v1
 kind: Service

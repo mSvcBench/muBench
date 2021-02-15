@@ -6,9 +6,9 @@ RUN apt install -y screen
 RUN pip install -r requirements.txt
 
 # Debug
-RUN apt -y install vim ssh iproute2 vim curl
-COPY id_rsa.pub /root/.ssh/authorized_keys
-EXPOSE 22
+#RUN apt -y install vim ssh iproute2 vim curl
+#COPY id_rsa.pub /root/.ssh/authorized_keys
+#EXPOSE 22
 # End debug
 
 

@@ -30,6 +30,7 @@ from pprint import pprint
 # except Exception as err:
 #     print("ERROR: in read ID from app label")
 
+
 def read_config_files():
     with open('/etc/MSconfig/servicemesh') as f:
         servicemesh = json.load(f)
@@ -41,11 +42,19 @@ def read_config_files():
 
 
 # Configuration Variable
-# ID = "s1"  # Service ID
+# ID = "s0"  # Service ID
 ID = os.environ["APP"]
 service_mesh, work_model = read_config_files()
 my_service_mesh = service_mesh[ID]
 my_work_model = work_model[ID]
+
+################################
+# Modifico my_work_model per i test
+# my_work_model["params"] = {'ave_luca': {"P": 0.3, "hellos_number": 13, "b": 42}}
+# pprint(my_work_model)
+# exit()
+################################
+
 REQUEST_METHOD = "REST"
 
 # Flask settings
@@ -71,7 +80,12 @@ class HttpThread(Thread):
     @app.route("/update", methods=['GET'])
     def update():
         print("updatePath")
-        return json.dumps("Update Function Not Implemented Yet! :("), 200
+        global service_mesh, work_model, my_work_model, my_service_mesh
+        service_mesh, work_model = read_config_files()
+        my_service_mesh = service_mesh[ID]
+        my_work_model = work_model[ID]
+        # return json.dumps("Update Function Not Implemented Yet! :("), 200
+        return json.dumps("Successfully Update ServiceMesh and WorkModel variables! :)"), 200
 
     # work_model modificare in my_work_model
     @app.route(f"{my_work_model['path']}", methods=['GET'])
@@ -81,7 +95,7 @@ class HttpThread(Thread):
 
             # Execute the internal job
             print("*************** INTERNAL JOB STARTED ***************")
-            run_internal_job(my_work_model["params"])
+            body = run_internal_job(my_work_model["params"])
             print("############### INTERNAL JOB FINISHED! ###############")
 
             # Execute the external jobs
@@ -94,14 +108,7 @@ class HttpThread(Thread):
                     HttpThread.app.logger.error(service_error_dict)
                     return make_response(json.dumps({"message": "Error in same external services request"}), 500)
             print("############### EXTERNAL JOB FINISHED! ###############")
-            # Make response with size E[Y] = B
-            # KB -> 1024**1
-            # MB -> 1024**2
-            # GB -> 1024**3
-            bandwidth_load = random.expovariate(1/my_work_model["params"]["b"])
-            print("E[bandwidth] = 1/%d ---> Response size = %d KB" % (my_work_model["params"]["b"], bandwidth_load))
-            num_chars = 1024 * bandwidth_load  # Response in KB
-            body = 'L' * int(num_chars)
+
             return make_response(body)
             # return json.dumps(service_mesh[ID]), 200
         except Exception as err:

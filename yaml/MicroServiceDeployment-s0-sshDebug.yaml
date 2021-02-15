@@ -1,36 +1,40 @@
 apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
 kind: Deployment
 metadata:
-  name: s5-dep
+  name: s0-dep
   namespace: default
   labels:
     zone: default
-    app: s5
+    app: s0
   annotations:
     something: something
 spec:
   selector:
     matchLabels:
-      app: s5-pod
+      app: s0-pod
   replicas: 1
   template:
     metadata:
       labels:
-        app: s5-pod
+        app: s0-pod
     spec:
       containers:
-        - name: s5-pod
-          image: lucapetrucci/microservice:latest
+        - name: s0-pod
+          image: lucapetrucci/microservice-ssh:latest
           ports:
             - containerPort: 8080
+            - containerPort: 22
           volumeMounts:
             - name: podinfo
               mountPath: /etc/podinfo
             - name: config-volume
               mountPath: /etc/MSconfig
+            - name: job-function-volume
+              mountPath: /app/JobFunctions.py
+              subPath: JobFunctions.py
           env:
             - name: APP
-              value: s5
+              value: s0
 #      terminationGracePeriodSeconds: 0
       volumes:
         - name: podinfo
@@ -50,14 +54,20 @@ spec:
               path: servicemesh
             - key: work-model
               path: workmodel
+        - name: job-function-volume
+          configMap:
+            name: jobfunction-configmap
+            items:
+              - key: JobFunction
+                path: JobFunctions.py
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: s5
+  name: s0
   namespace: default
   labels:
-    app: s5-pod
+    app: s0-pod
 spec:
   type: NodePort
   ports:
@@ -65,5 +75,9 @@ spec:
     targetPort: 8080
     nodePort:
     name: input
+  - port: 9999
+    targetPort: 22
+    nodePort: 30500
+    name: ssh
   selector:
-    app: s5-pod
+    app: s0-pod

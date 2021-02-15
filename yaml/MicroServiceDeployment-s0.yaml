@@ -1,29 +1,28 @@
 apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
 kind: Deployment
 metadata:
-  name: runner-dep
+  name: s0-dep
   namespace: default
   labels:
     zone: default
-    app: runner
+    app: s0
   annotations:
     something: something
 spec:
   selector:
     matchLabels:
-      app: runner-pod
+      app: s0-pod
   replicas: 1
   template:
     metadata:
       labels:
-        app: runner-pod
+        app: s0-pod
     spec:
       containers:
-        - name: runner-pod
-          image: lucapetrucci/runner-ssh:latest
+        - name: s0-pod
+          image: lucapetrucci/microservice:latest
           ports:
             - containerPort: 8080
-            - containerPort: 22
           volumeMounts:
             - name: podinfo
               mountPath: /etc/podinfo
@@ -31,7 +30,7 @@ spec:
               mountPath: /etc/MSconfig
           env:
             - name: APP
-              value: runner
+              value: s0
 #      terminationGracePeriodSeconds: 0
       volumes:
         - name: podinfo
@@ -51,16 +50,14 @@ spec:
               path: servicemesh
             - key: work-model
               path: workmodel
-            - key: workload
-              path: workload
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: runner
+  name: s0
   namespace: default
   labels:
-    app: runner-pod
+    app: s0-pod
 spec:
   type: NodePort
   ports:
@@ -68,9 +65,5 @@ spec:
     targetPort: 8080
     nodePort:
     name: input
-  - port: 9999
-    targetPort: 22
-    nodePort: 30501
-    name: ssh
   selector:
-    app: runner-pod
+    app: s0-pod
