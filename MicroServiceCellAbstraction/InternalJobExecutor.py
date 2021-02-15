@@ -1,5 +1,10 @@
 import threading
-from JobFunctions import *
+import random
+try:
+    from JobFunctions import *
+except Exception as err:
+    print("Error:", err)
+
 from pprint import pprint
 
 
