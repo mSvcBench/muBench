@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jobfunction-configmap
+  namespace: default
+data:
+  JobFunction: |
+    import random
+    def ave_luca(params):
+        hellos_num = params["ave_number"]
+        for x in range(hellos_num):
+            print("%d. Ave Luca, operarii te salutant! :)" % (x+1))
+
+        response_body = 'L' * int(13)
+        return response_body
+
