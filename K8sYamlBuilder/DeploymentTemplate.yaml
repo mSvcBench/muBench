@@ -29,7 +29,7 @@ spec:
 #            - name: config-volume
 #              mountPath: /etc/MSconfig
             - name: job-function-volume
-              mountPath: /app/JobFunctions
+              mountPath: /app/MSConfig
           env:
             - name: APP
               value: {{SERVICE_NAME}}
