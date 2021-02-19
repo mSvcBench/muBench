@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-pv-ms
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+#    - ReadWriteMany
+    - ReadOnlyMany
+  persistentVolumeReclaimPolicy: Retain
+  #storageClassName: slow
+  nfs:
+    server: 10.3.0.4
+    path: '/mnt/MSSharedData'
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-pvc-ms
+  namespace: default
+spec:
+  accessModes:
+    - ReadOnlyMany # Access modes for volumes is defined under Persistent Volumes
+  #storageClassName: slow
+  resources:
+    requests:
+      storage: 50Mi # volume size requested

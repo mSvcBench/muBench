@@ -2,23 +2,13 @@ import json
 from pprint import pprint
 import random
 
-'''
-work_model
-    {
-    "s1": {"params": {"c": 101, "b": 11}},
-    "s2": {"params": {"c": 102, "b": 12}},
-    "s3": {"params": {"c": 103, "b": 13}},
-    "s4": {"params": {"c": 104, "b": 14}},
-    "s5": {"params": {"c": 105, "b": 15}}
-    }
-    
-    
+'''    
 NEW_work_model
-    {'s0': {'params': {'function_1': {'P': 1, 'b': [11, 11], 'c': [101, 101]}}},
-     's1': {'params': {'function_3': {'P': 0.6, 'd': [5, 5], 'e': [42, 42]}}},
-     's2': {'params': {'function_1': {'P': 1, 'b': [11, 11], 'c': [101, 101]}}},
-     's3': {'params': {'function_3': {'P': 0.6, 'd': [5, 5], 'e': [42, 42]}}},
-     's4': {'params': {'function_1': {'P': 1, 'b': [11, 11], 'c': [101, 101]}}}}
+    {'s0': {'params': {'function_1': {'P': 1, 'b': 11, 'c': [101, 101]}}},
+     's1': {'params': {'function_3': {'P': 0.6, 'd': 5, 'e': [42, 42]}}},
+     's2': {'params': {'function_1': {'P': 1, 'b': 11, 'c': [101, 101]}}},
+     's3': {'params': {'function_3': {'P': 0.6, 'd': 5, 'e': [42, 42]}}},
+     's4': {'params': {'function_1': {'P': 1, 'b': 11, 'c': [101, 101]}}}}
 '''
 
 

@@ -78,4 +78,5 @@ add_param_to_work_model(work_model, PATH, NAMESPACE, CLUSTER_DOMAIN, IMAGE)
 
 create_deployment_yaml_files(work_model, var_to_be_replaced)
 
-create_configmap_yaml(service_mesh, work_model, NAMESPACE)
+# create_configmap_yaml(service_mesh, work_model, NAMESPACE)
+

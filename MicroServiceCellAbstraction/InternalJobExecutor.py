@@ -1,27 +1,23 @@
 import threading
+import os
+import glob
 import random
-try:
-    from JobFunctions import *
-except Exception as err:
-    print("Error:", err)
 
-from pprint import pprint
+# Dinamyc import of all function in JobFunctions folder
+for path in glob.glob('MSConfig/JobFunctions/[!_]*.py'):
+    name, ext = os.path.splitext(os.path.basename(path))
+    exec(f"from MSConfig.JobFunctions.{name} import *")
 
 
 class InternalJobExecutor(threading.Thread):
     def __init__(self, job_function, params, response):
         threading.Thread.__init__(self)
-        self.job_function = f'{job_function}(%s)'
-        self.params = params
+        self.job_function = f'{job_function}({params})'
         self.response = response
 
     def run(self):
-        self.internal_job()
-
-    def internal_job(self):
-        self.response.set_body(eval(self.job_function % self.params))
-        # self.response.append(eval(self.job_function % self.params)[0])
-        # self.response = eval(self.job_function % self.params)[0]
+        # self.internal_job()
+        self.response.set_body(eval(self.job_function))
 
 
 class ThreadReturnedValue:
@@ -78,7 +74,6 @@ def run_internal_job(job_params):
     return response.get_body()
 
 
-# asd = run_internal_job({'compute_pi': {'P': 1, 'b': 1, 'c': [101, 101]}})
-# pprint(asd)
-# pprint(len(asd))
-# run_internal_job({'say_hello_to_luca': {"hellos_number": 13, "b": 42}})
+# test_func = {'ave_luca': {'P': 0.6, 'ave_number': 2, 'b': 42}}
+# test_func = {'compute_pi': {'P': 1, 'b': 1, 'c': [101, 101]}}
+# print(run_internal_job(test_func))

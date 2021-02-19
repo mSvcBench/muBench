@@ -27,11 +27,10 @@ spec:
           volumeMounts:
             - name: podinfo
               mountPath: /etc/podinfo
-            - name: config-volume
-              mountPath: /etc/MSconfig
+#            - name: config-volume
+#              mountPath: /etc/MSconfig
             - name: job-function-volume
-              mountPath: /app/JobFunctions.py
-              subPath: JobFunctions.py
+              mountPath: /app/MSConfig
           env:
             - name: APP
               value: s0
@@ -46,21 +45,17 @@ spec:
               - path: "annotations"
                 fieldRef:
                   fieldPath: metadata.annotations
-        - name: config-volume
-          configMap:
-            name: microservices-configmap
-            items:
-            - key: service-mesh
-              path: servicemesh
-            - key: work-model
-              path: workmodel
+#        - name: config-volume
+#          configMap:
+#            name: microservices-configmap
+#            items:
+#            - key: service-mesh
+#              path: servicemesh
+#            - key: work-model
+#              path: workmodel
         - name: job-function-volume
-          configMap:
-            name: jobfunction-configmap
-            optional: true
-            items:
-              - key: JobFunction
-                path: JobFunctions.py
+          persistentVolumeClaim:
+            claimName: nfs-pvc-ms
 ---
 apiVersion: v1
 kind: Service

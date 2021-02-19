@@ -32,10 +32,10 @@ from pprint import pprint
 
 
 def read_config_files():
-    with open('/etc/MSconfig/servicemesh') as f:
+    with open('MSConfig/servicemesh') as f:
         servicemesh = json.load(f)
 
-    with open('/etc/MSconfig/workmodel') as f:
+    with open('MSConfig/workmodel') as f:
         workmodel = json.load(f)
 
     return servicemesh, workmodel
