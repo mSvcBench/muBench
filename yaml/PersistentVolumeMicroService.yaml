@@ -4,7 +4,7 @@ metadata:
   name: nfs-pv-ms
 spec:
   capacity:
-    storage: 1Gi
+    storage: 100Mi
   accessModes:
 #    - ReadWriteMany
     - ReadOnlyMany
