@@ -9,29 +9,29 @@ from pprint import pprint
 # input workload.json
 
 
-'''
-work_model = {"s1": {"url": "http://s1.default.svc.cluster.local",
-                     "path": "/api/v1",
+
+work_model = {"s0": {"url": "http://localhost:9999",
+                     "path": "/api/v0",
                      "image": "python:latest",
                      "params": {"c": 101, "b": 11}
                      },
-              "s2": {"url": "http://s2.default.svc.cluster.local",
+              "s1": {"url": "http://localhost:9999",
                      "path": "/api/v1",
                      "image": "python:latest",
                      "params": {"c": 102, "b": 12}
                      },
-              "s3": {"url": "http://s3.default.svc.cluster.local",
-                     "path": "/api/v1",
+              "s2": {"url": "http://localhost:9999",
+                     "path": "/api/v2",
                      "image": "python:latest",
                      "params": {"c": 103, "b": 13}
                      },
-              "s4": {"url": "http://s4.default.svc.cluster.local",
-                     "path": "/api/v1",
+              "s3": {"url": "http://localhost:9999",
+                     "path": "/api/v3",
                      "image": "python:latest",
                      "params": {"c": 104, "b": 14}
                      },
-              "s5": {"url": "http://s5.default.svc.cluster.local",
-                     "path": "/api/v1",
+              "s4": {"url": "http://localhost:9999",
+                     "path": "/api/v4",
                      "image": "python:latest",
                      "params": {"c": 105, "b": 15}
                      }
@@ -44,21 +44,21 @@ workload = [{'services': {'s1': 1, 's2': 0.8}, 'time': 0},
             {'services': {'s2': 0.8}, 'time': 6},
             {'services': {'s3': 0.3, "s4": 0.5}, 'time': 10},
             {'services': {'s1': 1}, 'time': 15}]
-'''
 
-def read_config_files():
-    with open('/etc/MSconfig/workload') as f:
-        v_workload = json.load(f)
-    # v_workload = ""
-    with open('/etc/MSconfig/workmodel') as f:
-        workmodel = json.load(f)
-
-    return v_workload, workmodel
-
+# Non mi serve piu', il runner non sta dentro il cluster
+# def read_config_files():
+#     with open('/etc/MSconfig/workload') as f:
+#         v_workload = json.load(f)
+#     # v_workload = ""
+#     with open('/etc/MSconfig/workmodel') as f:
+#         workmodel = json.load(f)
+#
+#     return v_workload, workmodel
+#
+# workload, work_model = read_config_files()
 
 start_time = 0.0
-workload, work_model = read_config_files()
-# trash, work_model = read_config_files()
+
 
 
 def richiesto_le_teste(event):

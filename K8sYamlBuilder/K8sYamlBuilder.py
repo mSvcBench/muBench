@@ -1,5 +1,7 @@
 import json
+import os
 from pprint import pprint
+
 
 # Variabili di test
 service_mesh = {"s0": [{"seq_len": 1,
@@ -55,6 +57,9 @@ def create_deployment_yaml_files(model, args):
             for key in args:
                 f = f.replace(key, args[key])
 
+        if not os.path.exists("yamls"):
+            os.makedirs("yamls")
+
         with open(f"yamls/{YAML_OUTPUT_FILE}-{service}.yaml", 'w') as file:
             file.write(f)
     print("Deployment Created!")
@@ -67,7 +72,10 @@ def create_configmap_yaml(mesh, model, namespace):
         f = f.replace("{{WORK_MODEL}}", json.dumps(model))
         f = f.replace("{{NAMESPACE}}", namespace)
 
-    with open("yamls/ConfigMapMicroSevice.yaml", 'w') as file:
+    if not os.path.exists("yamls"):
+        os.makedirs("yamls")
+
+    with open("yamls/ConfigMapMicroService.yaml", 'w') as file:
         file.write(f)
 
     print("ConfigMap Created!")

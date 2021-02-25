@@ -33,7 +33,7 @@ workload = [{"time": 0, "services": {"s1": 1,
 # vertex_number -> N number of vertex
 # ingress_services -> {"sx": probability, ...}
 # number_of_ingreress -> number of ingress services in range [MIN, MAX]
-def get_workload(vertex_number, ingress_services, ingress_number, request_params):
+def get_workload(ingress_services, ingress_number, request_params):
     workload_l = list()
     # print("vertex_number: %d" % vertex_number)
     # print("ingress_services:", ingress_services)
@@ -42,7 +42,7 @@ def get_workload(vertex_number, ingress_services, ingress_number, request_params
 
     events_cnt = 0
     time = 0
-    while events_cnt < request_params["request_time_interval_s"]:
+    while events_cnt < request_params["event_number"]:
 
         selected_ingress_number = random.randint(ingress_number["min"], ingress_number["max"])
         # print("selected_ingress_number:", selected_ingress_number)
@@ -64,10 +64,11 @@ def get_workload(vertex_number, ingress_services, ingress_number, request_params
 
 
 # Il termine della simulazione e' dato dal numero di eventi, non dal tempo
-ingress_list = {"s1": 1, "s2": 0.8, "s4": 0.5}
-request_parameters = {"request_number": 100, "request_time_interval_s": 3, "interarrival_mean": 100}
+# ingress_list = {"s1": 1, "s2": 0.8, "s4": 0.5}
+# request_parameters = {"event_number": 10, "request_time_interval_s": 3, "interarrival_mean": 100}
 
 # Vertex mi sembra inutile come variabile
-workload = get_workload(10, ingress_list, {"min": 1, "max": 3}, request_parameters)
 
-pprint(workload)
+# workload = get_workload(ingress_list, {"min": 1, "max": 3}, request_parameters)
+
+

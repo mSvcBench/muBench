@@ -17,7 +17,7 @@ NEW_work_model
 def select_job(jobs):
     jobs_items = jobs.items()
     random_extraction = random.random()
-    print("Extraction: %.4f" % random_extraction)
+    # print("Extraction: %.4f" % random_extraction)
     p_total = 0.0
     for job in jobs.values():
         p_total += job["P"]
@@ -39,18 +39,18 @@ def get_work_model(vertex_number, params):
         print("ERROR: in creation work model,", err)
         exit(1)
 
-    pprint(work_model)
+    # pprint(work_model)
     return work_model
 
 
 # INPUT params:
-v_numbers = 5
-parameters = {"compute_pi": {"P": 1, "b": 11, "c": [101, 101]},
-              "ave_luca": {"P": 0.6, "ave_number": 13, "b": 42}
-              }
-
-# print(select_job(parameters))
-get_work_model(v_numbers, parameters)
+# v_numbers = 5
+# parameters = {"compute_pi": {"P": 1, "b": 11, "c": [101, 101]},
+#               "ave_luca": {"P": 0.6, "ave_number": 13, "b": 42}
+#               }
+#
+# # print(select_job(parameters))
+# get_work_model(v_numbers, parameters)
 
 
 # test_dict = {"a": 0.4,
