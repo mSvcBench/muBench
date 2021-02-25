@@ -1,8 +1,7 @@
 import ServiceMeshGenerator.ServiceMeshGenerator as smGen
 import WorkModelGenerator.WorkModelGenerator as wmGen
 import WorkLoadGenerator.WorkLoadGenerator as wlGen
-import K8sYamlBuilder
-import K8sYamlBuilder.K8sYamlBuilder as lll
+import K8sYamlBuilder.K8sYamlBuilder as K8sBld
 
 
 from pprint import pprint
@@ -53,9 +52,20 @@ request_parameters = {"event_number": 10, "request_time_interval_s": 3, "interar
 workload = wlGen.get_workload(ingress_dict, min_max, request_parameters)
 
 
-print(lll.PATH)
+YAML_OUTPUT_FILE = "MicroServiceDeployment"
+NAMESPACE = "default"
+IMAGE = "lucapetrucci/microservice:latest"
+CLUSTER_DOMAIN = "cluster"
+PATH = "/api/v1"
+# var_to_be_replaced = {"{{string_in_template}}": "new_value", ...}
+var_to_be_replaced = {}
 
-lll.add_param_to_work_model(None,None,None,None,None)
+K8sBld.add_param_to_work_model(work_model, PATH, NAMESPACE, CLUSTER_DOMAIN, IMAGE)
+# pprint(work_model)
+
+K8sBld.create_deployment_yaml_files(work_model, var_to_be_replaced)
+
+
 # asd = input("CIAO")
 
 # print(asd)
