@@ -27,12 +27,10 @@ def init_args(parser):
                         help='MIN Number of selected ingress services from the list', default=1)
     parser.add_argument('-max', action='store', dest='selected_ingress_max', type=int,
                         help='MAX Number of selected ingress services from the list', default=1)
-    parser.add_argument('-r', action='store', dest='event_number', type=int,
+    parser.add_argument('-r', action='store', dest='stop_event', type=int,
                         help='Number of event until the end of simulation', default=100)
-    parser.add_argument('-i', action='store', dest='request_interval', type=int,
-                        help='Time in seconds until the end of simulation', default=3)
-    parser.add_argument('-m', action='store', dest='interarrival_mean', type=int,
-                        help='Mean of Request Interarrival', default=101)
+    parser.add_argument('-m', action='store', dest='mean_interarrival_time', type=int,
+                        help='Mean of Request Interarrival Time', default=101)
     parser.set_defaults(func=run)
 
 
@@ -45,9 +43,8 @@ def run(args):
         min_max = {"min": args.selected_ingress_min,
                    "max": args.selected_ingress_max
                    }
-        params = {"event_number": args.event_number,
-                  "request_time_interval_s": args.request_interval,
-                  "interarrival_mean": args.interarrival_mean
+        params = {"stop_event": args.stop_event,
+                  "mean_interarrival_time": args.mean_interarrival_time
                   }
 
         output_file = args.output_file

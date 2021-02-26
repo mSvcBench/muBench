@@ -40,6 +40,7 @@ def get_work_model(vertex_number, params):
         exit(1)
 
     # pprint(work_model)
+    print("Work Model Created!")
     return work_model
 
 
@@ -48,9 +49,9 @@ def get_work_model(vertex_number, params):
 # parameters = {"compute_pi": {"P": 1, "b": 11, "c": [101, 101]},
 #               "ave_luca": {"P": 0.6, "ave_number": 13, "b": 42}
 #               }
-#
-# # print(select_job(parameters))
-# get_work_model(v_numbers, parameters)
+
+# print(select_job(parameters))
+# print(get_work_model(v_numbers, parameters))
 
 
 # test_dict = {"a": 0.4,

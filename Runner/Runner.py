@@ -39,9 +39,9 @@ work_model = {"s0": {"url": "http://localhost:9999",
 
 # Il runner ha un threadPool che esegue le varie richieste
 # Workload = [{"time": t0, "services":[{"sx": "p"}, {"sx": "p"}, ...]}, ...]
-workload = [{'services': {'s1': 1, 's2': 0.8}, 'time': 0},
-            {'services': {'s1': 1, 's2': 0.8, 's4': 0.5}, 'time': 2},
-            {'services': {'s2': 0.8}, 'time': 6},
+workload = [{'services': {'s0': 1, 's2': 0.8}, 'time': 0},
+            {'services': {'s1': 1, 's2': 0.8, 's4': 0.5}, 'time': 0},
+            {'services': {'s2': 0.8}, 'time': 0},
             {'services': {'s3': 0.3, "s4": 0.5}, 'time': 10},
             {'services': {'s1': 1}, 'time': 15}]
 
@@ -60,12 +60,12 @@ workload = [{'services': {'s1': 1, 's2': 0.8}, 'time': 0},
 start_time = 0.0
 
 
-
 def richiesto_le_teste(event):
     # pprint(workload[event]["services"])
     for services in event["services"]:
+        print(services)
         try:
-            r = requests.get(f"{work_model[services]['url']}{work_model[services]['path']}")
+            r = requests.get(f"http://n1:31113/{services}")
             print(r)
         except Exception as err:
             print("Error: %s" % err)

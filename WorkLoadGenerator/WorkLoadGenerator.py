@@ -42,7 +42,7 @@ def get_workload(ingress_services, ingress_number, request_params):
 
     events_cnt = 0
     time = 0
-    while events_cnt < request_params["event_number"]:
+    while events_cnt < request_params["stop_event"]:
 
         selected_ingress_number = random.randint(ingress_number["min"], ingress_number["max"])
         # print("selected_ingress_number:", selected_ingress_number)
@@ -54,7 +54,7 @@ def get_workload(ingress_services, ingress_number, request_params):
             selected_services[service[0]] = service[1]
         workload_l.append({"time": time, "services": selected_services})
 
-        next_event = round(random.expovariate(1 / request_params["interarrival_mean"]))  # Gli interarrivi sono exp neg, il tempo in millisecondi
+        next_event = round(random.expovariate(1 / request_params["mean_interarrival_time"]))  # Gli interarrivi sono exp neg, il tempo in millisecondi
         time += next_event
         # print("interarrivo", round(next_event, 0))
         events_cnt += 1
@@ -65,10 +65,10 @@ def get_workload(ingress_services, ingress_number, request_params):
 
 # Il termine della simulazione e' dato dal numero di eventi, non dal tempo
 # ingress_list = {"s1": 1, "s2": 0.8, "s4": 0.5}
-# request_parameters = {"event_number": 10, "request_time_interval_s": 3, "interarrival_mean": 100}
+# request_parameters = {"stop_event": 10, "mean_interarrival_time": 100}
 
 # Vertex mi sembra inutile come variabile
 
 # workload = get_workload(ingress_list, {"min": 1, "max": 3}, request_parameters)
-
+# pprint(workload)
 

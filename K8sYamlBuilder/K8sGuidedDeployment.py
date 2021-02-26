@@ -7,35 +7,35 @@ from kubernetes.client.rest import ApiException
 WORKING_PATH = os.path.dirname(__file__) or '.'
 
 ######### Variabili di test #########
-
-service_mesh = {"s0": [{"seq_len": 1,
-                        "services": ["s2", "s3"]
-                        },
-                       {"seq_len": 1,
-                        "services": ["s3"]
-                        }
-                       ],
-                "s1": [],
-                "s2": [{"seq_len": 1,
-                        "services": ["s4"]}],
-                "s3": [],
-                "s4": []
-                }
-
-work_model = {'s0': {'params': {'ave_luca': {'P': 0.6, 'ave_number': 13, 'b': 42}}},
-              's1': {'params': {'compute_pi': {'P': 1, 'b': 11, 'c': [101, 101]}}},
-              's2': {'params': {'compute_pi': {'P': 1, 'b': 11, 'c': [101, 101]}}},
-              's3': {'params': {'compute_pi': {'P': 1, 'b': 11, 'c': [101, 101]}}},
-              's4': {'params': {'compute_pi': {'P': 1, 'b': 11, 'c': [101, 101]}}}}
-
-
-YAML_OUTPUT_FILE = "MicroServiceDeployment"
-NAMESPACE = "default"
-IMAGE = "lucapetrucci/microservice:latest"
-CLUSTER_DOMAIN = "cluster"
-PATH = "/api/v1"
-# var_to_be_replaced = {"{{string_in_template}}": "new_value", ...}
-var_to_be_replaced = {}
+#
+# service_mesh = {"s0": [{"seq_len": 1,
+#                         "services": ["s2", "s3"]
+#                         },
+#                        {"seq_len": 1,
+#                         "services": ["s3"]
+#                         }
+#                        ],
+#                 "s1": [],
+#                 "s2": [{"seq_len": 1,
+#                         "services": ["s4"]}],
+#                 "s3": [],
+#                 "s4": []
+#                 }
+#
+# work_model = {'s0': {'params': {'ave_luca': {'P': 0.6, 'ave_number': 13, 'b': 42}}},
+#               's1': {'params': {'compute_pi': {'P': 1, 'b': 11, 'c': [101, 101]}}},
+#               's2': {'params': {'compute_pi': {'P': 1, 'b': 11, 'c': [101, 101]}}},
+#               's3': {'params': {'compute_pi': {'P': 1, 'b': 11, 'c': [101, 101]}}},
+#               's4': {'params': {'compute_pi': {'P': 1, 'b': 11, 'c': [101, 101]}}}}
+#
+#
+# YAML_OUTPUT_FILE = "MicroServiceDeployment"
+# NAMESPACE = "default"
+# IMAGE = "lucapetrucci/microservice:latest"
+# CLUSTER_DOMAIN = "cluster"
+# PATH = "/api/v1"
+# # var_to_be_replaced = {"{{string_in_template}}": "new_value", ...}
+# var_to_be_replaced = {}
 
 ######### Variabili di test #########
 
@@ -118,7 +118,7 @@ def undeploy_items(items):
 
 def create_deployment_config():
     print("---")
-    add_param_to_work_model(work_model, PATH, NAMESPACE, CLUSTER_DOMAIN, IMAGE)
+    customization_work_model(work_model, PATH, NAMESPACE, CLUSTER_DOMAIN, IMAGE)
     create_deployment_yaml_files(work_model, var_to_be_replaced)
     created_items = os.listdir(f"{WORKING_PATH}/yamls")
     print(f"The following files are created: {created_items}")

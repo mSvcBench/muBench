@@ -56,7 +56,7 @@ def get_service_mesh(graph_params):
     # g.vs["label"] = list(range(graph_params["vertices"]))
     # print(g)
     # plot(g)
-
+    print("Service Mesh Created!")
     return service_mesh
 
 # pprint(get_service_mesh(graph_params_test))
