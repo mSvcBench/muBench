@@ -1,17 +1,10 @@
-from kubernetes import client, config, utils
-from kubernetes.client.rest import ApiException
-import json
-
 import ServiceMeshGenerator.ServiceMeshGenerator as smGen
 import WorkModelGenerator.WorkModelGenerator as wmGen
-import WorkLoadGenerator.WorkLoadGenerator as wlGen
-import K8sYamlBuilder.K8sYamlBuilder as K8sBuilder
-import K8sDeployer.K8sDeployer as K8sDeployer
-import yaml
+from Kubernetes.K8sYamlBuilder import K8sYamlBuilder as K8sBuilder
+from Kubernetes.K8sDeployer import K8sDeployer as K8sDeployer
 import os
-
-from pprint import pprint
-
+import json
+import shutil
 
 ############### Input Param ###############
 vertices = 5
@@ -55,12 +48,11 @@ var_to_be_replaced = {}
 # request_parameters = {"stop_event": 10, "mean_interarrival": 100}
 # workload = wlGen.get_workload(ingress_dict, min_max, request_parameters)
 
+print(K8sBuilder.K8s_YAML_BUILDER_PATH)
 folder_not_exist = False
-if os.path.exists(f"{K8sBuilder.K8s_YAML_BUILDER_PATH}/yamls"):
-    folder = f"{K8sBuilder.K8s_YAML_BUILDER_PATH}/yamls"
-else:
+if not os.path.exists(f"{K8sBuilder.K8s_YAML_BUILDER_PATH}/yamls"):
     folder_not_exist = True
-
+folder = f"{K8sBuilder.K8s_YAML_BUILDER_PATH}/yamls"
 
 
 def create_deployment_config():
@@ -102,13 +94,47 @@ def remove_files(folder_v):
         print("######################")
 
 
+def copy_config_file_to_nfs(nfs_folder_path, servicemesh, workmodel, job_functions):
+    try:
+        with open(f"{nfs_folder_path}/servicemesh", "w") as f:
+            f.write(json.dumps(servicemesh))
+
+        with open(f"{nfs_folder_path}/workmodel", "w") as f:
+            f.write(json.dumps(workmodel))
+
+        if not os.path.exists(f"{nfs_folder_path}/JobFunctions"):
+            os.makedirs(f"{nfs_folder_path}/JobFunctions")
+
+        if os.path.isdir(job_functions):
+            src_files = os.listdir(job_functions)
+            for file_name in src_files:
+                full_file_name = os.path.join(job_functions, file_name)
+                if os.path.isfile(full_file_name):
+                    shutil.copy(full_file_name, f"{nfs_folder_path}/JobFunctions/")
+        else:
+            shutil.copyfile(job_functions, f"{nfs_folder_path}/JobFunctions/{job_functions}")
+            print("FILE")
+
+    except Exception as er:
+        print("Error in copy_config_file_to_nfs: %s" % er)
+        exit()
+
+
 ######## SCRIPT
 try:
     if folder_not_exist or len(os.listdir(folder)) == 0:
-        keyboard_input = input("\nDirectory empty, wanna DEPLOY?")
-        if keyboard_input == "":
+        nfs_address = input("\nNFS server IP address [e.g. 10.3.0.4]: ")
+        nfs_mount_path = input("\nEnter the mount path of NFS server: (/mnt/MSSharedData) ") or "/mnt/MSSharedData1"
+        job_functions_file_path = input("\nEnter the path of folder of additional job functions file: ")
+
+        keyboard_input = input("\nDirectory empty, wanna DEPLOY? [y]").lower() or "y"
+        if keyboard_input == "y" or keyboard_input == "yes":
             updated_folder_items, service_mesh, work_model = create_deployment_config()
+            copy_config_file_to_nfs(nfs_folder_path=nfs_mount_path, servicemesh=service_mesh,
+                                    workmodel=work_model, job_functions=job_functions_file_path)
             # deploy_items(updated_folder_items)
+            K8sDeployer.deploy_volume("yaml/PersistentVolumeMicroService.yaml", server=nfs_address, path=nfs_mount_path)
+            K8sDeployer.deploy_nginx_gateway("yaml/DeploymentNginxGw.yaml")
             K8sDeployer.deploy_items(folder)
         else:
             print("...\nOk you do not want to DEPLOY stuff! Bye!")
@@ -121,6 +147,8 @@ try:
         if keyboard_input == "":
             # undeploy_items(folder_items)
             K8sDeployer.undeploy_items(folder)
+            K8sDeployer.undeploy_nginx_gateway("yaml/DeploymentNginxGw.yaml")
+            K8sDeployer.undeploy_volume("yaml/PersistentVolumeMicroService.yaml")
             remove_files(folder)
             # updated_folder_items = create_deployment_config()
             # deploy_items(updated_folder_items)

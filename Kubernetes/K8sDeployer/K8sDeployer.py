@@ -81,7 +81,7 @@ def undeploy_items(folder):
                     print("######################")
 
 
-def deploy_volume(yamls):
+def deploy_volume(yamls, server, path):
     print("######################")
     print(f"We are going to DEPLOY the PersistentVolume Persi and PersistentVolumeClaim from the yaml file: {yamls}")
     print("######################")
@@ -94,6 +94,8 @@ def deploy_volume(yamls):
         for partial_yaml in complete_yaml:
             try:
                 if partial_yaml["kind"] == "PersistentVolume":
+                    partial_yaml["spec"]["nfs"]["server"] = server
+                    partial_yaml["spec"]["nfs"]["path"] = path
                     api_response = k8s_core_api.create_persistent_volume(body=partial_yaml)
                     print(f"PersistentVolume '{partial_yaml['metadata']['name']}' created.")
                     print("---")
