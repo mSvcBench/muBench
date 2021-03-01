@@ -10,7 +10,7 @@ import WorkModelGenerator.WorkModelGenerator as wmGen
 
 
 '''
-gen-workmodel -o outFile -v 3 -p '{"compute_pi":{"P":1,"b":11,"c":[101,101]},"ave_luca":{"P":0.6,"ave_number":13,"b":42}}'
+gen-workmodel -o outFile -v 3 -p '{"compute_pi":{"probability":1,"mean_bandwidth":11,"range_complexity":[101,101]},"ave_luca":{"probability":0.6,"ave_number":13,"mean_bandwidth":42}}'
 '''
 
 
@@ -21,7 +21,7 @@ def init_args(parser):
     parser.add_argument('-v', action='store', dest='v_number',
                         help='Vertices Number', default=5)
     parser.add_argument('-p', action='store', dest='params',
-                        help='WorkModel parameters', default='{"compute_pi":{"P":1,"b":11,"c":[101,101]}}')
+                        help='WorkModel parameters', default='{"compute_pi":{"probability":1,"mean_bandwidth":11,"range_complexity":[101,101]}}')
     parser.add_argument('-f', action='store', dest='function_file',
                         help='WorkModel parameters', default='funzioni.json')
     parser.set_defaults(func=run)

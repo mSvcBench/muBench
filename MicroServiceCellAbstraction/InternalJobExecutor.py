@@ -32,7 +32,7 @@ class ThreadReturnedValue:
 
 
 def compute_pi(params):
-    cpu_load = random.randint(params["c"][0], params["c"][1])
+    cpu_load = random.randint(params["range_complexity"][0], params["range_complexity"][1])
     pi_greco = list()
 
     q, r, t, k, m, x = 1, 0, 1, 1, 3, 3
@@ -54,8 +54,8 @@ def compute_pi(params):
     # KB -> 1024**1
     # MB -> 1024**2
     # GB -> 1024**3
-    bandwidth_load = random.expovariate(1 / params["b"])
-    print("E[bandwidth] = 1/%d ---> Response size = %d KB" % (params["b"], bandwidth_load))
+    bandwidth_load = random.expovariate(1 / params["mean_bandwidth"])
+    print("E[bandwidth] = 1/%d ---> Response size = %d KB" % (params["mean_bandwidth"], bandwidth_load))
     num_chars = 1024 * bandwidth_load  # Response in KB
     response_body = 'L' * int(num_chars)
 
@@ -74,6 +74,6 @@ def run_internal_job(job_params):
     return response.get_body()
 
 
-# test_func = {'ave_luca': {'P': 0.6, 'ave_number': 2, 'b': 42}}
-# test_func = {'compute_pi': {'P': 1, 'b': 1, 'c': [101, 101]}}
+# test_func = {'ave_luca': {'ave_number': 2, 'mean_bandwidth': 42}}
+# test_func = {'compute_pi': {'mean_bandwidth': 1, 'range_complexity': [101, 101]}}
 # print(run_internal_job(test_func))

@@ -15,22 +15,6 @@ import os
 from pprint import pprint
 
 
-# try:
-#     filepath = "/etc/podinfo/labels"
-#     with open(filepath) as fp:
-#        line = fp.readline()
-#        cnt = 1
-#        while line:
-#            print(line)
-#            if line.startswith("app="):
-#                ID = line[4:].strip("\n").strip('"')
-#                break
-#            line = fp.readline()
-#            cnt += 1
-# except Exception as err:
-#     print("ERROR: in read ID from app label")
-
-
 def read_config_files():
     with open('MSConfig/servicemesh') as f:
         servicemesh = json.load(f)
@@ -42,11 +26,19 @@ def read_config_files():
 
 
 # Configuration Variable
-# ID = "s0"  # Service ID
-ID = os.environ["APP"]
+ID = "s0"  # Service ID
+# ID = os.environ["APP"]
 service_mesh, work_model = read_config_files()
 my_service_mesh = service_mesh[ID]
 my_work_model = work_model[ID]
+
+################################
+# Modifico my_work_model per i test
+# my_work_model["params"] = {'ave_luca': {"probability": 0.3, "ave_number": 13, "mean_bandwidth": 42}}
+# my_work_model["params"] = {'compute_pi': {"probability": 1, 'mean_bandwidth': 1, 'range_complexity': [101, 101]}}
+pprint(my_work_model)
+# exit()
+################################
 
 REQUEST_METHOD = "REST"
 

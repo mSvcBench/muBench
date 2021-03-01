@@ -18,8 +18,8 @@ zero_appeal = 10  # ??
 
 ##### WorkModel Params
 # Possible Internal Job Functions with params
-work_model_params = {"compute_pi": {"P": 1, "b": 11, "c": [101, 101]},
-                     "ave_luca": {"P": 0.6, "ave_number": 13, "b": 42}
+work_model_params = {"compute_pi": {"probability": 1, "mean_bandwidth": 11, "range_complexity": [101, 101]},
+                     "ave_luca": {"probability": 0.6, "ave_number": 13, "mean_bandwidth": 42}
                      }
 
 ##### Workload
@@ -124,7 +124,7 @@ def copy_config_file_to_nfs(nfs_folder_path, servicemesh, workmodel, job_functio
 try:
     if folder_not_exist or len(os.listdir(folder)) == 0:
         nfs_address = input("\nNFS server IP address [e.g. 10.3.0.4]: ")
-        nfs_mount_path = input("\nEnter the mount path of NFS server: (/mnt/MSSharedData) ") or "/mnt/MSSharedData1"
+        nfs_mount_path = input("\nEnter the mount path of NFS server: (/mnt/MSSharedData) ") or "/mnt/MSSharedData"
         job_functions_file_path = input("\nEnter the path of folder of additional job functions file: ")
 
         keyboard_input = input("\nDirectory empty, wanna DEPLOY? [y]").lower() or "y"

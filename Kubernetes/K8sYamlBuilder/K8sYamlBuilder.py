@@ -19,11 +19,11 @@ service_mesh = {"s0": [{"seq_len": 1,
                 "s4": []
                 }
 
-work_model = {'s0': {'params': {'ave_luca': {'P': 0.6, 'ave_number': 13, 'b': 42}}},
-              's1': {'params': {'compute_pi': {'P': 1, 'b': 11, 'c': [101, 101]}}},
-              's2': {'params': {'compute_pi': {'P': 1, 'b': 11, 'c': [101, 101]}}},
-              's3': {'params': {'compute_pi': {'P': 1, 'b': 11, 'c': [101, 101]}}},
-              's4': {'params': {'compute_pi': {'P': 1, 'b': 11, 'c': [101, 101]}}}}
+work_model = {'s0': {'params': {'ave_luca': {'ave_number': 13, 'mean_bandwidth': 42}}},
+              's1': {'params': {'compute_pi': {'mean_bandwidth': 11, 'range_complexity': [101, 101]}}},
+              's2': {'params': {'compute_pi': {'mean_bandwidth': 11, 'range_complexity': [101, 101]}}},
+              's3': {'params': {'compute_pi': {'mean_bandwidth': 11, 'range_complexity': [101, 101]}}},
+              's4': {'params': {'compute_pi': {'mean_bandwidth': 11, 'range_complexity': [101, 101]}}}}
 
 
 #########
