@@ -1,52 +1,51 @@
 import ServiceMeshGenerator.ServiceMeshGenerator as smGen
 import WorkModelGenerator.WorkModelGenerator as wmGen
+import WorkLoadGenerator.WorkLoadGenerator as wlGen
 from Kubernetes.K8sYamlBuilder import K8sYamlBuilder as K8sBuilder
 from Kubernetes.K8sDeployer import K8sDeployer as K8sDeployer
 import os
 import json
 import shutil
+import AutoPilotConf as APConf
+
+
 
 ############### Input Param ###############
-vertices = 5
+vertices = APConf.vertices
 
 ##### ServiceMesh Params
-services_groups = 1  # Number of services for group
-power = 1  # Power ???
-edges_per_vertex = 1  # ??
-zero_appeal = 10  # ??
+services_groups = APConf.services_groups  # Number of services for group
+power = APConf.power  # Power ???
+edges_per_vertex = APConf.edges_per_vertex
+zero_appeal = APConf.zero_appeal
 
 
 ##### WorkModel Params
 # Possible Internal Job Functions with params
-work_model_params = {"compute_pi": {"probability": 1, "mean_bandwidth": 11, "range_complexity": [101, 101]},
-                     "ave_luca": {"probability": 0.6, "ave_number": 13, "mean_bandwidth": 42}
-                     }
+work_model_params = APConf.work_model_params
+
 
 ##### Workload
-ingress_dict = {"s1": 1, "s2": 0.8, "s4": 0.5}  # Dictionary of possibile ingress Services with associated probability
-min_services = 1  # MIN number of selected ingress dictionary
-max_services = 1  # MAX number of selected ingress dictionary
+ingress_dict = APConf.ingress_dict  # Dictionary of possibile ingress Services with associated probability
+min_services = APConf.min_services  # MIN number of selected ingress dictionary
+max_services = APConf.max_services  # MAX number of selected ingress dictionary
 
-event_number = 10  # Number of event until the end of simulation
-mean_interarrival_time = 100  # Mean of request interarrival
+stop_event = APConf.stop_event  # Number of event until the end of simulation
+mean_interarrival_time = APConf.mean_interarrival_time  # Mean of request interarrival
 
 #### K8s Yaml Builder
 
-yaml_output_file_name = "MicroServiceDeployment"
-deployment_namespace = "default"
-image_name = "lucapetrucci/microservice:latest"
-cluster_domain = "cluster"
-service_path = "/api/v1"
+yaml_output_file_name = APConf.yaml_output_file_name
+deployment_namespace = APConf.deployment_namespace
+image_name = APConf.image_name
+cluster_domain = APConf.cluster_domain
+service_path = APConf.service_path
 # var_to_be_replaced = {"{{string_in_template}}": "new_value", ...}
-var_to_be_replaced = {}
+var_to_be_replaced = APConf.var_to_be_replaced
 
 ###########################
 ##          RUN          ##
 ###########################
-# TODO chiedere del workload all'utente
-# min_max = {"min": min_services, "max": max_services}
-# request_parameters = {"stop_event": 10, "mean_interarrival": 100}
-# workload = wlGen.get_workload(ingress_dict, min_max, request_parameters)
 
 print(K8sBuilder.K8s_YAML_BUILDER_PATH)
 folder_not_exist = False
@@ -121,21 +120,38 @@ def copy_config_file_to_nfs(nfs_folder_path, servicemesh, workmodel, job_functio
 
 
 ######## SCRIPT
+TEST = False
 try:
     if folder_not_exist or len(os.listdir(folder)) == 0:
-        nfs_address = input("\nNFS server IP address [e.g. 10.3.0.4]: ")
-        nfs_mount_path = input("\nEnter the mount path of NFS server: (/mnt/MSSharedData) ") or "/mnt/MSSharedData"
-        job_functions_file_path = input("\nEnter the path of folder of additional job functions file: ")
+        if TEST:
+            nfs_address = "10.3.0.4"
+            nfs_mount_path = "/mnt/MSSharedData"
+            job_functions_file_path = "AveLuca.py"
+            keyboard_input = "y"
+        else:
+            nfs_address = input("\nNFS server IP address [e.g. 10.3.0.4]: ")
+            nfs_mount_path = input("\nEnter the mount path of NFS server: (/mnt/MSSharedData) ") or "/mnt/MSSharedData"
+            job_functions_file_path = input("\nEnter the path of folder of additional job functions file: ")
+            keyboard_input = input("\nDirectory empty, wanna DEPLOY? (y)").lower() or "y"
 
-        keyboard_input = input("\nDirectory empty, wanna DEPLOY? [y]").lower() or "y"
         if keyboard_input == "y" or keyboard_input == "yes":
             updated_folder_items, service_mesh, work_model = create_deployment_config()
             copy_config_file_to_nfs(nfs_folder_path=nfs_mount_path, servicemesh=service_mesh,
                                     workmodel=work_model, job_functions=job_functions_file_path)
+
             # deploy_items(updated_folder_items)
             K8sDeployer.deploy_volume("yaml/PersistentVolumeMicroService.yaml", server=nfs_address, path=nfs_mount_path)
             K8sDeployer.deploy_nginx_gateway("yaml/DeploymentNginxGw.yaml")
             K8sDeployer.deploy_items(folder)
+
+            keyboard_input = input("Do you wanna create the workload file?? (y)") or "y"
+            if keyboard_input == "y" or keyboard_input == "yes":
+                req_params = {"stop_event": stop_event, "mean_interarrival_time": mean_interarrival_time}
+                workload = wlGen.get_workload(ingress_dict, {"min": min_services, "max": max_services}, req_params)
+                with open(f"workload", "w") as f:
+                    f.write(json.dumps(workload))
+                print("Worklod file saved in '%s'" % os.path.abspath("workload"))
+
         else:
             print("...\nOk you do not want to DEPLOY stuff! Bye!")
     else:
@@ -143,8 +159,8 @@ try:
         print("!!!! Warning !!!!")
         print("######################")
         print(f"Folder is not empty: {folder}.")
-        keyboard_input = input("Wanna UNDEPLOY old yamls first, delete the files and then start again?")
-        if keyboard_input == "":
+        keyboard_input = input("Wanna UNDEPLOY old yamls first, delete the files and then start again? (n)") or "n"
+        if keyboard_input == "y" or keyboard_input == "yes":
             # undeploy_items(folder_items)
             K8sDeployer.undeploy_items(folder)
             K8sDeployer.undeploy_nginx_gateway("yaml/DeploymentNginxGw.yaml")

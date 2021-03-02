@@ -67,8 +67,6 @@ def get_workload(ingress_services, ingress_number, request_params):
 # ingress_list = {"s1": 1, "s2": 0.8, "s4": 0.5}
 # request_parameters = {"stop_event": 10, "mean_interarrival_time": 2}
 
-# Vertex mi sembra inutile come variabile
-
 # workload = get_workload(ingress_list, {"min": 1, "max": 3}, request_parameters)
 #
 # with open(f"../Runner/workload.json", "w") as f:
