@@ -1,5 +1,24 @@
 # MicroServiceSimulator
 
+Let's face it. If you ever stumbled upon simulating microservices, you made your life miserable trying.
+This project aims at facilitating this process.
+Thanks to its modular design, you can perform, if you feel confident enough, the following steps individually:
+
+1. Create the Microservice Mesh (Service Mesh)
+2. Establish the behaviour of each service (Work Model)
+3. Combine the Service Mesh and Work Model into K8s deployable YAML files
+4. Generate the simulation workload (Work Load Generator)
+5. Perform the simulation across the Microservice Mesh
+6. Retrieve the simulation data you are interested in and use it for your fancy Machine Learning techniques.
+
+Otherwise, if you have a Kubernetes cluster up and running and feel like deploying the Microservices on it, you can rely on the [AutoPilot](#autopilot) feature, which, as the name suggests, will perform the aforementioned steps automatically for you.
+
+If you want to dig deeper into the architecture of the MicroServiceSimulator, you can visit the [documentation](#PathToDocumentation).
+
+## Autopilot
+todo
+
+---
 * Configurare NFS Server su masterNode
 ### Configure NFS Server
 The MicroServiceSimulator use the NFS Server to share the configuration files between services, in particular 
@@ -40,7 +59,7 @@ sudo exportfs -a
 sudo systemctl restart nfs-kernel-server
 ```
 
-
+---
 * Gen ServiceMesh
 * Gen WorkModel
   
