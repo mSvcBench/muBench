@@ -148,9 +148,9 @@ try:
             if keyboard_input == "y" or keyboard_input == "yes":
                 req_params = {"stop_event": stop_event, "mean_interarrival_time": mean_interarrival_time}
                 workload = wlGen.get_workload(ingress_dict, {"min": min_services, "max": max_services}, req_params)
-                with open(f"workload", "w") as f:
+                with open(f"workload.json", "w") as f:
                     f.write(json.dumps(workload))
-                print("Worklod file saved in '%s'" % os.path.abspath("workload"))
+                print("Worklod file saved in '%s'" % os.path.abspath("workload.json"))
 
         else:
             print("...\nOk you do not want to DEPLOY stuff! Bye!")

@@ -5,36 +5,21 @@ from pprint import pprint
 K8s_YAML_BUILDER_PATH = os.path.dirname(__file__)
 
 # Variabili di test
-service_mesh = {"s0": [{"seq_len": 1,
-                        "services": ["s2", "s3"]
-                        },
-                       {"seq_len": 1,
-                        "services": ["s3"]
-                        }
-                       ],
-                "s1": [],
-                "s2": [{"seq_len": 1,
-                        "services": ["s4"]}],
-                "s3": [],
-                "s4": []
-                }
 
-work_model = {'s0': {'params': {'ave_luca': {'ave_number': 13, 'mean_bandwidth': 42}}},
-              's1': {'params': {'compute_pi': {'mean_bandwidth': 11, 'range_complexity': [101, 101]}}},
-              's2': {'params': {'compute_pi': {'mean_bandwidth': 11, 'range_complexity': [101, 101]}}},
-              's3': {'params': {'compute_pi': {'mean_bandwidth': 11, 'range_complexity': [101, 101]}}},
-              's4': {'params': {'compute_pi': {'mean_bandwidth': 11, 'range_complexity': [101, 101]}}}}
+# work_model = {'s0': {'params': {'ave_luca': {'ave_number': 13, 'mean_bandwidth': 42}}},
+#               's1': {'params': {'compute_pi': {'mean_bandwidth': 11, 'range_complexity': [101, 101]}}},
+#               's2': {'params': {'compute_pi': {'mean_bandwidth': 11, 'range_complexity': [101, 101]}}},
+#               's3': {'params': {'compute_pi': {'mean_bandwidth': 11, 'range_complexity': [101, 101]}}},
+#               's4': {'params': {'compute_pi': {'mean_bandwidth': 11, 'range_complexity': [101, 101]}}}}
 
 
-#########
-
-YAML_OUTPUT_FILE = "MicroServiceDeployment"
-NAMESPACE = "default"
-IMAGE = "lucapetrucci/microservice:latest"
-CLUSTER_DOMAIN = "cluster"
-PATH = "/api/v1"
-# var_to_be_replaced = {"{{string_in_template}}": "new_value", ...}
-var_to_be_replaced = {}
+# YAML_OUTPUT_FILE = "MicroServiceDeployment"
+# NAMESPACE = "default"
+# IMAGE = "lucapetrucci/microservice:latest"
+# CLUSTER_DOMAIN = "cluster"
+# PATH = "/api/v1"
+# # var_to_be_replaced = {"{{string_in_template}}": "new_value", ...}
+# var_to_be_replaced = {}
 
 
 # Add params to work_model json
@@ -86,6 +71,4 @@ def create_configmap_yaml(mesh, model, namespace):
 # pprint(work_model)
 
 # create_deployment_yaml_files(work_model, var_to_be_replaced)
-
-# create_configmap_yaml(service_mesh, work_model, NAMESPACE)
 

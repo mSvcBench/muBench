@@ -7,17 +7,18 @@ import json
 from pprint import pprint
 
 
-microServiceSimulator_access_gateway = "http://localhost:9999"
+ms_access_gateway = "http://localhost:9999"
 # microServiceSimulator_access_gateway = "http://n1:31113"
 workload_file_path = "workload.json"
 start_time = 0.0
+
 
 def richiesto_le_teste(event):
     # pprint(workload[event]["services"])
     for services in event["services"]:
         print(services)
         try:
-            r = requests.get(f"{microServiceSimulator_access_gateway}/{services}")
+            r = requests.get(f"{ms_access_gateway}/{services}")
             print(r)
         except Exception as err:
             print("Error: %s" % err)
