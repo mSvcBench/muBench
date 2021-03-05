@@ -13,7 +13,7 @@ K8s_YAML_BUILDER_PATH = os.path.dirname(__file__)
 #               's4': {'params': {'compute_pi': {'mean_bandwidth': 11, 'range_complexity': [101, 101]}}}}
 
 
-# YAML_OUTPUT_FILE = "MicroServiceDeployment"
+# PREFIX_YAML_FILE = "MicroServiceDeployment"
 # NAMESPACE = "default"
 # IMAGE = "lucapetrucci/microservice:latest"
 # CLUSTER_DOMAIN = "cluster"
@@ -33,7 +33,7 @@ def customization_work_model(model, path, name_space, cluster_domain, image):
     print("Work Model Updated!")
 
 
-def create_deployment_yaml_files(model, args):
+def create_deployment_yaml_files(model, prefix_yaml_file, args):
     for service in model:
         with open(f"{K8s_YAML_BUILDER_PATH}/DeploymentTemplate.yaml", "r") as file:
             f = file.read()
@@ -46,7 +46,7 @@ def create_deployment_yaml_files(model, args):
         if not os.path.exists(f"{K8s_YAML_BUILDER_PATH}/yamls"):
             os.makedirs(f"{K8s_YAML_BUILDER_PATH}/yamls")
 
-        with open(f"{K8s_YAML_BUILDER_PATH}/yamls/{YAML_OUTPUT_FILE}-{service}.yaml", "w") as file:
+        with open(f"{K8s_YAML_BUILDER_PATH}/yamls/{prefix_yaml_file}-{service}.yaml", "w") as file:
             file.write(f)
     print("Deployment Created!")
 
@@ -70,5 +70,5 @@ def create_configmap_yaml(mesh, model, namespace):
 # customization_work_model(work_model, PATH, NAMESPACE, CLUSTER_DOMAIN, IMAGE)
 # pprint(work_model)
 
-# create_deployment_yaml_files(work_model, var_to_be_replaced)
+# create_deployment_yaml_files(work_model, PREFIX_YAML_FILE, var_to_be_replaced)
 

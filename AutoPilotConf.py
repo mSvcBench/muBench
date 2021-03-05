@@ -24,7 +24,7 @@ mean_interarrival_time = 100  # Mean of request interarrival
 
 
 #### K8s Yaml Builder
-yaml_output_file_name = "MicroServiceDeployment"
+prefix_yaml_output_file = "MicroServiceDeployment"
 deployment_namespace = "default"
 image_name = "lucapetrucci/microservice:latest"
 cluster_domain = "cluster"

@@ -98,10 +98,16 @@ MicroServiceDeployment-s4.yaml
 
 ---
 ### Autopilot
-todo
+* Properly edit the AutoPilotConf file
+* Run autopilot, it check if there is a deployment yet. 
+  * Yes -> asks for undeploy, if yes delete the deployment and remove yaml files
+  * No -> Generate yaml files and deploy
+    
+* Asks to generate the workload file
+* DONE! :)
 
 ---
-* Configurare NFS Server su masterNode
+## Requirements
 ### Configure NFS Server
 The MicroServiceSimulator use the NFS Server to share the configuration files between services, in particular 
 the nfs shared directory contains the work model and service mesh files, and a directory with the optional

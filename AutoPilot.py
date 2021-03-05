@@ -35,7 +35,7 @@ mean_interarrival_time = APConf.mean_interarrival_time  # Mean of request intera
 
 #### K8s Yaml Builder
 
-yaml_output_file_name = APConf.yaml_output_file_name
+prefix_yaml_output_file = APConf.prefix_yaml_output_file
 deployment_namespace = APConf.deployment_namespace
 image_name = APConf.image_name
 cluster_domain = APConf.cluster_domain
@@ -69,7 +69,7 @@ def create_deployment_config():
     K8sBuilder.customization_work_model(workmodel, service_path, deployment_namespace, cluster_domain, image_name)
     # pprint(workmodel)
 
-    K8sBuilder.create_deployment_yaml_files(workmodel, var_to_be_replaced)
+    K8sBuilder.create_deployment_yaml_files(workmodel, prefix_yaml_output_file, var_to_be_replaced)
     created_items = os.listdir(f"{K8sBuilder.K8s_YAML_BUILDER_PATH}/yamls")
     print(f"The following files are created: {created_items}")
     print("---")
@@ -120,7 +120,7 @@ def copy_config_file_to_nfs(nfs_folder_path, servicemesh, workmodel, job_functio
 
 
 ######## SCRIPT
-TEST = False
+TEST = True
 try:
     if folder_not_exist or len(os.listdir(folder)) == 0:
         if TEST:
