@@ -2,7 +2,7 @@
 
 Let's face it. If you ever stumbled upon simulating microservices, you made your life miserable trying.
 This project aims at facilitating this process.
-Thanks to its modular design, you can perform, if you feel confident enough, the following steps individually:
+Thanks to its modular design you can perform the following steps individually:
 
 1. Create the Microservice Mesh (Service Mesh)
 2. Establish the behaviour of each service (Work Model)
@@ -13,9 +13,91 @@ Thanks to its modular design, you can perform, if you feel confident enough, the
 
 Otherwise, if you have a Kubernetes cluster up and running and feel like deploying the Microservices on it, you can rely on the [AutoPilot](#autopilot) feature, which, as the name suggests, will perform the aforementioned steps automatically for you.
 
-If you want to dig deeper into the architecture of the MicroServiceSimulator, you can visit the [documentation](#PathToDocumentation).
+Below we'll try to briefly summarize the main ideas behind this project and how it works, but if you want to dig deeper into the architecture of the MicroServiceSimulator, you can visit the documentation [here](#PathToDocumentation).
 
-## Autopilot
+---
+[comment]: <> (# Unique image CELLLLLLLLLL)
+
+## A brief overview
+![mss-overview](Docs/mss-MSS.png)
+### Service Mesh Generator
+The ServiceMeshGenerator, as the name suggests, generates the mesh that links the services throughout a Microservice.
+It takes as input how you want to shape the Microservice:
+```json
+{
+  "services_groups": 1, 
+  "vertices": 10, 
+  "power": 1, 
+  "edges_per_vertex": 1, 
+  "zero_appeal": 10
+}
+```
+
+Output:
+```json
+{
+  "s0": [], 
+  "s1": [{"services": ["s0"], "seq_len": 1}], 
+  "s2": [{"services": ["s0"], "seq_len": 1}], 
+  "s3": [{"services": ["s0"], "seq_len": 1}],
+  ...
+}
+```
+        
+### Work Model Generator
+Ok, so now you made you've built your nice Service Mesh, now what? Now you can assign which job a service must execute when called. You can write your own CPU specific jobs or use the default ones like the `computePi`, that keeps busy the CPU depending on the specified complexity.
+
+Also, you can specify a set of functions followed by their likelihood to be chosen, to give a random spin to your simulation:
+
+```json
+{
+  "compute_pi": {"probability": 1, "mean_bandwidth": 11, "range_complexity": [1, 250]}, 
+  "functionName": {"probability": customProbability, "customParameter": customValue}
+}
+```
+
+![sm&wm](Docs/mss-MSS_sm.png)
+
+
+### Work Load Generator
+The WorkLoadGenerator maps the simulation time steps with the services, or rather, with the probability a certain service may execute its job.
+maps the 
+
+```json
+[
+  {"time": 0, "services": {"s1": 1, "s2": 0.8}},
+  {"time": 2, "services": {"s1": 1}},
+  {"time": 5, "services": {"s1": 1, "s2": 0.8}},
+  {"time": 7, "services": {"s1": 0.3, "s4": 0.5}},
+  {"time": 9, "services": {"s1": 1, "s2": 0.8}},
+  {"time": 10, "services": {"s4": 1, "s7": 0.2}}
+  ...
+]
+```
+
+### Kubernetes
+Up to now, the deploying part of this simulator requires Kubernetes, but the availability can be expanded in the future. 
+
+#### K8s Yaml Builder
+The K8sYamlBuilder translates the Service Mesh and the Work Model files into K8s deployable YAML files.
+In particular, it creates one YAML per service with its `Deployment` as well as its `Service` inside the directory `yamls` at its path.
+
+```zsh
+host@hostname:~/MicroServiceSimulator/Kubernetes/K8sYamlBuilder/yamls$ ls
+MicroServiceDeployment-s0.yaml
+MicroServiceDeployment-s1.yaml
+MicroServiceDeployment-s2.yaml
+MicroServiceDeployment-s3.yaml
+MicroServiceDeployment-s4.yaml
+...
+```
+
+[comment]: <> (#### K8s Deployer)
+
+### Runner
+
+---
+### Autopilot
 todo
 
 ---
