@@ -33,13 +33,13 @@ def customization_work_model(model, path, name_space, cluster_domain, image):
     print("Work Model Updated!")
 
 
-def create_deployment_yaml_files(model, prefix_yaml_file, args):
+def create_deployment_yaml_files(model, prefix_yaml_file, nfs, namespace, args):
     for service in model:
-        with open(f"{K8s_YAML_BUILDER_PATH}/DeploymentTemplate.yaml", "r") as file:
+        with open(f"{K8s_YAML_BUILDER_PATH}/Template/DeploymentTemplate.yaml", "r") as file:
             f = file.read()
             f = f.replace("{{SERVICE_NAME}}", service)
             f = f.replace("{{IMAGE}}", model[service]["image"])
-            f = f.replace("{{NAMESPACE}}", model[service]["namespace"])
+            f = f.replace("{{NAMESPACE}}", namespace)
             for key in args:
                 f = f.replace(key, args[key])
 
@@ -48,11 +48,36 @@ def create_deployment_yaml_files(model, prefix_yaml_file, args):
 
         with open(f"{K8s_YAML_BUILDER_PATH}/yamls/{prefix_yaml_file}-{service}.yaml", "w") as file:
             file.write(f)
+
+    with open(f"{K8s_YAML_BUILDER_PATH}/Template/ConfigMapNginxGwTemplate.yaml", "r") as file:
+        f = file.read()
+        f = f.replace("{{NAMESPACE}}", namespace)
+
+    with open(f"{K8s_YAML_BUILDER_PATH}/yamls/ConfigMapNginxGw.yaml", "w") as file:
+        file.write(f)
+
+    with open(f"{K8s_YAML_BUILDER_PATH}/Template/DeploymentNginxGwTemplate.yaml", "r") as file:
+        f = file.read()
+        f = f.replace("{{NAMESPACE}}", namespace)
+
+    with open(f"{K8s_YAML_BUILDER_PATH}/yamls/DeploymentNginxGw.yaml", "w") as file:
+        file.write(f)
+
+    with open(f"{K8s_YAML_BUILDER_PATH}/Template/PersistentVolumeMicroServiceTemplate.yaml", "r") as file:
+        f = file.read()
+        f = f.replace("{{NAMESPACE}}", namespace)
+        f = f.replace("{{SERVER}}", nfs["address"])
+        f = f.replace("{{PATH}}", nfs["mount_path"])
+
+    with open(f"{K8s_YAML_BUILDER_PATH}/yamls/PersistentVolumeMicroService.yaml", "w") as file:
+        file.write(f)
+
     print("Deployment Created!")
 
 
+
 def create_configmap_yaml(mesh, model, namespace):
-    with open(f"{K8s_YAML_BUILDER_PATH}/ConfigMapTemplate.yaml", "r") as file:
+    with open(f"{K8s_YAML_BUILDER_PATH}/Template/ConfigMapTemplate.yaml", "r") as file:
         f = file.read()
         f = f.replace("{{SERVICE_MESH}}", json.dumps(mesh))
         f = f.replace("{{WORK_MODEL}}", json.dumps(model))

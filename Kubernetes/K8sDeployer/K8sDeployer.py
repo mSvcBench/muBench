@@ -24,7 +24,7 @@ def deploy_items(folder):
 
     for yaml_to_create in items:
         with open(yaml_to_create) as f:
-            print(yaml_to_create)
+            # print(yaml_to_create)
             complete_yaml = yaml.load_all(f)
             for partial_yaml in complete_yaml:
                 try:
@@ -81,9 +81,9 @@ def undeploy_items(folder):
                     print("######################")
 
 
-def deploy_volume(yamls, server, path):
+def deploy_volume(yamls):
     print("######################")
-    print(f"We are going to DEPLOY the PersistentVolume Persi and PersistentVolumeClaim from the yaml file: {yamls}")
+    print(f"We are going to DEPLOY the PersistentVolume and PersistentVolumeClaim from the yaml file: {yamls}")
     print("######################")
 
     config.load_kube_config()
@@ -94,8 +94,6 @@ def deploy_volume(yamls, server, path):
         for partial_yaml in complete_yaml:
             try:
                 if partial_yaml["kind"] == "PersistentVolume":
-                    partial_yaml["spec"]["nfs"]["server"] = server
-                    partial_yaml["spec"]["nfs"]["path"] = path
                     api_response = k8s_core_api.create_persistent_volume(body=partial_yaml)
                     print(f"PersistentVolume '{partial_yaml['metadata']['name']}' created.")
                     print("---")
@@ -108,6 +106,7 @@ def deploy_volume(yamls, server, path):
                 print("######################")
                 print(f"Exception raised deploying a {partial_yaml['kind']}: {api_exception_body['details']} -> {api_exception_body['reason']}")
                 print("######################")
+
 
 def undeploy_volume(yamls):
     print("######################")
@@ -140,6 +139,7 @@ def undeploy_volume(yamls):
 
 def deploy_nginx_gateway(nginx_yaml):
     deploy_items(nginx_yaml)
+
 
 def undeploy_nginx_gateway(nginx_yaml):
     undeploy_items(nginx_yaml)
