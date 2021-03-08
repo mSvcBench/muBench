@@ -9,7 +9,7 @@ Thanks to its modular design you can perform the following steps individually:
 3. Combine the Service Mesh and Work Model into K8s deployable YAML files
 4. Generate the simulation workload (Work Load Generator)
 5. Perform the simulation across the Microservice Mesh
-6. Retrieve the simulation data you are interested in and use it for your fancy Machine Learning techniques.
+6. Retrieve the simulation data you are interested in
 
 Otherwise, if you have a Kubernetes cluster up and running and feel like deploying the MSS on it, you can rely on the [AutoPilot](Docs/Autopilot.md) script which, as the name suggests, will perform the aforementioned steps automatically for you.
 
