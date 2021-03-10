@@ -135,9 +135,12 @@ if folder_not_exist or len(os.listdir(folder)) == 0:
         copy_config_file_to_nfs(nfs_folder_path=nfs_conf["mount_path"], servicemesh=service_mesh,
                                 workmodel=work_model, job_functions=job_functions_file_path)
 
+        # pprint(service_mesh)
+        # pprint(work_model)
+
         # deploy_items(updated_folder_items)
         K8sDeployer.deploy_volume(f"{folder}/PersistentVolumeMicroService.yaml")
-        K8sDeployer.deploy_nginx_gateway(f"{folder}/DeploymentNginxGw.yaml")
+        K8sDeployer.deploy_nginx_gateway(folder)
         K8sDeployer.deploy_items(folder)
 
         keyboard_input = input("Do you wanna create the workload file?? (y)  ") or "y"
@@ -157,13 +160,11 @@ else:
     print(f"Folder is not empty: {folder}.")
     keyboard_input = input("Wanna UNDEPLOY old yamls first, delete the files and then start again? (n) ") or "n"
     if keyboard_input == "y" or keyboard_input == "yes":
-        # undeploy_items(folder_items)
         K8sDeployer.undeploy_items(folder)
-        K8sDeployer.undeploy_nginx_gateway(f"{folder}/DeploymentNginxGw.yaml")
+        K8sDeployer.undeploy_nginx_gateway(folder)
         K8sDeployer.undeploy_volume(f"{folder}/PersistentVolumeMicroService.yaml")
         remove_files(folder)
-        # updated_folder_items = create_deployment_config()
-        # deploy_items(updated_folder_items)
+
     else:
         print("...\nOk you want to keep the OLD deployment! Bye!")
 

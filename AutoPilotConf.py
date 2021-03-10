@@ -11,7 +11,7 @@ zero_appeal = 10
 ##### Work Model Parameters
 # Possible Internal Job Functions with params
 work_model_params = {"compute_pi": {"probability": 1, "mean_bandwidth": 11, "range_complexity": [101, 101]},
-                     "ave_luca": {"probability": 0.6, "ave_number": 13, "mean_bandwidth": 42}
+                     "ave_luca": {"probability": 0.8, "ave_number": 13, "mean_bandwidth": 42}
                      }
 
 ##### Workload Parameters
@@ -37,3 +37,41 @@ nfs_conf = {"address": "10.3.0.4", "mount_path": "/mnt/MSSharedData"}
 #### Autopilot Parameters
 
 job_functions_file_path = "AveLuca.py"
+
+
+###### TEST
+
+workmodel_j = {'s0': [],
+               's1': [{'seq_len': 1, 'services': ['s0']}],
+               's2': [{'seq_len': 1, 'services': ['s0']}],
+               's3': [{'seq_len': 1, 'services': ['s2']}],
+               's4': [{'seq_len': 1, 'services': ['s3']}]}
+
+servicemesh_j = {'s0': {'image': 'lucapetrucci/microservice:latest',
+                        'namespace': 'default',
+                        'params': {'ave_luca': {'ave_number': 3, 'mean_bandwidth': 42}},
+                        'path': '/api/v1',
+                        'url': 'http://s0.default.svc.cluster.local'},
+                 's1': {'image': 'lucapetrucci/microservice:latest',
+                        'namespace': 'default',
+                        'params': {'compute_pi': {'mean_bandwidth': 11,
+                                                  'range_complexity': [101, 101]}},
+                        'path': '/api/v1',
+                        'url': 'http://s1.default.svc.cluster.local'},
+                 's2': {'image': 'lucapetrucci/microservice:latest',
+                        'namespace': 'default',
+                        'params': {'ave_luca': {'ave_number': 13, 'mean_bandwidth': 42}},
+                        'path': '/api/v1',
+                        'url': 'http://s2.default.svc.cluster.local'},
+                 's3': {'image': 'lucapetrucci/microservice:latest',
+                        'namespace': 'default',
+                        'params': {'compute_pi': {'mean_bandwidth': 11,
+                                                  'range_complexity': [101, 101]}},
+                        'path': '/api/v1',
+                        'url': 'http://s3.default.svc.cluster.local'},
+                 's4': {'image': 'lucapetrucci/microservice:latest',
+                        'namespace': 'default',
+                        'params': {'compute_pi': {'mean_bandwidth': 11,
+                                                  'range_complexity': [101, 101]}},
+                        'path': '/api/v1',
+                        'url': 'http://s4.default.svc.cluster.local'}}

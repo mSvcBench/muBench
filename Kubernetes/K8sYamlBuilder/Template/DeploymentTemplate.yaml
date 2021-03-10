@@ -69,6 +69,6 @@ spec:
   - port: 80
     targetPort: 8080
     nodePort:
-    name: input
+    name: tcp-input
   selector:
     app: {{SERVICE_NAME}}-pod
