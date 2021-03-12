@@ -99,10 +99,10 @@ def remove_files(folder_v):
 
 def copy_config_file_to_nfs(nfs_folder_path, servicemesh, workmodel, job_functions):
     try:
-        with open(f"{nfs_folder_path}/servicemesh", "w") as f:
+        with open(f"{nfs_folder_path}/servicemesh.json", "w") as f:
             f.write(json.dumps(servicemesh))
 
-        with open(f"{nfs_folder_path}/workmodel", "w") as f:
+        with open(f"{nfs_folder_path}/workmodel.json", "w") as f:
             f.write(json.dumps(workmodel))
 
         if job_functions != "" or job_functions is None:

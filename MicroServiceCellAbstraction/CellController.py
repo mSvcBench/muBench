@@ -16,10 +16,10 @@ from pprint import pprint
 
 
 def read_config_files():
-    with open('MSConfig/servicemesh') as f:
+    with open('MSConfig/servicemesh.json') as f:
         servicemesh = json.load(f)
 
-    with open('MSConfig/workmodel') as f:
+    with open('MSConfig/workmodel.json') as f:
         workmodel = json.load(f)
 
     return servicemesh, workmodel
