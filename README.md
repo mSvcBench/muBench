@@ -81,7 +81,7 @@ The WorkLoadGenerator maps the simulation time steps (in ms) with the services, 
 Up until to now, the deploying part of the MSS requires Kubernetes, but the availability can be expanded in the future. 
 
 #### K8s Yaml Builder
-The K8sYamlBuilder comines the `servicemesh.json`, `workmodel.json` and the following input parameters into K8s deployable YAML files:
+The [K8sYamlBuilder](Kubernetes) comines the `servicemesh.json`, `workmodel.json` and the following input parameters into K8s deployable YAML files:
 
 ```shell
 prefix_yaml_output_file = "MicroServiceDeployment"
