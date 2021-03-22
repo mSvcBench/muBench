@@ -27,7 +27,7 @@ def richiesto_le_teste(event):
 def job_assignment(v_pool, v_futures, event):
     try:
         worker = (v_pool.submit(richiesto_le_teste, event))
-        time.sleep(0.0001)  # serve a lsciare il tempo di cambiare la variabile _state
+        time.sleep(0.0001)  # lascia il tempo di cambiare la variabile _state
         # print(f"{v_time}-{worker._state}-{time.time()}")
         print(f"{event['time']} - {worker._state} - Diff: {time.time()-start_time-event['time']}")
         # Se il thread viene messo in pending significa che non ho thread liberi e quindi non rispetto

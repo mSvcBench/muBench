@@ -6,6 +6,7 @@ services_groups = 1  # Number of services for group
 power = 1  # Power ???
 edges_per_vertex = 1
 zero_appeal = 10
+dbs = {"sdb1": 0.4, "sdb2": 0.6, "sdb3": 0.2}
 
 
 ##### Work Model Parameters
@@ -38,5 +39,8 @@ nfs_conf = {"address": "10.3.0.4", "mount_path": "/mnt/MSSharedData"}
 #### Autopilot Parameters
 
 job_functions_file_path = "AveLuca.py"
+
+
+
 
 

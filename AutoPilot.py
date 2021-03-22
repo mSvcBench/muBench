@@ -18,6 +18,8 @@ services_groups = APConf.services_groups  # Number of services for group
 power = APConf.power  # Power ???
 edges_per_vertex = APConf.edges_per_vertex
 zero_appeal = APConf.zero_appeal
+dbs = APConf.dbs
+
 
 
 ##### WorkModel Params
@@ -64,7 +66,8 @@ def create_deployment_config():
                            "vertices": vertices,
                            "power": power,
                            "edges_per_vertex": edges_per_vertex,
-                           "zero_appeal": zero_appeal
+                           "zero_appeal": zero_appeal,
+                           "dbs": dbs
                            }
     servicemesh = smGen.get_service_mesh(service_mesh_params)
 
