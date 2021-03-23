@@ -28,9 +28,10 @@ import random
 '''
 
 # graph_params_test = {"services_groups": 1, "vertices": 10, "power": 0.9, "edges_per_vertex": 1, "zero_appeal": 0.001}
-graph_params_test = {"services_groups": 1, "vertices": 2, "power": 1, "edges_per_vertex": 1, "zero_appeal": 10,
+graph_params_test = {"services_groups": 1, "vertices": 10, "power": 1, "edges_per_vertex": 1, "zero_appeal": 10,
                      # "dbs": {}
-                     "dbs": {"nodb": 1, "sdb1": 0.4, "sdb2": 0.6, "sdb3": 0.2}
+                     # "dbs": {"nodb": 1, "sdb1": 0.4, "sdb2": 0.6, "sdb3": 0.2}
+                     # "dbs": {"sdb1": 0.4, "sdb2": 0.6, "sdb3": 0.2}
                      }
 
 
@@ -80,12 +81,13 @@ def get_service_mesh(graph_params):
 
         if "dbs" in graph_params.keys() and len(graph_params["dbs"]) > 0:
             selected_db = select_db(graph_params["dbs"])
-            print(selected_db)
+            # print(selected_db)
             if selected_db is "nodb":
                 continue
             if selected_db not in graph_added_dbs:
                 graph_added_dbs.append(selected_db)
                 g.add_vertices(1)
+                service_mesh[selected_db] = list()
             new_vertex = g.vcount() - 1
             g.add_edges([(vertex, new_vertex)])
             service_mesh[f"s{vertex}"].append({'seq_len': 1, "services": [selected_db]})
@@ -93,16 +95,16 @@ def get_service_mesh(graph_params):
     # print("THE MESH:\n", json.dumps(service_mesh))
 
     g.vs["label"] = list(range(graph_params["vertices"])) + graph_added_dbs
-    print(g)
+    # print(g)
     # plot(g)
     print("Service Mesh Created!")
     return service_mesh
 
 
 # pprint(get_service_mesh(graph_params_test))
-get_service_mesh(graph_params_test)
-db_param_test = {"sdb1": 0.4,
-                 "sdb2": 0.6,
-                 "sdb3": 0.2
-                 }
+# get_service_mesh(graph_params_test)
+# db_param_test = {"sdb1": 0.4,
+#                  "sdb2": 0.6,
+#                  "sdb3": 0.2
+#                  }
 # print(select_db(db_param_test))

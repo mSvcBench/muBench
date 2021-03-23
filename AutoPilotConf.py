@@ -1,18 +1,19 @@
 ############### Input Parameters ###############
-vertices = 5
+vertices = 10
 
 ##### Service Mesh Parameters
 services_groups = 1  # Number of services for group
-power = 1  # Power ???
+power = 0.05  # Power ???
 edges_per_vertex = 1
-zero_appeal = 10
-dbs = {"sdb1": 0.4, "sdb2": 0.6, "sdb3": 0.2}
+zero_appeal = 0.01
+dbs = {}
+# dbs = {"sdb1": 0.4, "sdb2": 0.6, "sdb3": 0.2}
 
 
 ##### Work Model Parameters
 # Possible Internal Job Functions with params
-work_model_params = {"compute_pi": {"probability": 1, "mean_bandwidth": 11, "range_complexity": [101, 101]},
-                     "ave_luca": {"probability": 0.8, "ave_number": 13, "mean_bandwidth": 42}
+work_model_params = {"compute_pi": {"probability": 1, "mean_bandwidth": 100, "range_complexity": [300, 300]},
+                     # "ave_luca": {"probability": 0.8, "ave_number": 13, "mean_bandwidth": 42}
                      }
 
 ##### Workload Parameters
@@ -37,10 +38,5 @@ nfs_conf = {"address": "10.3.0.4", "mount_path": "/mnt/MSSharedData"}
 
 
 #### Autopilot Parameters
-
-job_functions_file_path = "AveLuca.py"
-
-
-
-
-
+# job_functions_file_path = "AveLuca.py"
+job_functions_file_path = ""

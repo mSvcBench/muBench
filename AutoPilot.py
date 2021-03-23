@@ -67,7 +67,7 @@ def create_deployment_config():
                            "power": power,
                            "edges_per_vertex": edges_per_vertex,
                            "zero_appeal": zero_appeal,
-                           "dbs": dbs
+                           # "dbs": dbs
                            }
     servicemesh = smGen.get_service_mesh(service_mesh_params)
 
@@ -150,7 +150,7 @@ if folder_not_exist or len(os.listdir(folder)) == 0:
         if keyboard_input == "y" or keyboard_input == "yes":
             req_params = {"stop_event": stop_event, "mean_interarrival_time": mean_interarrival_time}
             workload = wlGen.get_workload(ingress_dict, {"min": min_services, "max": max_services}, req_params)
-            with open(f"workload.json", "w") as f:
+            with open(f"WorkLoadGenerator/workload.json", "w") as f:
                 f.write(json.dumps(workload))
             print("Worklod file saved in '%s'" % os.path.abspath("workload.json"))
 

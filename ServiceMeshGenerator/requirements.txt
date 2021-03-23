@@ -1,1 +1,2 @@
 python-igraph==0.8.3
+cairocffi==1.2.0
