@@ -47,12 +47,20 @@ def select_db(dbs):
             return db[0]
         prev_interval += round(db[1]/p_total, 10)
 
+def edges_reversal(graph):
+    for edge in graph.get_edgelist():
+        print(edge[0], edge[1])
+        graph.delete_edges([(edge[0], edge[1])])
+        graph.add_edges([(edge[1], edge[0])])
+
 
 def get_service_mesh(graph_params):
     # Takes as inputs the graph parameters and generates its json file accordingly
     g = Graph.Barabasi(n=graph_params["vertices"], power=graph_params["power"], m=graph_params["edges_per_vertex"],
                        zero_appeal=graph_params["zero_appeal"], directed=True)
     g.vs["label"] = list(range(graph_params["vertices"]))  # label nodes with
+
+    edges_reversal(g)
 
     service_mesh = {}
 
