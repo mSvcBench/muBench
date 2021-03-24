@@ -9,17 +9,14 @@ import shutil
 import AutoPilotConf as APConf
 
 
-
 ############### Input Param ###############
-vertices = APConf.vertices
-
 ##### ServiceMesh Params
+vertices = APConf.vertices
 services_groups = APConf.services_groups  # Number of services for group
 power = APConf.power  # Power ???
 edges_per_vertex = APConf.edges_per_vertex
 zero_appeal = APConf.zero_appeal
 dbs = APConf.dbs
-
 
 
 ##### WorkModel Params
@@ -67,15 +64,13 @@ def create_deployment_config():
                            "power": power,
                            "edges_per_vertex": edges_per_vertex,
                            "zero_appeal": zero_appeal,
-                           # "dbs": dbs
+                           "dbs": dbs
                            }
     servicemesh = smGen.get_service_mesh(service_mesh_params)
 
-    workmodel = wmGen.get_work_model(vertices, work_model_params)
+    workmodel = wmGen.get_work_model(servicemesh, work_model_params)
 
     K8sBuilder.customization_work_model(workmodel, service_path, deployment_namespace, cluster_domain, image_name)
-    # pprint(workmodel)
-
     K8sBuilder.create_deployment_yaml_files(workmodel, prefix_yaml_output_file, nfs_conf, deployment_namespace, var_to_be_replaced)
     created_items = os.listdir(f"{K8sBuilder.K8s_YAML_BUILDER_PATH}/yamls")
     print(f"The following files are created: {created_items}")

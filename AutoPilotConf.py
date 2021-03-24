@@ -1,13 +1,12 @@
 ############### Input Parameters ###############
-vertices = 10
-
 ##### Service Mesh Parameters
+vertices = 10
 services_groups = 1  # Number of services for group
 power = 0.05  # Power ???
 edges_per_vertex = 1
 zero_appeal = 0.01
-dbs = {}
-# dbs = {"sdb1": 0.4, "sdb2": 0.6, "sdb3": 0.2}
+# dbs = {}
+dbs = {"sdb1": 1, "sdb2": 0.2, "sdb3": 0.1}
 
 
 ##### Work Model Parameters
@@ -15,6 +14,7 @@ dbs = {}
 work_model_params = {"compute_pi": {"probability": 1, "mean_bandwidth": 100, "range_complexity": [300, 300]},
                      # "ave_luca": {"probability": 0.8, "ave_number": 13, "mean_bandwidth": 42}
                      }
+
 
 ##### Workload Parameters
 ingress_dict = {"s0": 1}  # Dictionary of possibile ingress Services with associated probability

@@ -21,7 +21,8 @@ graph_params_test = {"services_groups": 1,
                      "vertices": 5, 
                      "power": 1, 
                      "edges_per_vertex": 1, 
-                     "zero_appeal": 10
+                     "zero_appeal": 10,
+                     "dbs": {"sdb1": 0.8, "sdb2": 0.3}
                     }
 ```
 * Then, you can run the python file `RunServiceMeshGen.py`:
@@ -41,11 +42,11 @@ you can assign which job a service must execute when called.
 cd MicroServiceSimulator/WorkModelGenerator
 ```
 * Similarly to step one, edit the input parameters at the beginning of the `RunWorkModelGen.py` file.
-Be careful to set the same value to `v_numbers` as the previously defined `graph_params_test["vertices"]` in step one. If you want to include your own functions to the work model, check [here](CustomJobs.md).
+Be careful to set the correct path to the `servicemesh.json` file saved in step one. If you want to include your own functions to the work model, check [here](CustomJobs.md).
 
 ```python
-v_numbers = 5
 parameters = {"compute_pi": {"probability": 1, "mean_bandwidth": 11, "range_complexity": [1, 250]}}
+servicemesh_file_path = "../ServiceMeshGenerator/servicemesh.json"
 ```
 
 

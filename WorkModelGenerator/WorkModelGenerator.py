@@ -21,7 +21,22 @@ def select_job(jobs):
         prev_interval += round(job[1]["probability"]/p_total, 10)
 
 
-def get_work_model(vertex_number, params):
+def get_work_model(service_mesh, params):
+    work_model = dict()
+    # pprint(params)
+    try:
+        for vertex in service_mesh.keys():
+            work_model[f"{vertex}"] = {"params": select_job(params)}
+    except Exception as err:
+        print("ERROR: in creation work model,", err)
+        exit(1)
+
+    # pprint(work_model)
+    print("Work Model Created!")
+    return work_model
+
+
+def get_work_model_OLD(vertex_number, params):
     work_model = dict()
     # pprint(params)
     try:
