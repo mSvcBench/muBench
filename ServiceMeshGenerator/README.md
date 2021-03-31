@@ -29,28 +29,28 @@ graph_params_test = {"services_groups": 1, "vertices": 10, "power": 0.05, "edges
                      "dbs": {"sdb1": 0.4, "sdb2": 0.6, "sdb3": 0.2}}
 ```
 
-![1](../Docs/service_mesh_example_1.pdf)
+<img width="400" height="400" src="../Docs/service_mesh_example_1.png">
 
 ```
 graph_params_test = {"services_groups": 1, "vertices": 10, "power": 0.9, "edges_per_vertex": 1, "zero_appeal": 0.01,
                      "dbs": {"nodb": 0.3, "sdb1": 0.4, "sdb2": 0.6, "sdb3": 0.2}}
 ```
 
-![2](../Docs/service_mesh_example_2.pdf)
+<img width="400" height="400" src="../Docs/service_mesh_example_2.png">
 
 ```
 graph_params_test = {"services_groups": 1, "vertices": 10, "power": 0.05, "edges_per_vertex": 1, "zero_appeal": 3.25,
                      "dbs": {}}
 ```
 
-![3](../Docs/service_mesh_example_3.pdf)
+<img width="400" height="400" src="../Docs/service_mesh_example_3.png">
 
 ```
 graph_params_test = {"services_groups": 1, "vertices": 10, "power": 0.9, "edges_per_vertex": 1, "zero_appeal": 3.25,
                      "dbs": {"nodb": 0.8, "sdb1": 0.4}}
 ```
 
-![4](../Docs/service_mesh_example_4.pdf)
+<img width="400" height="400" src="../Docs/service_mesh_example_4.png">
 
 ## Run the script
 Finally, run the script:
