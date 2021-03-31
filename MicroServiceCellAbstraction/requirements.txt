@@ -8,6 +8,7 @@ idna==2.10
 itsdangerous==1.1.0
 Jinja2==2.11.2
 MarkupSafe==1.1.1
+prometheus-client==0.9.0
 PyJWT==1.7.1
 requests==2.25.1
 six==1.15.0

@@ -16,7 +16,11 @@ spec:
   template:
     metadata:
       labels:
+        zone: default
         app: {{SERVICE_NAME}}-pod
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8081'
     spec:
       containers:
         - name: {{SERVICE_NAME}}-pod
@@ -33,6 +37,14 @@ spec:
           env:
             - name: APP
               value: {{SERVICE_NAME}}
+            - name: ZONE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['zone']
+            - name: K8S_APP
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['app']
 #      terminationGracePeriodSeconds: 0
       volumes:
         - name: podinfo

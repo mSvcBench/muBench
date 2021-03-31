@@ -16,7 +16,11 @@ spec:
   template:
     metadata:
       labels:
+        zone: default
         app: s0-pod
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8081'
     spec:
       containers:
         - name: s0-pod
@@ -34,6 +38,14 @@ spec:
           env:
             - name: APP
               value: s0
+            - name: ZONE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['zone']
+            - name: K8S_APP
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['app']
 #      terminationGracePeriodSeconds: 0
       volumes:
         - name: podinfo
@@ -45,6 +57,7 @@ spec:
               - path: "annotations"
                 fieldRef:
                   fieldPath: metadata.annotations
+
 #        - name: config-volume
 #          configMap:
 #            name: microservices-configmap
