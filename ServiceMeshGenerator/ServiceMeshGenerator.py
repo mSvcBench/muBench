@@ -1,4 +1,3 @@
-import igraph
 from igraph import *
 import json
 from pprint import pprint
@@ -51,6 +50,7 @@ def select_db(dbs):
         if random_extraction <= prev_interval + db[1]/p_total:
             return db[0]
         prev_interval += round(db[1]/p_total, 10)
+
 
 def edges_reversal(graph):
     for edge in graph.get_edgelist():

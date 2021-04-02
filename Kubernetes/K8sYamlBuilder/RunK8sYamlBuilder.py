@@ -9,7 +9,7 @@ path = "/api/v1"
 # var_to_be_replaced = {"{{string_in_template}}": "new_value", ...}
 var_to_be_replaced = {}
 
-nfs_conf = {"address": "10.3.0.4", "mount_path": "/mnt/MSSharedData"}
+nfs_conf = {"address": "192.168.0.144", "mount_path": "/kubedata/MSSharedData"}
 
 work_model_path = "../../WorkModelGenerator/workmodel.json"
 

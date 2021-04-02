@@ -10,7 +10,8 @@ from ServiceMeshGenerator import get_service_mesh, pprint, json
 #                      "dbs": {"sdb1": 0.4, "sdb2": 0.6, "sdb3": 0.2}
 #                      }
 graph_params_test = {"services_groups": 1, "vertices": 10, "power": 0.05, "edges_per_vertex": 1, "zero_appeal": 3.25,
-                     "dbs": {"sdb1": 0.6, "sdb2": 0.4}
+                     "dbs": {"nodb": 0.2, "sdb1": 0.6, "sdb2": 0.4}
+                     # "dbs": {"sdb1": 0.6, "sdb2": 0.4}
                      }
 ####################
 

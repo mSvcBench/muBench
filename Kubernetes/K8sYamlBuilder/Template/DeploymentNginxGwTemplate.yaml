@@ -25,12 +25,17 @@ spec:
           subPath: nginx.conf
         - mountPath: /var/log/nginx
           name: log
+        - name: job-function-volume
+          mountPath: /etc/nginx/MSConfig
       volumes:
       - name: config-volume
         configMap:
           name: ms-gateway-configmap
       - name: log
         emptyDir: {}
+      - name: job-function-volume
+        persistentVolumeClaim:
+          claimName: nfs-pvc-ms
 ---
 apiVersion: v1
 kind: Service

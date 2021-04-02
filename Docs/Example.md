@@ -29,9 +29,10 @@ graph_params_test = {"services_groups": 1,
 ```shell
 python RunServiceMeshGen.py
 ```
-* To save the file `servicemesh.json` just generated, type `y` when the python script asks you for it. Now, copy the file to the NFS shared folder path, previously defined:
+* To save the file `servicemesh.json` just generated, type `y` when the python script asks you for it. Now, copy the files `servicemesh.json` and `servicemesh.png` to the NFS shared folder path, previously defined:
 ```shell
 cp servicemesh.json $NFS_SHARED_FOLDER/
+cp servicemesh.png $NFS_SHARED_FOLDER/
 ```
 
 ## 2. Generate the work model of the MicroService
