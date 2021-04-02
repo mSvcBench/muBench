@@ -1,3 +1,4 @@
+import igraph
 from igraph import *
 import json
 from pprint import pprint
@@ -82,7 +83,7 @@ def get_service_mesh(graph_params):
         if "dbs" in graph_params.keys() and len(graph_params["dbs"]) > 0:
             selected_db = select_db(graph_params["dbs"])
             # print(selected_db)
-            if selected_db is "nodb":
+            if selected_db == "nodb":
                 continue
             if selected_db not in graph_added_dbs:
                 graph_added_dbs.append(selected_db)
@@ -95,8 +96,11 @@ def get_service_mesh(graph_params):
     # print("THE MESH:\n", json.dumps(service_mesh))
 
     g.vs["label"] = list(range(graph_params["vertices"])) + graph_added_dbs
+    g.vs["size"] = 35
+    # g.save('testttt.png')
+    plot(g, "servicemesh.png")
+
     # print(g)
-    # plot(g)
     print("Service Mesh Created!")
     return service_mesh
 
