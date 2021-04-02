@@ -55,14 +55,20 @@ pprint(my_work_model)
 # Misuro il throughput quindi mi memorizzo il totale dei dati scambiati e il numero delle richieste
 # Throughput --> Zona_pod, app_name, method, endpoint, from   -> Sommo il body
 
+# Local Processing --> Misuro il tempo di esecuzione della funzione
+
 # tutti counter
 REQUEST_LATENCY = Summary('mss_request_latency_seconds', 'Request latency',
                           ['zone', 'app_name', 'method', 'endpoint', 'from']
                           )
 
-RESPONSE_SIZE = Summary('mss_response_size', 'Request latency',
+RESPONSE_SIZE = Summary('mss_response_size', 'Response size',
                         ['zone', 'app_name', 'method', 'endpoint', 'from']
                         )
+
+LOCAL_PROCESSING = Summary('mss_local_processing_latency_seconds', 'Local processing latency',
+                          ['zone', 'app_name', 'method', 'endpoint', 'from']
+                          )
 
 
 def start_timer():
@@ -121,7 +127,10 @@ class HttpThread(Thread):
             mss_test_ingress.inc(1)  # Increment by 1
             # Execute the internal job
             print("*************** INTERNAL JOB STARTED ***************")
+            start_local_processing = time.time()
             body = run_internal_job(my_work_model["params"])
+            local_processing_latency = time.time() - start_local_processing
+            LOCAL_PROCESSING.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr).observe(local_processing_latency)
             RESPONSE_SIZE.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr).observe(len(body))
             print("len(body): %d" % len(body))
             print("############### INTERNAL JOB FINISHED! ###############")

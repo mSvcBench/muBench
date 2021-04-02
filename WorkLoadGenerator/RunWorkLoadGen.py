@@ -4,7 +4,7 @@ from WorkLoadGenerator import get_workload, json, pprint
 # INPUT params:
 # ingress_list = {"s1": 1, "s2": 0.8, "s4": 0.5}
 ingress_list = {"s0": 1}
-request_parameters = {"stop_event": 100, "mean_interarrival_time": 300}
+request_parameters = {"stop_event": 500, "mean_interarrival_time": 100}
 
 ####################
 
