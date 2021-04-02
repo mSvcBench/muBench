@@ -35,6 +35,8 @@ graph_params_test = {"services_groups": 1, "vertices": 10, "power": 1, "edges_pe
                      # "dbs": {"sdb1": 0.4, "sdb2": 0.6, "sdb3": 0.2}
                      }
 
+SERVICEMESH_PATH = os.path.dirname(__file__)
+
 
 def select_db(dbs):
     dbs_items = dbs.items()
@@ -97,7 +99,7 @@ def get_service_mesh(graph_params):
 
     g.vs["label"] = list(range(graph_params["vertices"])) + graph_added_dbs
     g.vs["size"] = 35
-    plot(g, "servicemesh.png")
+    plot(g, f"{SERVICEMESH_PATH}/servicemesh.png")
     # print(g)
     print("Service Mesh Created!")
     return service_mesh

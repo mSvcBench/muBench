@@ -103,6 +103,10 @@ def copy_config_file_to_nfs(nfs_folder_path, servicemesh, workmodel, job_functio
         with open(f"{nfs_folder_path}/workmodel.json", "w") as f:
             f.write(json.dumps(workmodel))
 
+        if os.path.exists(f"{smGen.SERVICEMESH_PATH}/servicemesh.json"):
+            # TODO Implementare copia della service mesh nel path dell'NFS server
+            print(":)")
+
         if job_functions != "" or job_functions is None:
             if not os.path.exists(f"{nfs_folder_path}/JobFunctions"):
                 os.makedirs(f"{nfs_folder_path}/JobFunctions")
