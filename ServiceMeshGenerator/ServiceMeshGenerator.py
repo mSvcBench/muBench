@@ -97,9 +97,7 @@ def get_service_mesh(graph_params):
 
     g.vs["label"] = list(range(graph_params["vertices"])) + graph_added_dbs
     g.vs["size"] = 35
-    # g.save('testttt.png')
     plot(g, "servicemesh.png")
-
     # print(g)
     print("Service Mesh Created!")
     return service_mesh
