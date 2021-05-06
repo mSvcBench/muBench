@@ -42,8 +42,10 @@ def get_workload(ingress_services, ingress_number, request_params):
 
     events_cnt = 0
     time = 0
-    while events_cnt < request_params["stop_event"]:
 
+    sim_duration = 180  # Durata della simulazione in secondi
+    while time <= sim_duration*1000:
+    # while events_cnt < request_params["stop_event"]:
         selected_ingress_number = random.randint(ingress_number["min"], ingress_number["max"])
         # print("selected_ingress_number:", selected_ingress_number)
 

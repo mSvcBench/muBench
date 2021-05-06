@@ -4,18 +4,36 @@ import time
 from TimingError import TimingError
 import requests
 import json
+import sys
+from datetime import datetime
 from pprint import pprint
 # import matplotlib
 # import matplotlib.pyplot as plt
 # import numpy as np
 
 # ms_access_gateway = "http://localhost:9999"
-# ms_access_gateway = "http://n1:31113"
+# ms_access_gateway = "http://vm1:31113"
 ms_access_gateway = "http://51.144.151.90:31113"
 # ms_access_gateway = "http://vm1:31113"
-workload_file_path = "../WorkLoadGenerator/workload.json"
-start_time = 0.0
+# workload_file_path = "../WorkLoadGenerator/workload_event300_mean_500.json"
+# workload_file_path = "../WorkLoadGenerator/workload_event100_mean_500.json"
 
+# workload_file_path = "../WorkLoadGenerator/workload_event500_mean_200.json"
+# workload_file_path = "../WorkLoadGenerator/workload_event500_mean_100.json"
+# workload_file_path = "../WorkLoadGenerator/workload_event500_mean_50.json"
+
+# workloads = ["../WorkLoadGenerator/workload_events_500_mean_200.json",
+#              "../WorkLoadGenerator/workload_events_500_mean_100.json",
+#              "../WorkLoadGenerator/workload_events_500_mean_50.json",
+#              "../WorkLoadGenerator/workload_events_500_mean_30.json"]
+
+workloads = ["../WorkLoadGenerator/workload_5_minutes_mean_200.json",
+             "../WorkLoadGenerator/workload_5_minutes_mean_100.json",
+             "../WorkLoadGenerator/workload_5_minutes_mean_50.json",
+             "../WorkLoadGenerator/workload_5_minutes_mean_40.json",
+             "../WorkLoadGenerator/workload_5_minutes_mean_30.json"]
+
+start_time = 0.0
 
 def do_requests(event):
     # pprint(workload[event]["services"])
@@ -46,15 +64,23 @@ def job_assignment(v_pool, v_futures, event):
         print("Error: %s" % err)
 
 
-def runner():
+def runner(workload=None):
     global start_time
-    print("I am THE Runner!!")
-    with open(workload_file_path) as f:
+    # print("I am THE Runner!!")
+    print("###############################################")
+    print("############   Run Forrest Run!!   ############")
+    print("###############################################")
+    if len(sys.argv) > 1 and workload is None:
+        workload_file = sys.argv[1]
+    else:
+        workload_file = workload
+
+    with open(workload_file) as f:
         workload = json.load(f)
     # pprint(workload)
     # pprint(work_model)
     s = sched.scheduler(time.time, time.sleep)
-    pool = ThreadPoolExecutor(320)
+    pool = ThreadPoolExecutor(600)
     futures = list()
     # print("Time_1:", time.time()*1000)
     # events = [10, 20, 30, 40, 50, 100, 150]
@@ -65,18 +91,22 @@ def runner():
         # in seconds
         # s.enter(event["time"], 1, job_assignment, argument=(pool, futures, event))
         # in milliseconds
-        s.enter(event["time"]/1000, 1, job_assignment, argument=(pool, futures, event))
+        s.enter((event["time"]/1000+2), 1, job_assignment, argument=(pool, futures, event))
 
 
     start_time = time.time()
-    print("Time_1:", start_time)
+    print("Start Time:", datetime.now().strftime("%H:%M:%S.%f - %g/%m/%Y"))
     s.run()
 
     wait(futures)
+    print("###############################################")
+    print("###########   Stop Forrest Stop!!   ###########")
+    print("###############################################")
+    print("Run Duration (sec): %.6f" % (time.time() - start_time))
     # plot_list = list()
     # for x in as_completed(futures):
     #     plot_list.append([x.result()[0], x.result()[1]])
-        # print(f"{x.result()[0]} ----> {x.result()[1]}")
+    # print(f"{x.result()[0]} ----> {x.result()[1]}")
 
     # plot_list = sorted(plot_list, key=lambda l: l[0])
     # #print(plot_list)
@@ -98,6 +128,24 @@ def runner():
     #
     # fig.savefig("test2.png")
     # plt.show()
+#
+for x in range(1):
+    work = "../WorkLoadGenerator/workload_3_minutes_mean_50.json"
+    print("Round: %d -- workload: %s" % (x+1, work))
+    runner(work)
+    print("***************************************")
 
 
-runner()
+# round = 1
+# for cnt, workload_var in enumerate(workloads):
+#     # runner(workload_var)
+#     for x in range(round):
+#         print("Round: %d -- workload: %s" % (x+1, workload_var))
+#         runner(workload_var)
+#         print("***************************************")
+#         # if cnt != len(workloads) - 1 or x != round - 1:
+#         #     print("Sleep for 240 sec")
+#         #     time.sleep(240)
+#     if cnt != len(workloads) - 1:
+#         print("Sleep for 240 sec")
+#         time.sleep(240)

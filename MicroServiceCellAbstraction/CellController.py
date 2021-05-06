@@ -59,16 +59,16 @@ pprint(my_work_model)
 
 # tutti counter
 REQUEST_LATENCY = Summary('mss_request_latency_seconds', 'Request latency',
-                          ['zone', 'app_name', 'method', 'endpoint', 'from']
+                          ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service']
                           )
 
 RESPONSE_SIZE = Summary('mss_response_size', 'Response size',
-                        ['zone', 'app_name', 'method', 'endpoint', 'from']
+                        ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service']
                         )
 
 LOCAL_PROCESSING = Summary('mss_local_processing_latency_seconds', 'Local processing latency',
-                          ['zone', 'app_name', 'method', 'endpoint', 'from']
-                          )
+                           ['zone', 'app_name', 'method', 'endpoint']
+                           )
 
 
 def start_timer():
@@ -78,7 +78,7 @@ def start_timer():
 def stop_timer(response):
     resp_time = time.time() - request.start_time
     # REQUEST_LATENCY.labels('mss', request.path, request.remote_addr).observe(resp_time)
-    REQUEST_LATENCY.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr).observe(resp_time)
+    REQUEST_LATENCY.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr, ID).observe(resp_time)
     return response
 
 
@@ -124,14 +124,16 @@ class HttpThread(Thread):
     def start_worker():
         try:
             HttpThread.app.logger.info('Request Received')
-            mss_test_ingress.inc(1)  # Increment by 1
+            mss_test_ingress.labels("s0").inc(1)  # Increment by 1
+            mss_test_summary.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr, ID).observe(100)
+            # mss_test_ingress.inc(1)  # Increment by 1
             # Execute the internal job
             print("*************** INTERNAL JOB STARTED ***************")
             start_local_processing = time.time()
             body = run_internal_job(my_work_model["params"])
             local_processing_latency = time.time() - start_local_processing
-            LOCAL_PROCESSING.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr).observe(local_processing_latency)
-            RESPONSE_SIZE.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr).observe(len(body))
+            LOCAL_PROCESSING.labels(ZONE, K8S_APP, request.method, request.path).observe(local_processing_latency)
+            RESPONSE_SIZE.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr, ID).observe(len(body))
             print("len(body): %d" % len(body))
             print("############### INTERNAL JOB FINISHED! ###############")
 
@@ -165,7 +167,8 @@ if __name__ == '__main__':
         print("Error: Unsupported request method")
         sys.exit(0)
 
-    mss_test_ingress = Counter('mss_test_ingress', 'Number of application request')
+    mss_test_ingress = Counter('mss_test_ingress_total', 'Number of application request', ['kubernetes_service'])
+    mss_test_summary = Summary('mss_test_summary', 'Number of application request', ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service'])
 
     # Function
     http_thread = HttpThread()
@@ -180,4 +183,6 @@ if __name__ == '__main__':
     start_http_server(8081)
 
     http_thread.join()
+
+# avg((increase(mss_test_summary_sum{endpoint="/api/v1"}[2m])/increase(mss_test_summary_count{endpoint="/api/v1"}[2m])) > 0) by (kubernetes_service)
 
