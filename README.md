@@ -19,8 +19,15 @@ Below we'll try to briefly summarize the main ideas behind this project and how 
 ## A brief overview
 ![mss-overview](Docs/mss-Overview.png)
 
+
+### Service Model Abstraction
+Each service, named *cell*, performs a **internal job** and a set of **external jobs**. An internal job is a task that user can define as a python function to be inserted in the `/mnt/MSSharedData/JobFunctions` (see also [here](Docs/NFSConfig.md)). However, each cell has an internal pre-defined job that is named `compute_pi`.
+
+External jobs are grouped and each groups are executed in parallel. A group contains a set of external jobs and a subset of them whose length is `seq_len` is executed sequentially. The selection of the subset of external jobs is random (uniform distribution).
+
+
 ### Service Mesh Generator
-The ServiceMeshGenerator, as the name suggests, generates the mesh that links the services throughout a Microservice.
+The ServiceMeshGenerator generates a files that descibes the mesh of the microservice that links the services throughout a Microservice Application.
 It takes as input how you want to shape the Microservice:
 
 <img align="right" width="270" height="170" src="Docs/mss-ServiceMesh.png">
@@ -35,6 +42,7 @@ It takes as input how you want to shape the Microservice:
   "zero_appeal": 10
 }
 ```
+
 
 
 Output:
