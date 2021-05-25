@@ -28,7 +28,7 @@ import random
 '''
 
 # graph_params_test = {"services_groups": 1, "vertices": 10, "power": 0.9, "edges_per_vertex": 1, "zero_appeal": 0.001}
-graph_params_test = {"services_groups": 1, "vertices": 10, "power": 1, "edges_per_vertex": 1, "zero_appeal": 10,
+graph_parameters = {"services_groups": 1, "vertices": 10, "power": 1, "edges_per_vertex": 1, "zero_appeal": 10,
                      # "dbs": {}
                      # "dbs": {"nodb": 1, "sdb1": 0.4, "sdb2": 0.6, "sdb3": 0.2}
                      # "dbs": {"sdb1": 0.4, "sdb2": 0.6, "sdb3": 0.2}
@@ -105,8 +105,8 @@ def get_service_mesh(graph_params):
     return service_mesh
 
 
-# pprint(get_service_mesh(graph_params_test))
-# get_service_mesh(graph_params_test)
+# pprint(get_service_mesh(graph_parameters))
+# get_service_mesh(graph_parameters)
 # db_param_test = {"sdb1": 0.4,
 #                  "sdb2": 0.6,
 #                  "sdb3": 0.2
