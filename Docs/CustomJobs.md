@@ -5,10 +5,9 @@ Each service of the microservice mesh executes an internal job when called and b
 The default job keeps the CPU busy depending on the specified complexity of operations.
 
 To try other scenarios, you can use your own specific jobs to stress the aspect you whish to simulate: CPU, memory or storage. 
-In order to do so, you must write your own python function and save it to the subfolder `JobFunctions` inside your NFS directory.
+In order to do so, you must write your own python function and save it to the subfolder `JobFunctions` inside your NFS shared directory.
 If you followed our [NFS configuration](NFSConfig.md), create the subfolder into `/mnt/MSSharedData` using 
 `mkdir /mnt/MSSharedData/JobFunctions`, otherwise create it according to your NFS configurations.
-
 
 ## How to write your own custom job
 
