@@ -14,7 +14,7 @@ If you followed our [NFS configuration](NFSConfig.md), create the subfolder into
 - As input, your function receives a dictionary with the parameters specified in the [work model generator](../WorkModelGenerator/README.md).
 - As output, your function must return a string used as body for the response.
 
-Note: each custom function must have a unique name, otherwise conflicts will occur.
+> Note: each custom function must have a unique name, otherwise conflicts will occur.
 Also, you can specify more than one custom function inside the same python file.
 
 ```python
