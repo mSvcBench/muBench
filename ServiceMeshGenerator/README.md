@@ -1,16 +1,18 @@
 # Service Mesh Generator
-The ServiceMeshGenerator generates a file that descibes the mesh of the microservice that links the services throughout the Microservice Application.
+The ServiceMeshGenerator generates a .json file that descibes the service mesh of the Microservice Application.
 
-Studies have shown that the interconnetions between services among real microservice applications follow a power-law distribution that can be modelled using a Barabási-Albert (BA) model.
-For this reason we chose to model the service mesh as a BA graph.
+## Service Mesh Topology
+Litterature [studies](https://researchcommons.waikato.ac.nz/bitstream/handle/10289/13981/EVOKE_CASCON_2020_paper_37_WeakestLink.pdf?sequence=11&isAllowed=y) show that the building of a realistic mesh can be done by using the Barabási-Albert (BA) algorithm, which uses a power-law distribution and results in a topology that follows a preferential-attachment model. For this reason we chose to model the service mesh as a BA graph.
 If we change the values of the BA model, we are able to genereate microservice applications with different mesh topologies. 
 
-The mesh topology is built as follows: at each step a new service is added as a vertex of a directed tree. This new service is connected with an edge to a single *parent* service already present in the topology. The edge direction is from the parent service to the new *child* service, this means that the parent service includes the new service in its external-services.  
-The parent service is chosen according to a preferred attachment strategy using a power-law distribution. Specifically, vertex *i* is chosen as a parent with a (non-normalized) probability equal to *Pi = di^aplha+a*, where *di* is the number of services that have already chosen the service *i* as a parent, *alpha* is the power-law exponent, and *a* is the zero-appeal property i.e., the probability of a service being chosen as a parent when no other service has yet chosen it.           
-    
+The BA algorithm builds the mesh topology as follows: at each step a new service is added as a vertex of a directed tree. This new service is connected with an edge to a single *parent* service already present in the topology. The edge direction is from the parent service to the new *child* service, this means that the parent service includes the new service in its external-services.  
+The parent service is chosen according to a preferred attachment strategy using a power-law distribution. Specifically, vertex *i* is chosen as a parent with a (non-normalized) probability equal to *Pi = di^aplha+a*, where *di* is the number of services that have already chosen the service *i* as a parent, *alpha* is the power-law exponent, and *a* is the zero-appeal property i.e., the probability of a service being chosen as a parent when no other service has yet chosen it.
 
-First, we describe the parameters, then we show 4 different topologies taken from the following [reaserch paper](https://researchcommons.waikato.ac.nz/bitstream/handle/10289/13981/EVOKE_CASCON_2020_paper_37_WeakestLink.pdf?sequence=11&isAllowed=y).
+## Service Grouping
+To simulate parallel and sequential execution of external-services, the whole set of external-services of a service is divided in a number of `services_groups`. Each group contains a different set of external-services and the insertion of external-services in groups is made according to a water-filling algorithm.
 
+## Service calls
+When a service request is received, a service executes its internal-service and then  
 
 ## Install requirements
 First, install the requirements using ``pip``:
