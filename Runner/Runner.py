@@ -37,16 +37,16 @@ start_time = 0.0
 
 def do_requests(event):
     # pprint(workload[event]["services"])
-    for services in event["services"]:
+    # for services in event["services"]:
         # print(services)
-        try:
-            r = requests.get(f"{ms_access_gateway}/{services}")
-            delta_diff = r.elapsed.total_seconds()
-            # print(f"DELAY DIFF >> {delta_diff}")
-            # print(r)
-            return event['time'], delta_diff
-        except Exception as err:
-            print("Error: %s" % err)
+    try:
+        r = requests.get(f"{ms_access_gateway}/{event['service']}")
+        delta_diff = r.elapsed.total_seconds()
+        # print(f"DELAY DIFF >> {delta_diff}")
+        # print(r)
+        return event['time'], delta_diff
+    except Exception as err:
+        print("Error: %s" % err)
 
 
 def job_assignment(v_pool, v_futures, event):
@@ -130,7 +130,7 @@ def runner(workload=None):
     # plt.show()
 #
 for x in range(1):
-    work = "../WorkLoadGenerator/workload_3_minutes_mean_50.json"
+    work = "../WorkLoadGenerator/workload_test50.json"
     print("Round: %d -- workload: %s" % (x+1, work))
     runner(work)
     print("***************************************")
