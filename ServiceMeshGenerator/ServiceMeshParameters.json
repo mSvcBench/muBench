@@ -1,6 +1,7 @@
 {
    "ServiceMeshParameters":{
-      "services_groups":1,
+      "services_groups":2,
+      "seq_len":10,
       "vertices":10,
       "power":0.05,
       "edges_per_vertex":1,

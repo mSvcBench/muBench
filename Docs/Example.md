@@ -9,7 +9,7 @@ export NFS_SHARED_FOLDER="/mnt/MSSharedData"
 ```
 
 ## 1. Generate the service mesh of the MicroService Application
-We start with the generation of the service mesh.
+We start with the generation of the service mesh that eventually produces two files `servicemesh.json` and `servicemesh.png`. The .png is a picture of the generated mesh. Service mesh detail can be seen [here](../ServiceMeshGenerator/README.md)
 
 ```shell
 cd MicroServiceSimulator/ServiceMeshGenerator

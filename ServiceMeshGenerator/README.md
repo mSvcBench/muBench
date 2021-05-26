@@ -3,7 +3,11 @@ The ServiceMeshGenerator generates a file that descibes the mesh of the microser
 
 Studies have shown that the interconnetions between services among real microservice applications follow a power-law distribution that can be modelled using a Barabási-Albert (BA) model.
 For this reason we chose to model the service mesh as a BA graph.
-If we play with the values of the BA model, we are able to genereate microservice applications with different topologies. 
+If we change the values of the BA model, we are able to genereate microservice applications with different mesh topologies. 
+
+The mesh topology is built as follows: at each step a new service is added as a vertex of a directed tree. This new service is connected with an edge to a single *parent* service already present in the topology. The edge direction is from the parent service to the new *child* service, this means that the parent service includes the new service in its external-services.  
+The parent service is chosen according to a preferred attachment strategy using a power-law distribution. Specifically, vertex *i* is chosen as a parent with a (non-normalized) probability equal to *Pi = di^aplha+a*, where *di* is the number of services that have already chosen the service *i* as a parent, *alpha* is the power-law exponent, and *a* is the zero-appeal property i.e., the probability of a service being chosen as a parent when no other service has yet chosen it.           
+    
 
 First, we describe the parameters, then we show 4 different topologies taken from the following [reaserch paper](https://researchcommons.waikato.ac.nz/bitstream/handle/10289/13981/EVOKE_CASCON_2020_paper_37_WeakestLink.pdf?sequence=11&isAllowed=y).
 
@@ -16,16 +20,12 @@ pip3 install -r requirements.txt
 ```
 
 ## Edit input parameters:
-Next, edit the ``RunServiceMeshGen.py`` before running it.
-It is important to edit the `graph_parameters` parameter, as it describes the generating process of the service mesh.
-In particular:
+Next, edit the values of the keys in ``ServiceMeshParameters.json`` before running the ``RunServiceMeshGen.py`` that actually generates the mesh files (servicemesh.json and servicemesh.png). The meaning of the keys is:
 
-* `services_groups` indicates how many groups of services can be executed in parallel while performing the simulations 
-* `vertices` are the number of vertices a service mesh has (db excluded, more later)
+* `vertices` are the number of services that forms the microservice application (db excluded, more later)
 * `power` is the exponent of the power law distribution that defines the generation of the service mesh. Essentially, an high value of this parameter imply an higher probability that one vertex is connected to more vertices, on the other hand, a lower value of the parameter means a lower chance a vertex is connected to other vertices.
-
 * `zero_appeal` is the attractiveness of vertices with no edges, meaning, it is the probability that during the creation of the topology, a new node is linked to a vertex with no outgoing edges.
-
+* `services_groups` indicates the number of groups in which the of external-services of a service are divided. 
 * `dbs` is used to specify if the service mesh is generated with services that behave as databases. 
 You can specify a list of db names followed by the probability it can be chosen by the services.
 Three options are possible:

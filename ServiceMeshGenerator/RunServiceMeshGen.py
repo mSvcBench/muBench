@@ -15,8 +15,8 @@ servicemesh = get_service_mesh(graph_parameters)
 
 pprint(servicemesh)
 
-keyboard_input = input("Save service mesh on file? (y) ") or "y"
-
+# keyboard_input = input("Save service mesh on file? (y) ") or "y"
+keyboard_input = "y"
 if keyboard_input == "y":
     with open(f'{SERVICEMESH_PATH}/servicemesh.json', "w") as f:
         f.write(json.dumps(servicemesh))

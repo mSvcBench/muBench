@@ -4,7 +4,6 @@ import os
 
 SERVICEMESH_PATH = os.path.dirname(__file__)
 
-
 def select_db(dbs):
     dbs_items = dbs.items()
     random_extraction = random.random()
@@ -41,14 +40,19 @@ def get_service_mesh(graph_params):
         service_list = []
         service_list_dict = {}
 
-        for services_group_id in range(graph_params["services_groups"]):
-            service_list_dict["services"] = [f"s{service}" for service in g.get_adjlist()[vertex]]
-            service_list_dict["seq_len"] = len(service_list_dict["services"])
+        current_service_group=0
+        for service_id in g.get_adjlist()[vertex]:
+            try:
+                x = service_list_dict[str(current_service_group)]["services"]
+            except KeyError:
+                service_list_dict[str(current_service_group)]={"services":[],"seq_len" : graph_params["seq_len"]}
 
-            if service_list_dict["seq_len"] != 0:
-                service_list.append(service_list_dict)
-
-            service_mesh[f"s{vertex}"] = service_list
+            service_list_dict[str(current_service_group)]["services"].append(f"s{service_id}")
+            current_service_group = (current_service_group + 1) % graph_params["services_groups"]
+                
+        service_mesh[f"s{vertex}"]=list()
+        for key in service_list_dict.keys():
+            service_mesh[f"s{vertex}"].append(service_list_dict[key])
 
         if "dbs" in graph_params.keys() and len(graph_params["dbs"]) > 0:
             selected_db = select_db(graph_params["dbs"])

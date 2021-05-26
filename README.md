@@ -21,9 +21,10 @@ Below we'll try to briefly summarize the main ideas behind this project and how 
 
 
 ### Service Model Abstraction
-Each service, named *cell*, performs a **internal job** and a set of **external jobs**. An internal job is a task that user can define as a python function to be inserted in the `/mnt/MSSharedData/JobFunctions` (see also [here](Docs/NFSConfig.md)). However, each cell has an internal pre-defined job that is named `compute_pi`.
+Upon a service request, each service locally executes an **internal-service** and then carries out a set of calls towards **external-services**. An internal-service is a task that user can define as a python function to be inserted in the `/mnt/MSSharedData/JobFunctions` (see also [here](Docs/NFSConfig.md)). However, each service has a pre-defined internal-service that is named `compute_pi`.
 
-External jobs are grouped and each groups are executed in parallel. A group contains a set of external jobs and a subset of them whose length is `seq_len` is executed sequentially. The selection of the subset of external jobs is random (uniform distribution).
+External services are grouped into a configurable number of groups (`service_groups`). Services from different groups are called in parallel; services from the same group are called sequentially. To mimic random paths on the service mesh, not all external services of a `service_group` are called, but only a subset of them, whose number is `seq_len` and these are chosen randomly (uniform distribution) from those in the `service_group`. 
+
 
 
 ### Service Mesh Generator
