@@ -14,20 +14,11 @@ We start with the generation of the service mesh.
 ```shell
 cd MicroServiceSimulator/ServiceMeshGenerator
 ```
-* If you want to tune the parameters for the generation of the service mesh, edit the input parameters at the beginning of the `RunServiceMeshGen.py` file:
+* If you want to tune the parameters for the generation of the service mesh, edit the input parameters in `ServiceMeshParameters.json`.
 
-```python
-graph_params_test = {"services_groups": 1,  
-                     "vertices": 5, 
-                     "power": 1, 
-                     "edges_per_vertex": 1, 
-                     "zero_appeal": 10,
-                     "dbs": {"sdb1": 0.8, "sdb2": 0.3}
-                    }
-```
 * Then, you can run the python file `RunServiceMeshGen.py`:
 ```shell
-python RunServiceMeshGen.py
+python3 RunServiceMeshGen.py
 ```
 * To save the file `servicemesh.json` just generated, type `y` when the python script asks you for it. Now, copy the files `servicemesh.json` and `servicemesh.png` to the NFS shared folder path, previously defined:
 ```shell
