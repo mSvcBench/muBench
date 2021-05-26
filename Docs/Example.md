@@ -8,7 +8,7 @@ Before we begin, export the path to your NFS shared folder as an environment var
 export NFS_SHARED_FOLDER="/mnt/MSSharedData" 
 ```
 
-## 1. Generate the service mesh that represent the MicroService
+## 1. Generate the service mesh of the MicroService Application
 We start with the generation of the service mesh.
 
 ```shell
