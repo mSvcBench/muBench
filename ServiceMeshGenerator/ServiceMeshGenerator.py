@@ -2,37 +2,7 @@ from igraph import *
 import json
 from pprint import pprint
 import random
-
-'''
-{
-  "s1": [
-    {
-      "seq_len": 3,
-      "services": ["s2", "s3", "s5"]
-    },
-    {
-      "seq_len": 2,
-      "services": ["s5", "s3"]
-    }
-  ],
-  "s2": [],
-  "s3": [
-    {
-      "seq_len": 1,
-      "services": ["s4"]
-    }
-  ],
-  "s4": [],
-  "s5": []
-}
-'''
-
-# graph_params_test = {"services_groups": 1, "vertices": 10, "power": 0.9, "edges_per_vertex": 1, "zero_appeal": 0.001}
-graph_parameters = {"services_groups": 1, "vertices": 10, "power": 1, "edges_per_vertex": 1, "zero_appeal": 10,
-                     # "dbs": {}
-                     # "dbs": {"nodb": 1, "sdb1": 0.4, "sdb2": 0.6, "sdb3": 0.2}
-                     # "dbs": {"sdb1": 0.4, "sdb2": 0.6, "sdb3": 0.2}
-                     }
+import os
 
 SERVICEMESH_PATH = os.path.dirname(__file__)
 
@@ -103,12 +73,3 @@ def get_service_mesh(graph_params):
     # print(g)
     print("Service Mesh Created!")
     return service_mesh
-
-
-# pprint(get_service_mesh(graph_parameters))
-# get_service_mesh(graph_parameters)
-# db_param_test = {"sdb1": 0.4,
-#                  "sdb2": 0.6,
-#                  "sdb3": 0.2
-#                  }
-# print(select_db(db_param_test))
