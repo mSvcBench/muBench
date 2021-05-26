@@ -1,6 +1,7 @@
-import json
-from pprint import pprint
 import random
+import os
+
+WORKMODEL_PATH = os.path.dirname(__file__)
 
 # Select exactly one job function according to the probability
 # Get in INPUT the list with the job functions

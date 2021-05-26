@@ -1,6 +1,4 @@
 from igraph import *
-import json
-from pprint import pprint
 import random
 import os
 

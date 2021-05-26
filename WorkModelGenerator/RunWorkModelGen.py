@@ -1,20 +1,26 @@
-from WorkModelGenerator import get_work_model, pprint, json
+from WorkModelGenerator import get_work_model, WORKMODEL_PATH
+import json
+from pprint import pprint
 
-# INPUT params:
-parameters = {"compute_pi": {"probability": 1, "mean_bandwidth": 11, "range_complexity": [101, 101]},
-              # "ave_luca": {"probability": 0.6, "ave_number": 13, "mean_bandwidth": 42}
-              }
-servicemesh_file_path = "../ServiceMeshGenerator/servicemesh.json"
-####################
+try:
+    with open(f'{WORKMODEL_PATH}/WorkModelParameters.json') as f:
+        params = json.load(f)
+    workmodel_parameters = params['WorkModelParameters']
+    servicemesh_file_path = params['ServiceMeshFilePath']
+    with open(servicemesh_file_path) as f:
+        servicemesh = json.load(f)
+except Exception as err:
+    print("ERROR: in creation of service mesh,", err)
+    exit(1)
 
-with open(servicemesh_file_path) as f:
-    servicemesh = json.load(f)
-
-workmodel = get_work_model(servicemesh, parameters)
+workmodel = get_work_model(servicemesh, workmodel_parameters)
 pprint(workmodel)
 
 keyboard_input = input("Save work model on file? (y)") or "y"
 
 if keyboard_input == "y":
-    with open("workmodel.json", "w") as f:
+    with open(f"{WORKMODEL_PATH}/workmodel.json", "w") as f:
         f.write(json.dumps(workmodel))
+
+    print(f"'{WORKMODEL_PATH}/workmodel.json'")
+    print("File Saved!")

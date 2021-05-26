@@ -1,5 +1,7 @@
 import errno
-from ServiceMeshGenerator import get_service_mesh, pprint, json, SERVICEMESH_PATH
+from ServiceMeshGenerator import get_service_mesh, SERVICEMESH_PATH
+import json
+from pprint import pprint
 
 try:
     with open(f'{SERVICEMESH_PATH}/ServiceMeshParameters.json') as f:
@@ -18,3 +20,7 @@ keyboard_input = input("Save service mesh on file? (y) ") or "y"
 if keyboard_input == "y":
     with open(f'{SERVICEMESH_PATH}/servicemesh.json', "w") as f:
         f.write(json.dumps(servicemesh))
+
+    print(f"'{SERVICEMESH_PATH}/servicemesh.json'")
+    print(f"'{SERVICEMESH_PATH}/servicemesh.png'")
+    print("Files Saved!")

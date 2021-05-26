@@ -1,0 +1,10 @@
+{
+   "WorkLoadParameters":{
+      "ingress_service":"s0",
+      "request_parameters": {
+         "mean_interarrival_time": 50,
+         "stop_event": 5
+      }
+   }
+
+}

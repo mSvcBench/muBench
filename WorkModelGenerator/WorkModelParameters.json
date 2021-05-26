@@ -1,0 +1,10 @@
+{
+   "WorkModelParameters":{
+      "compute_pi":{
+         "probability":1,
+         "mean_bandwidth":11,
+         "range_complexity":[101, 101]
+      }
+   },
+   "ServiceMeshFilePath":"../ServiceMeshGenerator/servicemesh.json"
+}
