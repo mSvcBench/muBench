@@ -14,14 +14,14 @@ gen-servicemesh -o servicemesh.json -v 3 -g 2 -p 2 -e 2 -z 11
 '''
 
 
-# graph_params_test = {"services_groups": 1, "vertices": 10, "power": 1, "edges_per_vertex": 1, "zero_appeal": 10}
+# graph_params_test = {"external_service_groups": 1, "vertices": 10, "power": 1, "edges_per_vertex": 1, "zero_appeal": 10}
 
 def init_args(parser):
     parser.add_argument('-o', action='store', dest='output_file',
                         help='Output File Name', default='servicemesh.json')
     parser.add_argument('-v', action='store', dest='v_number', type=int,
                         help='Vertices Number', default=5)
-    parser.add_argument('-g', action='store', dest='services_groups', type=int,
+    parser.add_argument('-g', action='store', dest='external_service_groups', type=int,
                         help='Number of Services Groups', default=1)
     parser.add_argument('-p', action='store', dest='power', type=int,
                         help='Power of vertices', default=1)
@@ -35,7 +35,7 @@ def init_args(parser):
 def run(args):
     print("Generate ServiceMesh")
     try:
-        params = {"services_groups": args.services_groups,
+        params = {"external_service_groups": args.external_service_groups,
                   "vertices": args.v_number,
                   "power": args.power,
                   "edges_per_vertex": args.edge_per_vertex,

@@ -45,7 +45,7 @@ def get_service_mesh(graph_params):
                 service_list.append({"seq_len": graph_params["seq_len"], "services": list()})
 
             service_list[current_service_group]["services"].append(f"s{service_id}")
-            current_service_group = (current_service_group + 1) % graph_params["services_groups"]
+            current_service_group = (current_service_group + 1) % graph_params["external_service_groups"]
                 
         service_mesh[f"s{vertex}"] = service_list
 
@@ -95,7 +95,7 @@ def get_service_mesh_detti(graph_params):
                 service_list_dict[str(current_service_group)] = {"services": [], "seq_len": graph_params["seq_len"]}
 
             service_list_dict[str(current_service_group)]["services"].append(f"s{service_id}")
-            current_service_group = (current_service_group + 1) % graph_params["services_groups"]
+            current_service_group = (current_service_group + 1) % graph_params["external_service_groups"]
 
         service_mesh[f"s{vertex}"] = list()
         for key in service_list_dict.keys():
@@ -145,7 +145,7 @@ def get_service_mesh_luca(graph_params):
 
         cnt = 0
         child = g.get_adjlist()[vertex]
-        groups = circular(range(graph_params["services_groups"]))
+        groups = circular(range(graph_params["external_service_groups"]))
         while cnt < len(child):
             group = next(groups)
             if len(service_list) == group:

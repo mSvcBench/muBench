@@ -1,7 +1,7 @@
 ############### Input Parameters ###############
 ##### Service Mesh Parameters
 vertices = 10
-services_groups = 1  # Number of services for group
+external_service_groups = 1  # Number of services for group
 power = 0.05  # Power ???
 edges_per_vertex = 1
 zero_appeal = 0.01

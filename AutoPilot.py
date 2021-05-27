@@ -12,7 +12,7 @@ import AutoPilotConf as APConf
 ############### Input Param ###############
 ##### ServiceMesh Params
 vertices = APConf.vertices
-services_groups = APConf.services_groups  # Number of services for group
+external_service_groups = APConf.external_service_groups  # Number of services for group
 power = APConf.power  # Power ???
 edges_per_vertex = APConf.edges_per_vertex
 zero_appeal = APConf.zero_appeal
@@ -59,7 +59,7 @@ folder = f"{K8sBuilder.K8s_YAML_BUILDER_PATH}/yamls"
 
 def create_deployment_config():
     print("---")
-    service_mesh_params = {"services_groups": services_groups,
+    service_mesh_params = {"external_service_groups": external_service_groups,
                            "vertices": vertices,
                            "power": power,
                            "edges_per_vertex": edges_per_vertex,

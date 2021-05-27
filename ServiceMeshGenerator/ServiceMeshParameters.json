@@ -1,6 +1,6 @@
 {
    "ServiceMeshParameters":{
-      "services_groups":2,
+      "external_service_groups":2,
       "seq_len":2,
       "vertices":10,
       "power":0.05,

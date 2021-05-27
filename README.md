@@ -36,10 +36,9 @@ It takes as input how you want to shape the Microservice:
 
 ```json
 {
-  "services_groups": 1, 
+  "external_service_groups": 1, 
   "vertices": 5, 
   "power": 1, 
-  "edges_per_vertex": 1, 
   "zero_appeal": 10
 }
 ```
