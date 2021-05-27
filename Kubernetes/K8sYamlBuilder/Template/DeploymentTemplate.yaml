@@ -32,7 +32,7 @@ spec:
               mountPath: /etc/podinfo
 #            - name: config-volume
 #              mountPath: /etc/MSconfig
-            - name: job-function-volume
+            - name: microservice-volume
               mountPath: /app/MSConfig
           env:
             - name: APP
@@ -64,7 +64,7 @@ spec:
 #              path: servicemesh
 #            - key: work-model
 #              path: workmodel
-        - name: job-function-volume
+        - name: microservice-volume
           persistentVolumeClaim:
             claimName: nfs-pvc-ms
 ---

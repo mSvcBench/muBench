@@ -25,7 +25,7 @@ spec:
           subPath: nginx.conf
         - mountPath: /var/log/nginx
           name: log
-        - name: job-function-volume
+        - name: microservice-volume
           mountPath: /etc/nginx/MSConfig
       volumes:
       - name: config-volume
@@ -33,7 +33,7 @@ spec:
           name: ms-gateway-configmap
       - name: log
         emptyDir: {}
-      - name: job-function-volume
+      - name: microservice-volume
         persistentVolumeClaim:
           claimName: nfs-pvc-ms
 ---

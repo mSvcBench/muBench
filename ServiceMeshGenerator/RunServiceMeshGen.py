@@ -8,7 +8,7 @@ try:
         params = json.load(f)
     graph_parameters = params['ServiceMeshParameters']
 except Exception as err:
-    print("ERROR: in creation of service mesh,", err)
+    print("ERROR: in RunServiceMeshGen,", err)
     exit(1)
         
 servicemesh = get_service_mesh(graph_parameters)

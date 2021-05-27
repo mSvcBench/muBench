@@ -10,7 +10,7 @@ try:
     ingress_service = workload_parameters['ingress_service']
     request_parameters = workload_parameters['request_parameters']
 except Exception as err:
-    print("ERROR: in creation of service mesh,", err)
+    print("ERROR: in RunWorkLoadGen,", err)
     exit(1)
 
 

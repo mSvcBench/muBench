@@ -24,29 +24,30 @@ K8s_YAML_BUILDER_PATH = os.path.dirname(__file__)
 
 # Add params to work_model json
 # http://s1.default.svc.cluster.local
-def customization_work_model(model, path, name_space, cluster_domain, image):
+def customization_work_model(model, k8s_parameters):
     for service in model:
-        model[service].update({"url": f"http://{service}.{name_space}.svc.{cluster_domain}.local"})
-        model[service].update({"path": path})
-        model[service].update({"image": image})
-        model[service].update({"namespace": name_space})
+        model[service].update({"url": f"http://{service}.{k8s_parameters['namespace']}.svc.{k8s_parameters['cluster_domain']}.local"})
+        model[service].update({"path": k8s_parameters['path']})
+        model[service].update({"image": k8s_parameters['image']})
+        model[service].update({"namespace": k8s_parameters['namespace']})
     print("Work Model Updated!")
 
 
-def create_deployment_yaml_files(model, prefix_yaml_file, nfs, namespace, args):
+def create_deployment_yaml_files(model, k8s_parameters, nfs):
+    namespace = k8s_parameters['namespace']
     for service in model:
         with open(f"{K8s_YAML_BUILDER_PATH}/Template/DeploymentTemplate.yaml", "r") as file:
             f = file.read()
             f = f.replace("{{SERVICE_NAME}}", service)
             f = f.replace("{{IMAGE}}", model[service]["image"])
             f = f.replace("{{NAMESPACE}}", namespace)
-            for key in args:
-                f = f.replace(key, args[key])
+            # for key in args:
+            #     f = f.replace(key, args[key])
 
         if not os.path.exists(f"{K8s_YAML_BUILDER_PATH}/yamls"):
             os.makedirs(f"{K8s_YAML_BUILDER_PATH}/yamls")
 
-        with open(f"{K8s_YAML_BUILDER_PATH}/yamls/{prefix_yaml_file}-{service}.yaml", "w") as file:
+        with open(f"{K8s_YAML_BUILDER_PATH}/yamls/{k8s_parameters['prefix_yaml_file']}-{service}.yaml", "w") as file:
             file.write(f)
 
     with open(f"{K8s_YAML_BUILDER_PATH}/Template/ConfigMapNginxGwTemplate.yaml", "r") as file:

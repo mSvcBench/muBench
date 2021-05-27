@@ -15,6 +15,11 @@ from pprint import pprint
 from prometheus_client import start_http_server, Gauge, Counter, Histogram, Summary
 import time
 
+# TODO refactoring code with
+# 1. Internal Service e External Services, Quando scriviamo si chiamano internal-service e external-service
+# 2. Service mesh -> services_groups refactor in external_service_groups
+# 3.
+
 
 def read_config_files():
     with open('MSConfig/servicemesh.json') as f:
