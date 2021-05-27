@@ -6,8 +6,8 @@ import time
 work_model = dict()
 
 
-def external_job(group):
-    print("**** Start JOBS nel thread: %s" % str(group))
+def external_service(group):
+    print("**** Start SERVICES nel thread: %s" % str(group))
     seq_len = len(group["services"])
     if group["seq_len"] < len(group["services"]):
         seq_len = group["seq_len"]
@@ -27,12 +27,12 @@ def external_job(group):
             service_error_flag = True
             print("Error in request external service %s -- %s" % (service, str(err)))
 
-    print("#### JOB Done!")
+    print("#### SERVICE Done!")
     return service_error_flag, service_error_dict
 
 
-def run_external_jobs_REST(jobs_group, model):
-    print("** EXTERNAL JOBS")
+def run_external_service_REST(jobs_group, model):
+    print("** EXTERNAL SERVICES")
     global work_model
     work_model = model
 
@@ -42,7 +42,7 @@ def run_external_jobs_REST(jobs_group, model):
     futures = list()
 
     for group in jobs_group:
-        futures.append(pool.submit(external_job, group))
+        futures.append(pool.submit(external_service, group))
 
     wait(futures)
 

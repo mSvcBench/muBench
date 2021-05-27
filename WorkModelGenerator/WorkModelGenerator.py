@@ -3,31 +3,32 @@ import os
 
 WORKMODEL_PATH = os.path.dirname(__file__)
 
-# Select exactly one job function according to the probability
-# Get in INPUT the list with the job functions
-def select_job(jobs):
-    jobs_items = jobs.items()
+
+# Select exactly one service function according to the probability
+# Get in INPUT the list with the internal-service functions
+def select_internal_service(internal_services):
+    internal_services_items = internal_services.items()
     random_extraction = random.random()
     # print("Extraction: %.4f" % random_extraction)
     p_total = 0.0
-    for job in jobs.values():
-        p_total += job["probability"]
+    for internal_service in internal_services.values():
+        p_total += internal_service["probability"]
     p_total = round(p_total, 10)
     prev_interval = 0
-    for job in jobs_items:
-        if random_extraction <= prev_interval + job[1]["probability"]/p_total:
-            tmp_param = dict(job[1])
+    for internal_service in internal_services_items:
+        if random_extraction <= prev_interval + internal_service[1]["probability"]/p_total:
+            tmp_param = dict(internal_service[1])
             tmp_param.pop("probability")
-            return {job[0]: tmp_param}
-        prev_interval += round(job[1]["probability"]/p_total, 10)
+            return {internal_service[0]: tmp_param}
+        prev_interval += round(internal_service[1]["probability"]/p_total, 10)
 
 
-def get_work_model(service_mesh, params):
+def get_work_model(service_mesh, workmodel_params):
     work_model = dict()
     # pprint(params)
     try:
         for vertex in service_mesh.keys():
-            work_model[f"{vertex}"] = {"params": select_job(params)}
+            work_model[f"{vertex}"] = {"internal_service": select_internal_service(workmodel_params)}
     except Exception as err:
         print("ERROR: in creation work model,", err)
         exit(1)
@@ -37,12 +38,12 @@ def get_work_model(service_mesh, params):
     return work_model
 
 
-def get_work_model_OLD(vertex_number, params):
+def get_work_model_OLD(vertex_number, workmodel_params):
     work_model = dict()
     # pprint(params)
     try:
         for vertex in range(vertex_number):
-            work_model[f"s{vertex}"] = {"params": select_job(params)}
+            work_model[f"s{vertex}"] = {"internal_service": select_internal_service(workmodel_params)}
     except Exception as err:
         print("ERROR: in creation work model,", err)
         exit(1)
@@ -58,7 +59,7 @@ def get_work_model_OLD(vertex_number, params):
 #               "ave_luca": {"probability": 0.6, "ave_number": 13, "mean_bandwidth": 42}
 #               }
 #
-# print(select_job(parameters))
+# print(select_internal_service(parameters))
 # pprint(get_work_model(v_numbers, parameters))
 
 
