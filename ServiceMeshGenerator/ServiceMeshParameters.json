@@ -4,8 +4,12 @@
       "seq_len":2,
       "vertices":10,
       "power":0.05,
+<<<<<<< HEAD
       "edges_per_vertex":1,
       "zero_appeal":0.5,
+=======
+      "zero_appeal":3.25,
+>>>>>>> 6d81e14348fcb2f1a10906a38665559986e5095a
       "dbs":{
          "nodb":1.0,
          "sdb1":0.0,

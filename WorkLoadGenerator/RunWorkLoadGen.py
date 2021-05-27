@@ -18,7 +18,8 @@ except Exception as err:
 workload = get_workload(ingress_service, request_parameters)
 pprint(workload)
 print("# Events: %d" % len(workload))
-keyboard_input = input("Save work model on file? (y)") or "y"
+# keyboard_input = input("Save work model on file? (y)") or "y"
+keyboard_input = "y"
 
 if keyboard_input == "y":
     # with open(f"workload_events_{stop_event}_mean_{mean_interarrival_time}.json", "w") as f:

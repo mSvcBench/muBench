@@ -16,7 +16,8 @@ except Exception as err:
 workmodel = get_work_model(servicemesh, workmodel_parameters)
 pprint(workmodel)
 
-keyboard_input = input("Save work model on file? (y)") or "y"
+# keyboard_input = input("Save work model on file? (y)") or "y"
+keyboard_input = "y"
 
 if keyboard_input == "y":
     with open(f"{WORKMODEL_PATH}/workmodel.json", "w") as f:
