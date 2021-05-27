@@ -26,8 +26,8 @@ cp servicemesh.json $NFS_SHARED_FOLDER/
 cp servicemesh.png $NFS_SHARED_FOLDER/
 ```
 
-## 2. Generate the work model of the MicroService
-The second step goal is to create the work model for the MicroService application, 
+## 2. Generate the work model of the MicroService Application
+The second step is about creating the work model for the MicroService application, 
 you can assign which job a service must execute when called.
 
 ```shell

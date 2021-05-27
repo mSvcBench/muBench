@@ -6,5 +6,5 @@
          "range_complexity":[101, 101]
       }
    },
-   "ServiceMeshFilePath":"../ServiceMeshGenerator/servicemesh.json"
+   "ServiceMeshFilePath":"ServiceMeshGenerator/servicemesh.json"
 }
