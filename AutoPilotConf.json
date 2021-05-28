@@ -40,7 +40,7 @@
    },
    "NFSConfigurations": {
       "address": "192.168.0.144",
-      "mount_path": "/mnt/MSSharedData1"
+      "mount_path": "/mnt/MSSharedData"
    },
    "InternalServiceFilePath": "Colosseum.py"
 }
