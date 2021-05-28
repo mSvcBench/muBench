@@ -6,51 +6,37 @@ from Kubernetes.K8sDeployer import K8sDeployer as K8sDeployer
 import os
 import json
 import shutil
-import AutoPilotConf as APConf
+
+try:
+    with open('AutoPilotConf.json') as f:
+        params = json.load(f)
+
+    ############### Input Param ###############
+    ##### ServiceMesh Params
+    graph_parameters = params['ServiceMeshParameters']
+
+    ##### WorkModel Params
+    workmodel_parameters = params['WorkModelParameters']
+
+    #### K8s Yaml Builder
+    k8s_parameters = params["K8sParameters"]
+    nfs_conf = params['NFSConfigurations']
+
+    ##### Workload
+    workload_parameters = params['WorkLoadParameters']
+
+    #### Autopilot
+    internal_service_functions_file_path = params['InternalServiceFilePath']
 
 
-############### Input Param ###############
-##### ServiceMesh Params
-vertices = APConf.vertices
-external_service_groups = APConf.external_service_groups  # Number of services for group
-power = APConf.power  # Power ???
-edges_per_vertex = APConf.edges_per_vertex
-zero_appeal = APConf.zero_appeal
-dbs = APConf.dbs
-
-
-##### WorkModel Params
-# Possible Internal Job Functions with params
-work_model_params = APConf.work_model_params
-
-
-##### Workload
-ingress_dict = APConf.ingress_dict  # Dictionary of possibile ingress Services with associated probability
-min_services = APConf.min_services  # MIN number of selected ingress dictionary
-max_services = APConf.max_services  # MAX number of selected ingress dictionary
-
-stop_event = APConf.stop_event  # Number of event until the end of simulation
-mean_interarrival_time = APConf.mean_interarrival_time  # Mean of request interarrival
-
-#### K8s Yaml Builder
-
-prefix_yaml_output_file = APConf.prefix_yaml_output_file
-deployment_namespace = APConf.deployment_namespace
-image_name = APConf.image_name
-cluster_domain = APConf.cluster_domain
-service_path = APConf.service_path
-# var_to_be_replaced = {"{{string_in_template}}": "new_value", ...}
-var_to_be_replaced = APConf.var_to_be_replaced
-nfs_conf = APConf.nfs_conf
-
-#### Autopilot
-job_functions_file_path = APConf.job_functions_file_path
+except Exception as err:
+    print("ERROR: in RunWorkLoadGen,", err)
+    exit(1)
 
 ###########################
 ##          RUN          ##
 ###########################
 
-print(K8sBuilder.K8s_YAML_BUILDER_PATH)
 folder_not_exist = False
 if not os.path.exists(f"{K8sBuilder.K8s_YAML_BUILDER_PATH}/yamls"):
     folder_not_exist = True
@@ -59,19 +45,15 @@ folder = f"{K8sBuilder.K8s_YAML_BUILDER_PATH}/yamls"
 
 def create_deployment_config():
     print("---")
-    service_mesh_params = {"external_service_groups": external_service_groups,
-                           "vertices": vertices,
-                           "power": power,
-                           "edges_per_vertex": edges_per_vertex,
-                           "zero_appeal": zero_appeal,
-                           "dbs": dbs
-                           }
-    servicemesh = smGen.get_service_mesh(service_mesh_params)
 
-    workmodel = wmGen.get_work_model(servicemesh, work_model_params)
+    servicemesh = smGen.get_service_mesh(graph_parameters)
 
-    K8sBuilder.customization_work_model(workmodel, service_path, deployment_namespace, cluster_domain, image_name)
-    K8sBuilder.create_deployment_yaml_files(workmodel, prefix_yaml_output_file, nfs_conf, deployment_namespace, var_to_be_replaced)
+    workmodel = wmGen.get_work_model(servicemesh, workmodel_parameters)
+
+    K8sBuilder.customization_work_model(workmodel, k8s_parameters)
+
+    K8sBuilder.create_deployment_yaml_files(workmodel, k8s_parameters, nfs_conf)
+
     created_items = os.listdir(f"{K8sBuilder.K8s_YAML_BUILDER_PATH}/yamls")
     print(f"The following files are created: {created_items}")
     print("---")
@@ -95,7 +77,7 @@ def remove_files(folder_v):
         print("######################")
 
 
-def copy_config_file_to_nfs(nfs_folder_path, servicemesh, workmodel, job_functions):
+def copy_config_file_to_nfs(nfs_folder_path, servicemesh, workmodel, internal_service_functions):
     try:
         with open(f"{nfs_folder_path}/servicemesh.json", "w") as f:
             f.write(json.dumps(servicemesh))
@@ -103,22 +85,21 @@ def copy_config_file_to_nfs(nfs_folder_path, servicemesh, workmodel, job_functio
         with open(f"{nfs_folder_path}/workmodel.json", "w") as f:
             f.write(json.dumps(workmodel))
 
-        if os.path.exists(f"{smGen.SERVICEMESH_PATH}/servicemesh.json"):
-            # TODO Implementare copia della service mesh nel path dell'NFS server
-            print(":)")
+        if os.path.exists(f"{smGen.SERVICEMESH_PATH}/servicemesh.png"):
+            shutil.copy(f"{smGen.SERVICEMESH_PATH}/servicemesh.png", f"{nfs_folder_path}/")
 
-        if job_functions != "" or job_functions is None:
-            if not os.path.exists(f"{nfs_folder_path}/JobFunctions"):
-                os.makedirs(f"{nfs_folder_path}/JobFunctions")
+        if internal_service_functions != "" or internal_service_functions is None:
+            if not os.path.exists(f"{nfs_folder_path}/InternalServiceFunctions"):
+                os.makedirs(f"{nfs_folder_path}/InternalServiceFunctions")
 
-            if os.path.isdir(job_functions):
-                src_files = os.listdir(job_functions)
+            if os.path.isdir(internal_service_functions):
+                src_files = os.listdir(internal_service_functions)
                 for file_name in src_files:
-                    full_file_name = os.path.join(job_functions, file_name)
+                    full_file_name = os.path.join(internal_service_functions, file_name)
                     if os.path.isfile(full_file_name):
-                        shutil.copy(full_file_name, f"{nfs_folder_path}/JobFunctions/")
+                        shutil.copy(full_file_name, f"{nfs_folder_path}/InternalServiceFunctions/")
             else:
-                shutil.copyfile(job_functions, f"{nfs_folder_path}/JobFunctions/{job_functions}")
+                shutil.copyfile(internal_service_functions, f"{nfs_folder_path}/InternalServiceFunctions/{internal_service_functions}")
                 print("FILE")
 
     except Exception as er:
@@ -135,7 +116,7 @@ if folder_not_exist or len(os.listdir(folder)) == 0:
     if keyboard_input == "y" or keyboard_input == "yes":
         updated_folder_items, service_mesh, work_model = create_deployment_config()
         copy_config_file_to_nfs(nfs_folder_path=nfs_conf["mount_path"], servicemesh=service_mesh,
-                                workmodel=work_model, job_functions=job_functions_file_path)
+                                workmodel=work_model, internal_service_functions=internal_service_functions_file_path)
 
         # pprint(service_mesh)
         # pprint(work_model)
@@ -147,8 +128,7 @@ if folder_not_exist or len(os.listdir(folder)) == 0:
 
         keyboard_input = input("Do you wanna create the workload file?? (y)  ") or "y"
         if keyboard_input == "y" or keyboard_input == "yes":
-            req_params = {"stop_event": stop_event, "mean_interarrival_time": mean_interarrival_time}
-            workload = wlGen.get_workload(ingress_dict, {"min": min_services, "max": max_services}, req_params)
+            workload = wlGen.get_workload(workload_parameters)
             with open(f"WorkLoadGenerator/workload.json", "w") as f:
                 f.write(json.dumps(workload))
             print("Worklod file saved in '%s'" % os.path.abspath("workload.json"))

@@ -1,0 +1,46 @@
+{
+   "ServiceMeshParameters": {
+      "vertices": 4,
+      "external_service_groups": 1,
+      "power": 0.05,
+      "seq_len": 2,
+      "zero_appeal": 0.5,
+      "dbs": {
+         "nodb": 1.0,
+         "sdb1": 0.1,
+         "sdb2": 0.3
+      }
+   },
+
+   "WorkModelParameters":{
+      "compute_pi":{
+         "probability":0.3,
+         "mean_bandwidth":11,
+         "range_complexity":[101, 101]
+      },
+      "colosseum": {
+         "probability": 0.6
+      }
+   },
+
+   "WorkLoadParameters":{
+      "ingress_service":"s0",
+      "request_parameters": {
+         "mean_interarrival_time": 50,
+         "stop_event": 5
+      }
+   },
+
+   "K8sParameters": {
+      "prefix_yaml_file":"MicroServiceDeployment",
+      "namespace": "default",
+      "image": "lucapetrucci/microservice:latest",
+      "cluster_domain": "cluster",
+      "path": "/api/v1"
+   },
+   "NFSConfigurations": {
+      "address": "192.168.0.144",
+      "mount_path": "/mnt/MSSharedData1"
+   },
+   "InternalServiceFilePath": "Colosseum.py"
+}

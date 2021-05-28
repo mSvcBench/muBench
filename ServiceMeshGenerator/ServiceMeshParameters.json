@@ -4,7 +4,6 @@
       "seq_len":2,
       "vertices":10,
       "power":0.05,
-      "edges_per_vertex":1,
       "zero_appeal":0.5,
       "dbs":{
          "nodb":1.0,

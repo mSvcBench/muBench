@@ -6,7 +6,9 @@ WORKLOAD_PATH = os.path.dirname(__file__)
 # vertex_number -> N number of vertex
 # ingress_services -> {"sx": probability, ...}
 # number_of_ingreress -> number of ingress services in range [MIN, MAX]
-def get_workload(ingress_service, request_params):
+def get_workload(workload_params):
+    ingress_service = workload_params["ingress_service"]
+    request_params = workload_params["request_parameters"]
     workload_l = list()
     # print("vertex_number: %d" % vertex_number)
     # print("ingress_services:", ingress_services)
