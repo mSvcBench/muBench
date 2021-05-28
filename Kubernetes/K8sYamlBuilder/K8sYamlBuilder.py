@@ -53,6 +53,7 @@ def create_deployment_yaml_files(model, k8s_parameters, nfs):
     with open(f"{K8s_YAML_BUILDER_PATH}/Template/ConfigMapNginxGwTemplate.yaml", "r") as file:
         f = file.read()
         f = f.replace("{{NAMESPACE}}", namespace)
+        f = f.replace("{{PATH}}", k8s_parameters["path"])
 
     with open(f"{K8s_YAML_BUILDER_PATH}/yamls/ConfigMapNginxGw.yaml", "w") as file:
         file.write(f)
