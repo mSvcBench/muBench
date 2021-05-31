@@ -1,5 +1,4 @@
 # Microservice Model
-![service-cell-abstraction](service-cell-abstraction.png)
 
 ### Table of Content
 * [Introduction](/README.md)
@@ -16,8 +15,8 @@
   * [Runner](/Docs/BuildingTools.md#Runner)
 * [Deployment](/Docs/Deployment.md)
     * [Kubernetes](/Docs/Deployment.md#Kubernetes)
-      * [K8s Yaml Builder](/Docs/Deployment.md#K8sYamlBuilder)
-      * [K8s Deployer](/Docs/Deployment.md#Kubernetes#K8sDeployer)
+      * [K8s Yaml Builder](/Docs/Deployment.md#K8s-Yaml-Builder)
+      * [K8s Deployer](/Docs/Deployment.md#K8s-Deployer)
     * [Further Works](/Docs/Deployment.md#Further-Works)
 * [Monitoring](/Docs/Monitoring.md)
     * [Prometheus](/Docs/Monitoring.md#Prometheus)
@@ -26,6 +25,8 @@
     * [Example](/Docs/GettingStarted.md#Example) - A step by step walkthrough
     * [K8s Autopilot](/Docs/GettingStarted.md#AutoPilot) - The lazy shortcut
 ---
+
+![service-cell-abstraction](service-cell-abstraction.png)
 
 ## Service Cell
 Upon a service request, each service locally executes an **internal-service** and then carries out a set of calls towards **external-services**. An internal-service is a task that user can define as a python function to be inserted in the `/mnt/MSSharedData/JobFunctions` (see also [here](/Docs/MicroserviceModel.md#Custom-Functions)). However, each service has a pre-defined internal-service that is named `compute_pi`.
