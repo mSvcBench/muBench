@@ -12,8 +12,9 @@ Before running the script edit the configuration file `AutoPilotConf.py`. This f
 nfs_conf = {"address": "10.3.0.4", "mount_path": "/mnt/MSSharedData"}
 ```
 * Then, you can run the `AutoPilot.py` script:
+
 ```shell
-python AutoPilot.py
+python3 AutoPilot.py
 ```
 
 * add workflow drawio:

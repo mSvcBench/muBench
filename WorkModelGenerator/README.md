@@ -1,6 +1,6 @@
 # Work Model Generator
 
-If you want to learn theoretical insights of the *Work Model Generator* [go here](/Docs/BuildingBlocks.md#Work-Model-Generator), otherwise, if you want to run it, go through the following steps.
+If you want to learn theoretical insights of the *Work Model Generator* [go here](/Docs/BuildingTools.md#Work-Model-Generator), otherwise, if you want to run it, go through the following steps.
 
 ---
 ## Run the script

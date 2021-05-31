@@ -43,8 +43,9 @@ servicemesh_file_path = "../ServiceMeshGenerator/servicemesh.json"
 
 
 * Run the python file `RunServiceMeshGen.py`:
+
 ```shell
-python RunWorkModelGen.py
+python3 RunWorkModelGen.py
 ```
 
 * We'll copy the `workmodel.json` file to the NFS folder on the next step, as it still needs to be edited by the `K8sYamlBuilder`.
@@ -72,7 +73,7 @@ work_model_path = "../../WorkModelGenerator/workmodel.json"
 
 * Run the python file `RunK8sYamlBuilder.py`:
 ```shell
-python RunK8sYamlBuilder.py
+python3 RunK8sYamlBuilder.py
 ```
 * Copy the updated `workmodel.json` file in the NFS shared folder as follows:
 ```shell

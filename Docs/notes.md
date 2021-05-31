@@ -1,5 +1,8 @@
 ### ServiceMesh
-python RunServiceMeshGen.py
+```bash
+python3 RunServiceMeshGen.py
+````
+
 Service Mesh Created!
 {'s0': [],
  's1': [{'seq_len': 1, 'services': ['s0']}],

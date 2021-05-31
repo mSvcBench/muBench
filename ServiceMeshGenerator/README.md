@@ -1,6 +1,6 @@
 # Service Mesh Generator
 
-If you want to learn theoretical insights of the *Service Mesh Generator* [go here](/Docs/BuildingBlocks.md#Service-Mesh-Generator), otherwise, if you want to run it, go through the following steps.
+If you want to learn theoretical insights of the *Service Mesh Generator* [go here](/Docs/BuildingTools.md#Service-Mesh-Generator), otherwise, if you want to run it, go through the following steps.
 
 
 ---
