@@ -1,0 +1,10 @@
+{
+   "RunnerParameters":{
+      "ms_access_gateway": "http://160.80.103.216:31113",
+      "workload_files_path_list": ["/Users/detti/Documents/MyDocuments/Personali/Prin2018/MicroServiceSimulator/WorkLoadGenerator/workload_test500.json"],
+      "workload_files_path_list_1": ["../WorkLoadGenerator/workload_test50.json"],
+      "workload_rounds": 1,
+      "thread_pool_size": 100,
+      "result_file": "result.txt"
+   }
+}

@@ -1,3 +1,4 @@
+from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 import sched
 import time
@@ -5,11 +6,25 @@ from TimingError import TimingError
 import requests
 import json
 import sys
-from datetime import datetime
+import os
 from pprint import pprint
 
-ms_access_gateway = "http://160.80.103.216:31113"
-workloads = ["/Users/detti/Documents/MyDocuments/Personali/Prin2018/MicroServiceSimulator/WorkLoadGenerator/workload_test500.json"]
+
+RUNNER_PATH = os.path.dirname(__file__)
+
+try:
+    with open(f'{RUNNER_PATH}/RunnerParameters.json') as f:
+        params = json.load(f)
+    runner_parameters = params['RunnerParameters']
+    ms_access_gateway = runner_parameters["ms_access_gateway"]
+    workloads = runner_parameters["workload_files_path_list"]
+    threads = runner_parameters["thread_pool_size"]
+    round = runner_parameters["workload_rounds"]  # number of repetition rounds
+
+except Exception as err:
+    print("ERROR: in Runner,", err)
+    exit(1)
+
 stats = list()
 start_time = 0.0
 
@@ -18,10 +33,10 @@ def do_requests(event, stats):
     # for services in event["services"]:
         # print(services)
     try:
-        now = time.time() * 1000
+        now_ms = time.time_ns() // 1_000_000
         r = requests.get(f"{ms_access_gateway}/{event['service']}")
         req_latency = r.elapsed.total_seconds()
-        stats.append(f"{now} \t {req_latency}") 
+        stats.append(f"{now_ms} \t {req_latency}")
         return event['time'], req_latency
     except Exception as err:
         print("Error: %s" % err)
@@ -30,11 +45,9 @@ def do_requests(event, stats):
 def job_assignment(v_pool, v_futures, event, stats):
     try:
         worker = v_pool.submit(do_requests, event, stats)
-        time.sleep(0.0001)  # lascia il tempo di cambiare la variabile _state
-        # print(f"{v_time}-{worker._state}-{time.time()}")
-        # print(f"{event['time']} - {worker._state} - Delay: {time.time()/1000-start_time-event['time']}")
-        # Se il thread viene messo in pending significa che non ho thread liberi e quindi non rispetto
-        # i tempi per le richieste
+        # Wait for the thread state change
+        time.sleep(0.0001)
+        #  If thread status is PENDING i can not respect the timing requirements
         if worker._state == "PENDING":
             raise TimingError(event['time'])
         v_futures.append(worker)
@@ -45,7 +58,6 @@ def job_assignment(v_pool, v_futures, event, stats):
 def runner(workload=None):
     global start_time, stats
 
-    # print("I am THE Runner!!")
     print("###############################################")
     print("############   Run Forrest Run!!   ############")
     print("###############################################")
@@ -56,22 +68,14 @@ def runner(workload=None):
 
     with open(workload_file) as f:
         workload = json.load(f)
-    # pprint(workload)
-    # pprint(work_model)
     s = sched.scheduler(time.time, time.sleep)
-    pool = ThreadPoolExecutor(100)
+    pool = ThreadPoolExecutor(threads)
     futures = list()
-    # print("Time_1:", time.time()*1000)
-    # events = [10, 20, 30, 40, 50, 100, 150]
-    # events = [0, 1, 2, 3, 4, 5, 10, 15]
-    # for event_time in events:
     for event in workload:
-        # s.enter(event_time, 1, job_assignment, argument=(pool, futures, event_time))
         # in seconds
         # s.enter(event["time"], 1, job_assignment, argument=(pool, futures, event))
         # in milliseconds
         s.enter((event["time"]/1000+2), 1, job_assignment, argument=(pool, futures, event, stats))
-
 
     start_time = time.time()
     print("Start Time:", datetime.now().strftime("%H:%M:%S.%f - %g/%m/%Y"))
@@ -84,9 +88,6 @@ def runner(workload=None):
     print("Run Duration (sec): %.6f" % (time.time() - start_time))
 
 
-
-
-round = 1 # number of repetition rounds
 for cnt, workload_var in enumerate(workloads):
     for x in range(round):
         print("Round: %d -- workload: %s" % (x+1, workload_var))
@@ -98,5 +99,5 @@ for cnt, workload_var in enumerate(workloads):
     # if cnt != len(workloads) - 1:
     #     print("Sleep for 240 sec")
     #     time.sleep(240)
-with open("result.txt","w") as f:
-    f.write(stats)
+with open("result.txt", "w") as f:
+    f.writelines("\n".join(stats))
