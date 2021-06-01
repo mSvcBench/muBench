@@ -23,10 +23,22 @@
     * [Grafana](/Docs/Monitoring.md#Grafana)
 * [Getting Started](/Docs/GettingStarted.md)
     * [Example](/Docs/GettingStarted.md#Example) - A step by step walkthrough
-    * [K8s Autopilot](/Docs/GettingStarted.md#AutoPilot) - The lazy shortcut
+    * [K8s Autopilot](/Docs/GettingStarted.md#K8s-Autopilot) - The lazy shortcut
 ---
 
 ![service-cell-abstraction](service-cell-abstraction.png)
+
+Using the **µBench** simulator a microservice application is composed of a collection of identical services which, at the time of their creation, only differ from their different ids, e.g. *s0, s1, s2... etc*.
+The services are coupled to each other in a way that depends on the quello che gli hai detto, and all together make up the *service mesh*.
+
+Each service becomes specialized in 
+
+
+
+ appena creata la mesh. Dopo si specializzano leggendo da json, riconoscendosi da 
+
+:
+the underlying services are  
 
 ## Service Cell
 Upon a service request, each service locally executes an **internal-service** and then carries out a set of calls towards **external-services**. An internal-service is a task that user can define as a python function to be inserted in the `/mnt/MSSharedData/JobFunctions` (see also [here](/Docs/MicroserviceModel.md#Custom-Functions)). However, each service has a pre-defined internal-service that is named `compute_pi`.

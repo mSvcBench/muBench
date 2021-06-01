@@ -23,7 +23,7 @@
     * [Grafana](/Docs/Monitoring.md#Grafana)
 * [Getting Started](/Docs/GettingStarted.md)
     * [Example](/Docs/GettingStarted.md#Example) - A step by step walkthrough
-    * [K8s Autopilot](/Docs/GettingStarted.md#AutoPilot) - The lazy shortcut
+    * [K8s Autopilot](/Docs/GettingStarted.md#K8s-Autopilot) - The lazy shortcut
 ---
 
 ## Prometheus
