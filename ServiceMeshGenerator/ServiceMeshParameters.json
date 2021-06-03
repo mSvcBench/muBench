@@ -10,5 +10,6 @@
          "sdb1":0.0,
          "sdb2":0.0
       }
-   }
+   },
+   "OutputPath": "../DirName"
 }
