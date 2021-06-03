@@ -38,13 +38,14 @@ def do_requests(event, stats):
     requests_processed = requests_processed + 1    
     try:
         now_ms = time.time_ns() // 1_000_000
-        if now_ms > last_print_time_ms + 10_000:
-            print(f"Processed requests {requests_processed} \n")
-            last_print_time_ms = now_ms
         r = requests.get(f"{ms_access_gateway}/{event['service']}")
-        req_latency = r.elapsed.total_seconds()*1000
-        stats.append(f"{now_ms} \t {req_latency}")
-        return event['time'], req_latency
+        req_latency_ms = r.elapsed.total_seconds()*1000
+        stats.append(f"{now_ms} \t {req_latency_ms}")
+        if now_ms > last_print_time_ms + 10_000:
+            print(f"Processed request {requests_processed}, latency {req_latency_ms} \n")
+            last_print_time_ms = now_ms
+ 
+        return event['time'], req_latency_ms
     except Exception as err:
         print("Error: %s" % err)
 
