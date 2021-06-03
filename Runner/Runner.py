@@ -11,6 +11,8 @@ from pprint import pprint
 
 
 RUNNER_PATH = os.path.dirname(__file__)
+last_print_time_ms = 0
+requests_processed = 0
 
 try:
     with open(f'{RUNNER_PATH}/RunnerParameters.json') as f:
@@ -29,11 +31,16 @@ stats = list()
 start_time = 0.0
 
 def do_requests(event, stats):
+    global requests_processed, last_print_time_ms
     # pprint(workload[event]["services"])
     # for services in event["services"]:
         # print(services)
+    requests_processed = requests_processed + 1    
     try:
         now_ms = time.time_ns() // 1_000_000
+        if now_ms > last_print_time_ms + 10_000:
+            print(f"Processed requests {requests_processed} \n")
+            last_print_time_ms = now_ms
         r = requests.get(f"{ms_access_gateway}/{event['service']}")
         req_latency = r.elapsed.total_seconds()
         stats.append(f"{now_ms} \t {req_latency}")
