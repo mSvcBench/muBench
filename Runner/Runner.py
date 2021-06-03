@@ -15,7 +15,7 @@ RUNNER_PATH = os.path.dirname(__file__)
 if len(sys.argv) > 1:
     parameters_file_path = sys.argv[1]
 else:
-    parameters_file_path = f'{RUNNER_PATH}/ServiceMeshParameters.json'
+    parameters_file_path = f'{RUNNER_PATH}/RunnerParameters.json'
 
 
 last_print_time_ms = 0
@@ -23,7 +23,7 @@ requests_processed = 0
 
 
 try:
-    with open(f'{RUNNER_PATH}/RunnerParameters.json') as f:
+    with open(parameters_file_path) as f:
         params = json.load(f)
     runner_parameters = params['RunnerParameters']
     ms_access_gateway = runner_parameters["ms_access_gateway"]

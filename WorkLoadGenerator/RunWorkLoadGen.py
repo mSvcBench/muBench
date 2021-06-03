@@ -7,10 +7,10 @@ import os
 if len(sys.argv) > 1:
     parameters_file_path = sys.argv[1]
 else:
-    parameters_file_path = f'{WORKLOAD_PATH}/ServiceMeshParameters.json'
+    parameters_file_path = f'{WORKLOAD_PATH}/WorkLoadParameters.json'
 
 try:
-    with open(f'{WORKLOAD_PATH}/WorkLoadParameters.json') as f:
+    with open(parameters_file_path) as f:
         params = json.load(f)
     workload_parameters = params['WorkLoadParameters']
     if "OutputPath" in params.keys() and len(params["OutputPath"]) > 0:

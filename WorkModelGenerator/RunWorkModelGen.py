@@ -7,10 +7,10 @@ import os
 if len(sys.argv) > 1:
     parameters_file_path = sys.argv[1]
 else:
-    parameters_file_path = f'{WORKMODEL_PATH}/ServiceMeshParameters.json'
+    parameters_file_path = f'{WORKMODEL_PATH}/WorkModelParameters.json'
 
 try:
-    with open(f'{WORKMODEL_PATH}/WorkModelParameters.json') as f:
+    with open(parameters_file_path) as f:
         params = json.load(f)
     workmodel_parameters = params['WorkModelParameters']
     servicemesh_file_path = params['ServiceMeshFilePath']
