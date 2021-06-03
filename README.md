@@ -18,7 +18,6 @@ Also, you can use the [K8s Autopilot](/Docs/GettingStarted.md#K8s-Autopilot) to 
   * [Service Cell](/Docs/MicroserviceModel.md#Service-Cell)
   * [Internal Service](/Docs/MicroserviceModel.md#Internal-Service)
   * [External Services](/Docs/MicroserviceModel.md#External-Services)
-  * [Docker Build](/Docs/MicroserviceModel.md#Docker-Build)
   * [Custom Functions](/Docs/MicroserviceModel.md#Custom-Functions)
 * [Building Tools](/Docs/BuildingTools.md#Building-Tools)
   * [Service Mesh Generator](/Docs/BuildingTools.md#Service-Mesh-Generator)
