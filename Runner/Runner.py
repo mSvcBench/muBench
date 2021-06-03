@@ -11,21 +11,38 @@ from pprint import pprint
 
 
 RUNNER_PATH = os.path.dirname(__file__)
+
+if len(sys.argv) > 1:
+    parameters_file_path = sys.argv[1]
+else:
+    parameters_file_path = f'{RUNNER_PATH}/RunnerParameters.json'
+
+
 last_print_time_ms = 0
 requests_processed = 0
 
+
 try:
-    with open(f'{RUNNER_PATH}/RunnerParameters.json') as f:
+    with open(parameters_file_path) as f:
         params = json.load(f)
     runner_parameters = params['RunnerParameters']
     ms_access_gateway = runner_parameters["ms_access_gateway"]
-    workloads = runner_parameters["workload_files_path_list"]
+    workloads = runner_parameters["workload_files_path_list_1"]
     threads = runner_parameters["thread_pool_size"]
     round = runner_parameters["workload_rounds"]  # number of repetition rounds
+    if "OutputPath" in params.keys() and len(params["OutputPath"]) > 0:
+        output_path = params["OutputPath"]
+        if output_path.endswith("/"):
+            output_path = output_path[:-1]
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
+    else:
+        output_path = RUNNER_PATH
 
 except Exception as err:
     print("ERROR: in Runner,", err)
     exit(1)
+
 
 stats = list()
 start_time = 0.0
@@ -107,5 +124,5 @@ for cnt, workload_var in enumerate(workloads):
     # if cnt != len(workloads) - 1:
     #     print("Sleep for 240 sec")
     #     time.sleep(240)
-with open("result.txt", "w") as f:
+with open(f"{output_path}/result.txt", "w") as f:
     f.writelines("\n".join(stats))
