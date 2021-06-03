@@ -1,3 +1,7 @@
+# This function computes X decimal points of pi, 
+# where X is a random integer in range_complexity[0] and range_complexity[1].
+# The evaluation is repeated sequentially trials times 
+
 import random
 def compute_pi_r(params):
     cpu_load = random.randint(params["range_complexity"][0], params["range_complexity"][1])

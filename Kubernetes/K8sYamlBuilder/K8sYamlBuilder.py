@@ -33,7 +33,7 @@ def customization_work_model(model, k8s_parameters):
     print("Work Model Updated!")
 
 
-def create_deployment_yaml_files(model, k8s_parameters, nfs):
+def create_deployment_yaml_files(model, k8s_parameters, nfs, output_path):
     namespace = k8s_parameters['namespace']
     for service in model:
         with open(f"{K8s_YAML_BUILDER_PATH}/Templates/DeploymentTemplate.yaml", "r") as file:
@@ -44,10 +44,10 @@ def create_deployment_yaml_files(model, k8s_parameters, nfs):
             # for key in args:
             #     f = f.replace(key, args[key])
 
-        if not os.path.exists(f"{K8s_YAML_BUILDER_PATH}/yamls"):
-            os.makedirs(f"{K8s_YAML_BUILDER_PATH}/yamls")
+        if not os.path.exists(f"{output_path}/yamls"):
+            os.makedirs(f"{output_path}/yamls")
 
-        with open(f"{K8s_YAML_BUILDER_PATH}/yamls/{k8s_parameters['prefix_yaml_file']}-{service}.yaml", "w") as file:
+        with open(f"{output_path}/yamls/{k8s_parameters['prefix_yaml_file']}-{service}.yaml", "w") as file:
             file.write(f)
 
     with open(f"{K8s_YAML_BUILDER_PATH}/Templates/ConfigMapNginxGwTemplate.yaml", "r") as file:
@@ -55,14 +55,14 @@ def create_deployment_yaml_files(model, k8s_parameters, nfs):
         f = f.replace("{{NAMESPACE}}", namespace)
         f = f.replace("{{PATH}}", k8s_parameters["path"])
 
-    with open(f"{K8s_YAML_BUILDER_PATH}/yamls/ConfigMapNginxGw.yaml", "w") as file:
+    with open(f"{output_path}/yamls/ConfigMapNginxGw.yaml", "w") as file:
         file.write(f)
 
     with open(f"{K8s_YAML_BUILDER_PATH}/Templates/DeploymentNginxGwTemplate.yaml", "r") as file:
         f = file.read()
         f = f.replace("{{NAMESPACE}}", namespace)
 
-    with open(f"{K8s_YAML_BUILDER_PATH}/yamls/DeploymentNginxGw.yaml", "w") as file:
+    with open(f"{output_path}/yamls/DeploymentNginxGw.yaml", "w") as file:
         file.write(f)
 
     with open(f"{K8s_YAML_BUILDER_PATH}/Templates/PersistentVolumeMicroServiceTemplate.yaml", "r") as file:
@@ -71,14 +71,13 @@ def create_deployment_yaml_files(model, k8s_parameters, nfs):
         f = f.replace("{{SERVER}}", nfs["address"])
         f = f.replace("{{PATH}}", nfs["mount_path"])
 
-    with open(f"{K8s_YAML_BUILDER_PATH}/yamls/PersistentVolumeMicroService.yaml", "w") as file:
+    with open(f"{output_path}/yamls/PersistentVolumeMicroService.yaml", "w") as file:
         file.write(f)
 
     print("Deployment Created!")
 
 
-
-def create_configmap_yaml(mesh, model, namespace):
+def create_configmap_yaml(mesh, model, namespace, output_path):
     with open(f"{K8s_YAML_BUILDER_PATH}/Templates/ConfigMapTemplate.yaml", "r") as file:
         f = file.read()
         f = f.replace("{{SERVICE_MESH}}", json.dumps(mesh))
@@ -88,7 +87,7 @@ def create_configmap_yaml(mesh, model, namespace):
     if not os.path.exists("yamls"):
         os.makedirs("yamls")
 
-    with open(f"{K8s_YAML_BUILDER_PATH}/yamls/ConfigMapMicroService.yaml", "w") as file:
+    with open(f"{output_path}/yamls/ConfigMapMicroService.yaml", "w") as file:
         file.write(f)
 
     print("ConfigMap Created!")

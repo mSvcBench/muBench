@@ -7,37 +7,63 @@ import requests
 import json
 import sys
 import os
+import shutil
 from pprint import pprint
 
 
 RUNNER_PATH = os.path.dirname(__file__)
 
+if len(sys.argv) > 1:
+    parameters_file_path = sys.argv[1]
+else:
+    parameters_file_path = f'{RUNNER_PATH}/RunnerParameters.json'
+
+
+last_print_time_ms = 0
+requests_processed = 0
+
+
 try:
-    with open(f'{RUNNER_PATH}/RunnerParameters.json') as f:
+    with open(parameters_file_path) as f:
         params = json.load(f)
     runner_parameters = params['RunnerParameters']
     ms_access_gateway = runner_parameters["ms_access_gateway"]
     workloads = runner_parameters["workload_files_path_list"]
     threads = runner_parameters["thread_pool_size"]
     round = runner_parameters["workload_rounds"]  # number of repetition rounds
+    if "OutputPath" in params.keys() and len(params["OutputPath"]) > 0:
+        output_path = params["OutputPath"]
+        if output_path.endswith("/"):
+            output_path = output_path[:-1]
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
+    else:
+        output_path = RUNNER_PATH
 
 except Exception as err:
     print("ERROR: in Runner,", err)
     exit(1)
 
+
 stats = list()
 start_time = 0.0
 
 def do_requests(event, stats):
+    global requests_processed, last_print_time_ms
     # pprint(workload[event]["services"])
     # for services in event["services"]:
         # print(services)
+    requests_processed = requests_processed + 1    
     try:
         now_ms = time.time_ns() // 1_000_000
         r = requests.get(f"{ms_access_gateway}/{event['service']}")
-        req_latency = r.elapsed.total_seconds()
-        stats.append(f"{now_ms} \t {req_latency}")
-        return event['time'], req_latency
+        req_latency_ms = r.elapsed.total_seconds()*1000
+        stats.append(f"{now_ms} \t {req_latency_ms}")
+        if now_ms > last_print_time_ms + 10_000:
+            print(f"Processed request {requests_processed}, latency {req_latency_ms} \n")
+            last_print_time_ms = now_ms
+ 
+        return event['time'], req_latency_ms
     except Exception as err:
         print("Error: %s" % err)
 
@@ -88,6 +114,8 @@ def runner(workload=None):
     print("Run Duration (sec): %.6f" % (time.time() - start_time))
 
 
+shutil.copy(parameters_file_path, f"{output_path}/")
+
 for cnt, workload_var in enumerate(workloads):
     for x in range(round):
         print("Round: %d -- workload: %s" % (x+1, workload_var))
@@ -99,5 +127,5 @@ for cnt, workload_var in enumerate(workloads):
     # if cnt != len(workloads) - 1:
     #     print("Sleep for 240 sec")
     #     time.sleep(240)
-with open("result.txt", "w") as f:
+with open(f"{output_path}/result.txt", "w") as f:
     f.writelines("\n".join(stats))

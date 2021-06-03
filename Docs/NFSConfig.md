@@ -4,7 +4,7 @@ the nfs shared directory contains the work model and service mesh files, and a d
 internal job functions.
 
 ## Install NFS Server
-For simplicity and compatibility with the AutoPilot script. 
+For simplicity and compatibility with the K8s Autopilot script. 
 1. We will install the **nfs-kernel-server** package on the master node.
 
 ```bash

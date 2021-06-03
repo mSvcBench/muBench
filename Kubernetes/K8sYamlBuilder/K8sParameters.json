@@ -10,5 +10,6 @@
       "address": "192.168.0.144",
       "mount_path": "/kubedata/MSSharedData"
    },
-   "WorkModelPath": "../../WorkModelGenerator/workmodel.json"
+   "WorkModelPath": "../../WorkModelGenerator/workmodel.json",
+   "OutputPath": "../../SimulationWorkspace"
 }

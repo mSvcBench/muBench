@@ -5,6 +5,6 @@
          "mean_interarrival_time": 50,
          "stop_event": 5
       }
-   }
-
+   },
+   "OutputPath": "../SimulationWorkspace"
 }
