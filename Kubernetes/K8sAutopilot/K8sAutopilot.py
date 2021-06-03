@@ -3,12 +3,20 @@ import WorkModelGenerator.WorkModelGenerator as wmGen
 import WorkLoadGenerator.WorkLoadGenerator as wlGen
 from Kubernetes.K8sYamlBuilder import K8sYamlBuilder as K8sBuilder
 from Kubernetes.K8sDeployer import K8sDeployer as K8sDeployer
+import sys
 import os
 import json
 import shutil
 
+AUTOPILOT_PATH = os.path.dirname(__file__)
+
+if len(sys.argv) > 1:
+    parameters_file_path = sys.argv[1]
+else:
+    parameters_file_path = f'{AUTOPILOT_PATH}/K8sAutopilotConf.json'
+
 try:
-    with open('K8sAutopilotConf.json') as f:
+    with open(parameters_file_path) as f:
         params = json.load(f)
 
     ############### Input Param ###############
@@ -28,6 +36,14 @@ try:
     #### K8s Autopilot
     internal_service_functions_file_path = params['InternalServiceFilePath']
 
+    if "OutputPath" in params.keys() and len(params["OutputPath"]) > 0:
+        output_path = params["OutputPath"]
+        if output_path.endswith("/"):
+            output_path = output_path[:-1]
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
+    else:
+        output_path = None
 
 except Exception as err:
     print("ERROR: in RunWorkLoadGen,", err)
@@ -38,23 +54,27 @@ except Exception as err:
 ###########################
 
 folder_not_exist = False
-if not os.path.exists(f"{K8sBuilder.K8s_YAML_BUILDER_PATH}/yamls"):
+if output_path is None:
+    builder_module_path = K8sBuilder.K8s_YAML_BUILDER_PATH
+else:
+    builder_module_path = output_path
+if not os.path.exists(f"{builder_module_path}/yamls"):
     folder_not_exist = True
-folder = f"{K8sBuilder.K8s_YAML_BUILDER_PATH}/yamls"
+folder = f"{builder_module_path}/yamls"
 
 
 def create_deployment_config():
     print("---")
 
-    servicemesh = smGen.get_service_mesh(graph_parameters)
+    servicemesh = smGen.get_service_mesh(graph_parameters, output_path)
 
     workmodel = wmGen.get_work_model(servicemesh, workmodel_parameters)
 
     K8sBuilder.customization_work_model(workmodel, k8s_parameters)
 
-    K8sBuilder.create_deployment_yaml_files(workmodel, k8s_parameters, nfs_conf)
+    K8sBuilder.create_deployment_yaml_files(workmodel, k8s_parameters, nfs_conf, builder_module_path)
 
-    created_items = os.listdir(f"{K8sBuilder.K8s_YAML_BUILDER_PATH}/yamls")
+    created_items = os.listdir(f"{builder_module_path}/yamls")
     print(f"The following files are created: {created_items}")
     print("---")
     # return a list of the files just created
@@ -79,14 +99,26 @@ def remove_files(folder_v):
 
 def copy_config_file_to_nfs(nfs_folder_path, servicemesh, workmodel, internal_service_functions):
     try:
-        with open(f"{nfs_folder_path}/servicemesh.json", "w") as f:
-            f.write(json.dumps(servicemesh))
+        if output_path is None:
+            with open(f"{nfs_folder_path}/servicemesh.json", "w") as f:
+                f.write(json.dumps(servicemesh))
 
-        with open(f"{nfs_folder_path}/workmodel.json", "w") as f:
-            f.write(json.dumps(workmodel))
+            with open(f"{nfs_folder_path}/workmodel.json", "w") as f:
+                f.write(json.dumps(workmodel))
 
-        if os.path.exists(f"{smGen.SERVICEMESH_PATH}/servicemesh.png"):
-            shutil.copy(f"{smGen.SERVICEMESH_PATH}/servicemesh.png", f"{nfs_folder_path}/")
+            if os.path.exists(f"{smGen.SERVICEMESH_PATH}/servicemesh.png"):
+                shutil.copy(f"{smGen.SERVICEMESH_PATH}/servicemesh.png", f"{nfs_folder_path}/")
+
+        else:
+            with open(f"{output_path}/servicemesh.json", "w") as f:
+                f.write(json.dumps(servicemesh))
+
+            with open(f"{output_path}/workmodel.json", "w") as f:
+                f.write(json.dumps(workmodel))
+
+            shutil.copy(f"{output_path}/servicemesh.json", f"{nfs_folder_path}/")
+            shutil.copy(f"{output_path}/servicemesh.png", f"{nfs_folder_path}/")
+            shutil.copy(f"{output_path}/workmodel.json", f"{nfs_folder_path}/")
 
         if internal_service_functions != "" or internal_service_functions is None:
             if not os.path.exists(f"{nfs_folder_path}/InternalServiceFunctions"):
@@ -99,7 +131,7 @@ def copy_config_file_to_nfs(nfs_folder_path, servicemesh, workmodel, internal_se
                     if os.path.isfile(full_file_name):
                         shutil.copy(full_file_name, f"{nfs_folder_path}/InternalServiceFunctions/")
             else:
-                shutil.copyfile(internal_service_functions, f"{nfs_folder_path}/InternalServiceFunctions/{internal_service_functions}")
+                shutil.copyfile(internal_service_functions, f"{nfs_folder_path}/InternalServiceFunctions/{internal_service_functions.split('/')[-1]}")
                 print("FILE")
 
     except Exception as er:
@@ -109,9 +141,11 @@ def copy_config_file_to_nfs(nfs_folder_path, servicemesh, workmodel, internal_se
 
 ######## SCRIPT
 # try:
-if folder_not_exist or len(os.listdir(folder)) == 0:
+# if folder_not_exist or len(os.listdir(folder)) == 0:
+if True:
 
-    keyboard_input = input("\nDirectory empty, wanna DEPLOY? (y)").lower() or "y"
+    # keyboard_input = input("\nDirectory empty, wanna DEPLOY? (y)").lower() or "y"
+    keyboard_input = "y"
 
     if keyboard_input == "y" or keyboard_input == "yes":
         updated_folder_items, service_mesh, work_model = create_deployment_config()
@@ -121,17 +155,21 @@ if folder_not_exist or len(os.listdir(folder)) == 0:
         # pprint(service_mesh)
         # pprint(work_model)
 
-        # deploy_items(updated_folder_items)
-        K8sDeployer.deploy_volume(f"{folder}/PersistentVolumeMicroService.yaml")
-        K8sDeployer.deploy_nginx_gateway(folder)
-        K8sDeployer.deploy_items(folder)
+        # K8sDeployer.deploy_volume(f"{folder}/PersistentVolumeMicroService.yaml")
+        # K8sDeployer.deploy_nginx_gateway(folder)
+        # K8sDeployer.deploy_items(folder)
 
-        keyboard_input = input("Do you wanna create the workload file?? (y)  ") or "y"
+        # keyboard_input = input("Do you wanna create the workload file?? (y)  ") or "y"
+        keyboard_input = "y"
         if keyboard_input == "y" or keyboard_input == "yes":
             workload = wlGen.get_workload(workload_parameters)
-            with open(f"WorkLoadGenerator/workload.json", "w") as f:
+            if output_path is None:
+                workload_module_path = wlGen.WORKLOAD_PATH
+            else:
+                workload_module_path = output_path
+            with open(f"{workload_module_path}/workload.json", "w") as f:
                 f.write(json.dumps(workload))
-            print("Worklod file saved in '%s'" % os.path.abspath("workload.json"))
+            print(f"Worklod file saved in '{workload_module_path}/workload.json'")
 
     else:
         print("...\nOk you do not want to DEPLOY stuff! Bye!")

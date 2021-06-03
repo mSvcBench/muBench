@@ -25,7 +25,9 @@ def edges_reversal(graph):
         graph.add_edges([(edge[1], edge[0])])
 
 
-def get_service_mesh(graph_params, output_path):
+def get_service_mesh(graph_params, output_path=None):
+    if output_path is None:
+        output_path = SERVICEMESH_PATH
     # Takes as inputs the graph parameters and generates its json file accordingly
     g = Graph.Barabasi(n=graph_params["vertices"], power=graph_params["power"], m=1,
                        zero_appeal=graph_params["zero_appeal"], directed=True)
