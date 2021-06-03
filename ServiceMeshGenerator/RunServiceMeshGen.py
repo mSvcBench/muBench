@@ -4,6 +4,7 @@ import json
 from pprint import pprint
 import sys
 import os
+import shutil
 
 
 if len(sys.argv) > 1:
@@ -37,6 +38,8 @@ keyboard_input = "y"
 if keyboard_input == "y":
     with open(f'{output_path}/servicemesh.json', "w") as f:
         f.write(json.dumps(servicemesh))
+
+    shutil.copy(parameters_file_path, f"{output_path}/")
 
     print(f"'{output_path}/servicemesh.json'")
     print(f"'{output_path}/servicemesh.png'")

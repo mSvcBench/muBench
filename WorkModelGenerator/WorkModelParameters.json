@@ -10,5 +10,5 @@
       }
    },
    "ServiceMeshFilePath": "../ServiceMeshGenerator/servicemesh.json",
-   "OutputPath": "../DirName"
+   "OutputPath": "../SimulationWorkspace"
 }

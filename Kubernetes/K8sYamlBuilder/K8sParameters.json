@@ -11,5 +11,5 @@
       "mount_path": "/kubedata/MSSharedData"
    },
    "WorkModelPath": "../../WorkModelGenerator/workmodel.json",
-   "OutputPath": "../../DirName"
+   "OutputPath": "../../SimulationWorkspace"
 }

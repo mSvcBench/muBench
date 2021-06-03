@@ -6,5 +6,5 @@
          "stop_event": 5
       }
    },
-   "OutputPath": "../DirName"
+   "OutputPath": "../SimulationWorkspace"
 }

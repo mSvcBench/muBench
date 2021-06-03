@@ -43,5 +43,5 @@
       "mount_path": "/mnt/MSSharedData"
    },
    "InternalServiceFilePath": "../../CustomFunctions/Colosseum.py",
-   "OutputPath": "/home/luca/DirName"
+   "OutputPath": "../SimulationWorkspace"
 }

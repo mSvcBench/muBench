@@ -3,6 +3,7 @@ import json
 from pprint import pprint
 import sys
 import os
+import shutil
 
 if len(sys.argv) > 1:
     parameters_file_path = sys.argv[1]
@@ -36,8 +37,10 @@ keyboard_input = "y"
 
 if keyboard_input == "y":
     # with open(f"workload_events_{stop_event}_mean_{mean_interarrival_time}.json", "w") as f:
-    with open(f"{output_path}/workload.json","w") as f:
+    with open(f"{output_path}/workload.json", "w") as f:
         f.write(json.dumps(workload))
+
+    shutil.copy(parameters_file_path, f"{output_path}/")
 
     print(f"'{output_path}/workload.json'")
     print("File Saved!")

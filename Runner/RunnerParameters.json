@@ -6,5 +6,5 @@
       "thread_pool_size": 100,
       "result_file": "result.txt"
    },
-   "OutputPath": "../DirName"
+   "OutputPath": "../SimulationWorkspace"
 }

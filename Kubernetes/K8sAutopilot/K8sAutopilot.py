@@ -62,6 +62,8 @@ if not os.path.exists(f"{builder_module_path}/yamls"):
     folder_not_exist = True
 folder = f"{builder_module_path}/yamls"
 
+shutil.copy(parameters_file_path, f"{output_path}/")
+
 
 def create_deployment_config():
     print("---")
@@ -99,6 +101,7 @@ def remove_files(folder_v):
 
 def copy_config_file_to_nfs(nfs_folder_path, servicemesh, workmodel, internal_service_functions):
     try:
+        # If output_path exist
         if output_path is None:
             with open(f"{nfs_folder_path}/servicemesh.json", "w") as f:
                 f.write(json.dumps(servicemesh))
@@ -109,6 +112,7 @@ def copy_config_file_to_nfs(nfs_folder_path, servicemesh, workmodel, internal_se
             if os.path.exists(f"{smGen.SERVICEMESH_PATH}/servicemesh.png"):
                 shutil.copy(f"{smGen.SERVICEMESH_PATH}/servicemesh.png", f"{nfs_folder_path}/")
 
+        # If output_path NOT exist
         else:
             with open(f"{output_path}/servicemesh.json", "w") as f:
                 f.write(json.dumps(servicemesh))
@@ -119,6 +123,7 @@ def copy_config_file_to_nfs(nfs_folder_path, servicemesh, workmodel, internal_se
             shutil.copy(f"{output_path}/servicemesh.json", f"{nfs_folder_path}/")
             shutil.copy(f"{output_path}/servicemesh.png", f"{nfs_folder_path}/")
             shutil.copy(f"{output_path}/workmodel.json", f"{nfs_folder_path}/")
+        # ---------
 
         if internal_service_functions != "" or internal_service_functions is None:
             if not os.path.exists(f"{nfs_folder_path}/InternalServiceFunctions"):
@@ -141,8 +146,8 @@ def copy_config_file_to_nfs(nfs_folder_path, servicemesh, workmodel, internal_se
 
 ######## SCRIPT
 # try:
-# if folder_not_exist or len(os.listdir(folder)) == 0:
-if True:
+# if True:
+if folder_not_exist or len(os.listdir(folder)) == 0:
 
     # keyboard_input = input("\nDirectory empty, wanna DEPLOY? (y)").lower() or "y"
     keyboard_input = "y"
@@ -155,9 +160,9 @@ if True:
         # pprint(service_mesh)
         # pprint(work_model)
 
-        # K8sDeployer.deploy_volume(f"{folder}/PersistentVolumeMicroService.yaml")
-        # K8sDeployer.deploy_nginx_gateway(folder)
-        # K8sDeployer.deploy_items(folder)
+        K8sDeployer.deploy_volume(f"{folder}/PersistentVolumeMicroService.yaml")
+        K8sDeployer.deploy_nginx_gateway(folder)
+        K8sDeployer.deploy_items(folder)
 
         # keyboard_input = input("Do you wanna create the workload file?? (y)  ") or "y"
         keyboard_input = "y"

@@ -117,7 +117,7 @@ class HttpThread(Thread):
         my_service_mesh = service_mesh[ID]
         my_work_model = work_model[ID]
         # return json.dumps("Update Function Not Implemented Yet! :("), 200
-        return json.dumps("Successfully Update ServiceMesh and WorkModel variables! :)"), 200
+        return json.dumps("Successfully Update ServiceMesh and WorkModel variables! :)\n"), 200
 
 
     @app.route(f"{my_work_model['path']}", methods=['GET'])
