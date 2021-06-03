@@ -9,5 +9,5 @@
          "probability": 0.6
       }
    },
-   "ServiceMeshFilePath":"ServiceMeshGenerator/servicemesh.json"
+   "ServiceMeshFilePath":"../ServiceMeshGenerator/servicemesh.json"
 }

@@ -6,7 +6,7 @@ from threading import Thread
 from flask import Flask, make_response, json, request
 import traceback
 from InternalServiceExecutor import run_internal_service
-from ExternalServiceExecutor import run_external_service_REST
+from ExternalServiceExecutor import run_external_service_REST, init_gRPC
 import sys
 # from MicroServiceCellAbstraction.ExternalJobExecutorClass import *
 import random
@@ -15,6 +15,13 @@ from pprint import pprint
 from prometheus_client import start_http_server, Gauge, Counter, Histogram, Summary
 import time
 
+# TODO
+# Non modificare il file workmodel, crare un nuovo file per passargli i parametri aggiunti dal builder
+# platform_bindings
+# cartella output con dentro i risultati dei singoli moduli
+# Non modificare direttamente il workmodel, creare un workmodel_k8s
+# TODO IMPORTANTE
+# implementare comunicazione gRPC
 
 def read_config_files():
     with open('MSConfig/servicemesh.json') as f:
@@ -41,6 +48,7 @@ my_work_model = work_model[ID]
 # Modifico my_work_model per i test
 # my_work_model["params"] = {'ave_luca': {"probability": 0.3, "ave_number": 13, "mean_bandwidth": 42}}
 # my_work_model["params"] = {'compute_pi': {"probability": 1, 'mean_bandwidth': 1, 'range_complexity': [101, 101]}}
+pprint(my_service_mesh)
 pprint(my_work_model)
 # exit()
 ################################
@@ -87,7 +95,7 @@ def stop_timer(response):
 #     return response
 ############################
 
-REQUEST_METHOD = "REST"
+REQUEST_METHOD = "gRPC"
 
 # Flask settings
 flask_host = "0.0.0.0"
@@ -163,10 +171,14 @@ if __name__ == '__main__':
     if REQUEST_METHOD == "REST":
         # Function association
         external_service = run_external_service_REST
+    elif REQUEST_METHOD == "gRPC":
+
+        init_gRPC(my_service_mesh, ID, work_model)
     else:
         print("Error: Unsupported request method")
         sys.exit(0)
 
+    exit()
     mss_test_ingress = Counter('mss_test_ingress_total', 'Number of application request', ['kubernetes_service'])
     mss_test_summary = Summary('mss_test_summary', 'Number of application request', ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service'])
 
