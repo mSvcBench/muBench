@@ -42,7 +42,7 @@ def do_requests(event, stats):
             print(f"Processed requests {requests_processed} \n")
             last_print_time_ms = now_ms
         r = requests.get(f"{ms_access_gateway}/{event['service']}")
-        req_latency = r.elapsed.total_seconds()
+        req_latency = r.elapsed.total_seconds()*1000
         stats.append(f"{now_ms} \t {req_latency}")
         return event['time'], req_latency
     except Exception as err:
