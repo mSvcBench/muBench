@@ -27,7 +27,7 @@ try:
         params = json.load(f)
     runner_parameters = params['RunnerParameters']
     ms_access_gateway = runner_parameters["ms_access_gateway"]
-    workloads = runner_parameters["workload_files_path_list_1"]
+    workloads = runner_parameters["workload_files_path_list"]
     threads = runner_parameters["thread_pool_size"]
     round = runner_parameters["workload_rounds"]  # number of repetition rounds
     if "OutputPath" in params.keys() and len(params["OutputPath"]) > 0:

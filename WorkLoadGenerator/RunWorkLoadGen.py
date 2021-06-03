@@ -36,10 +36,10 @@ keyboard_input = "y"
 
 if keyboard_input == "y":
     # with open(f"workload_events_{stop_event}_mean_{mean_interarrival_time}.json", "w") as f:
-    with open(f"{output_path}/workload_events{workload_parameters['request_parameters']['stop_event']}_interarrival{workload_parameters['request_parameters']['mean_interarrival_time']}.json", "w") as f:
+    with open(f"{output_path}/workload.json","w") as f:
         f.write(json.dumps(workload))
 
-    print(f"'{output_path}/workload_events{workload_parameters['request_parameters']['stop_event']}_interarrival{workload_parameters['request_parameters']['mean_interarrival_time']}.json'")
+    print(f"'{output_path}/workload.json'")
     print("File Saved!")
 
 
