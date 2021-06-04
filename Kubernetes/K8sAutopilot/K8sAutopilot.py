@@ -62,7 +62,8 @@ if not os.path.exists(f"{builder_module_path}/yamls"):
     folder_not_exist = True
 folder = f"{builder_module_path}/yamls"
 
-shutil.copy(parameters_file_path, f"{output_path}/")
+if output_path != K8sBuilder.K8s_YAML_BUILDER_PATH:
+    shutil.copy(parameters_file_path, f"{output_path}/")
 
 
 def create_deployment_config():
@@ -104,10 +105,10 @@ def copy_config_file_to_nfs(nfs_folder_path, servicemesh, workmodel, internal_se
         # If output_path exist
         if output_path is None:
             with open(f"{nfs_folder_path}/servicemesh.json", "w") as f:
-                f.write(json.dumps(servicemesh))
+                f.write(json.dumps(servicemesh, indent=2))
 
             with open(f"{nfs_folder_path}/workmodel.json", "w") as f:
-                f.write(json.dumps(workmodel))
+                f.write(json.dumps(workmodel, indent=2))
 
             if os.path.exists(f"{smGen.SERVICEMESH_PATH}/servicemesh.png"):
                 shutil.copy(f"{smGen.SERVICEMESH_PATH}/servicemesh.png", f"{nfs_folder_path}/")
@@ -115,10 +116,10 @@ def copy_config_file_to_nfs(nfs_folder_path, servicemesh, workmodel, internal_se
         # If output_path NOT exist
         else:
             with open(f"{output_path}/servicemesh.json", "w") as f:
-                f.write(json.dumps(servicemesh))
+                f.write(json.dumps(servicemesh, indent=2))
 
             with open(f"{output_path}/workmodel.json", "w") as f:
-                f.write(json.dumps(workmodel))
+                f.write(json.dumps(workmodel, indent=2))
 
             shutil.copy(f"{output_path}/servicemesh.json", f"{nfs_folder_path}/")
             shutil.copy(f"{output_path}/servicemesh.png", f"{nfs_folder_path}/")
@@ -173,7 +174,7 @@ if folder_not_exist or len(os.listdir(folder)) == 0:
             else:
                 workload_module_path = output_path
             with open(f"{workload_module_path}/workload.json", "w") as f:
-                f.write(json.dumps(workload))
+                f.write(json.dumps(workload, indent=2))
             print(f"Worklod file saved in '{workload_module_path}/workload.json'")
 
     else:

@@ -114,7 +114,9 @@ def runner(workload=None):
     print("Run Duration (sec): %.6f" % (time.time() - start_time))
 
 
-shutil.copy(parameters_file_path, f"{output_path}/")
+if output_path != RUNNER_PATH:
+    shutil.copy(parameters_file_path, f"{output_path}/")
+
 
 for cnt, workload_var in enumerate(workloads):
     for x in range(round):
