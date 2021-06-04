@@ -15,6 +15,11 @@ from pprint import pprint
 from prometheus_client import start_http_server, Gauge, Counter, Histogram, Summary
 import time
 
+import mss_pb2_grpc as pb2_grpc
+import mss_pb2 as pb2
+import grpc
+from concurrent import futures
+
 
 def read_config_files():
     with open('MSConfig/servicemesh.json') as f:
@@ -94,6 +99,7 @@ REQUEST_METHOD = "gRPC"
 flask_host = "0.0.0.0"
 flask_port = 8080  # application port
 
+gRPC_port = 51313
 
 class HttpThread(Thread):
     app = Flask(__name__)
@@ -157,36 +163,70 @@ class HttpThread(Thread):
             return json.dumps({"message": "Error"}), 500
 
 
-if __name__ == '__main__':
+class gRPCThread(Thread):
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
-    if REQUEST_METHOD == "REST":
-        # Function association
-        init_REST()
+    def __init__(self):
+        Thread.__init__(self)
 
-    elif REQUEST_METHOD == "gRPC":
+    # def run(self):
+    #     print("Thread http started")
+    #     global flask_host, flask_port
+    #
+    #     logging.basicConfig(level=logging.INFO)
+    #
+    #     self.app.run(host=flask_host, port=flask_port)
+    #     print("Thread '" + self.name + "closed")
 
-        init_gRPC(my_service_mesh, work_model)
-    else:
-        print("Error: Unsupported request method")
-        sys.exit(0)
+    def run(self):
+        print("CIAO")
+        logging.basicConfig(level=logging.INFO)
 
-    exit()
-    mss_test_ingress = Counter('mss_test_ingress_total', 'Number of application request', ['kubernetes_service'])
-    mss_test_summary = Summary('mss_test_summary', 'Number of application request', ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service'])
+        # server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+        pb2_grpc.add_MicroServiceServicer_to_server(pb2_grpc.MicroServiceServicer(), self.server)
+        self.server.add_insecure_port('[::]:51313')
+        self.server.start()
+        self.server.wait_for_termination()
+        print(self.server)
 
-    # Function
-    http_thread = HttpThread()
 
-    http_thread.app.before_request(start_timer)
-    # http_thread.app.after_request(record_request_data)
-    http_thread.app.after_request(stop_timer)
 
-    http_thread.start()
 
-    # Prometheus thread
-    start_http_server(8081)
 
-    http_thread.join()
+gRPC_thread = gRPCThread()
+gRPC_thread.start()
+
+
+# if __name__ == '__main__':
+#
+#     if REQUEST_METHOD == "REST":
+#         # Function association
+#         init_REST()
+#
+#     elif REQUEST_METHOD == "gRPC":
+#
+#         init_gRPC(my_service_mesh, work_model)
+#     else:
+#         print("Error: Unsupported request method")
+#         sys.exit(0)
+#
+#     exit()
+#     mss_test_ingress = Counter('mss_test_ingress_total', 'Number of application request', ['kubernetes_service'])
+#     mss_test_summary = Summary('mss_test_summary', 'Number of application request', ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service'])
+#
+#     # Function
+#     http_thread = HttpThread()
+#
+#     http_thread.app.before_request(start_timer)
+#     # http_thread.app.after_request(record_request_data)
+#     http_thread.app.after_request(stop_timer)
+#
+#     http_thread.start()
+#
+#     # Prometheus thread
+#     start_http_server(8081)
+#
+#     http_thread.join()
 
 # avg((increase(mss_test_summary_sum{endpoint="/api/v1"}[2m])/increase(mss_test_summary_count{endpoint="/api/v1"}[2m])) > 0) by (kubernetes_service)
 
