@@ -3,8 +3,9 @@
 The `Runner.py` is in charge of executing one or more *workloads* and save the simulation results as an output file.
 
 It is advisable to execute the `Runner` outside the nodes of the cluster where the microservices application is deployed, with the purpose of not holding resources from the running services and bias the simulation results.
+> Be careful of the network delays between the executor of the `Runner` simulator and the microservice application's gateway.
 
-The `Runner` firstly schedules the events defined in *ms* by the `workload` files and then a thread pool execute the requests to the associated `access_gateway`.
+The `Runner` schedules the events defined by the `workload` files and then a thread pool executes the requests to the associated `service` through the access gateway.
 We recall the structure of a `workload`:
 
 ```json
@@ -19,8 +20,7 @@ We recall the structure of a `workload`:
 ]
 ```
 
-
-## Input Parameters
+## Input Parameters 
 
 Edit the `RunnerParameters.json` file before executing `Runner.py`. We use the next example to explain the related parameters.
 
@@ -37,8 +37,11 @@ Edit the `RunnerParameters.json` file before executing `Runner.py`. We use the n
 }
 ```
 
-The requests are sent towards the service of the application that act as the access gateway, in this case `s0`, that is accessible through the `ms_access_gateway` IP address.
-The `workload_files_path_list` is the path of the directory where you can save one or more `workloads` generated with the [WorkLoadGenerator](/WorkLoadGenerator/README.md). Specifically, the `Runner` will sequentially execute one by one all of the files inside this directory and save the simulation result file with the name `result_file`, to the output directory `OutputPath`.
+The requests are sent towards the service of the application, in this case `s0`, that is accessible through the access gateway, which IP address is specified from the `ms_access_gateway` parameter.
+The workload files can be specified into the `workload_files_path_list` parameter as the path of a single file generated with the [WorkLoadGenerator](/WorkLoadGenerator/README.md) or as the path of a directory where multiple files are saved.
+In this way, you can simulate different scenarios one after the other.
+
+Specifically, the `Runner` will sequentially execute one by one all of the files inside this directory and save the simulation result file with the name `result_file`, to the output directory `OutputPath`.
 Also, you can specify how many times you want to cycle through the workload directory with the `workload_rounds` parameter, as well as the size of the thread pool allocated for each simulations with `thread_pool_size`.
 
 
