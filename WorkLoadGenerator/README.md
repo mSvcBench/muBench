@@ -6,12 +6,12 @@ The WorkLoadGenerator maps the simulation time steps (in ms) with the services, 
 
 ```json
 [
-  {"time": 0, "services": {"s1": 1, "s2": 0.8}},
-  {"time": 2, "services": {"s0": 1}},
-  {"time": 5, "services": {"s1": 1, "s2": 0.8}},
-  {"time": 7, "services": {"s1": 0.3, "s4": 0.5}},
-  {"time": 9, "services": {"s1": 1, "s2": 0.8}},
-  {"time": 10, "services": {"s4": 1, "s7": 0.2}}
+  {"time": 100, "service": "s0"},
+  {"time": 200, "service": "s0"},
+  {"time": 500, "service": "s0"},
+  {"time": 700, "service": "s0"},
+  {"time": 900, "service": "s0"},
+  {"time": 1000, "service": "s0"}
 ]
 ```
 
