@@ -58,6 +58,6 @@ To learn more go to [WorkLoad Generator](/WorkLoadGenerator/README.md#Workload-G
 
 ---
 ## Runner
-TODO
+The `Runner.py` is in charge of executing one or more *workloads* and save the simulation results as an output file. 
 
-To learn more go to [Runner](/Runner/README.md#Runner).
+To learn more go to the [Runner](/Runner/README.md#Runner).

@@ -16,6 +16,19 @@ The WorkLoadGenerator maps the simulation time steps (in ms) with the services, 
 ```
 
 ### Output Understanding
-TODO
+
+
 ### Input Parameters
-TODO
+
+```json
+{
+   "WorkLoadParameters":{
+      "ingress_service":"s0",
+      "request_parameters": {
+         "mean_interarrival_time": 50,
+         "stop_event": 5
+      }
+   },
+   "OutputPath": "../SimulationWorkspace"
+}
+```
