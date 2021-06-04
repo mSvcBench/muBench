@@ -50,7 +50,7 @@ As input, you must specify in the key `ServiceMeshFilePath` the path of the serv
 Also, you must specify the key `WorkModelParameters` whose value is the set of internal-service functions with their parameters, which must include the `probability` key. 
 
 For example:
-```json
+```
 parameters = {"compute_pi": {"probability": 1, "mean_bandwidth": 11, "range_complexity": [101, 101]},
               "custom_function": {"probability": 0.6, "function_param1": 13, "function_param2": 42}
               }

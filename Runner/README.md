@@ -16,7 +16,6 @@ We recall the structure of a `workload`:
   {"time": 700, "service": "s0"},
   {"time": 900, "service": "s0"},
   {"time": 1000, "service": "s0"}
-  
 ]
 ```
 
