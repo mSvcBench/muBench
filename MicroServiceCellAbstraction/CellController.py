@@ -34,12 +34,12 @@ def read_config_files():
 
 
 # Configuration Variable
-# ID = "s0"  # Service ID
-ID = os.environ["APP"]
-# ZONE = "default"
-ZONE = os.environ["ZONE"]  # Pod Zone
-# K8S_APP = "s0-pod"
-K8S_APP = os.environ["K8S_APP"]  # K8s label app
+ID = "s0"  # Service ID
+# ID = os.environ["APP"]
+ZONE = "default"
+# ZONE = os.environ["ZONE"]  # Pod Zone
+K8S_APP = "s0-pod"
+# K8S_APP = os.environ["K8S_APP"]  # K8s label app
 service_mesh, work_model = read_config_files()
 my_service_mesh = service_mesh[ID]
 my_work_model = work_model[ID]
