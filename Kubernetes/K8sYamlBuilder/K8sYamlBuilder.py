@@ -26,7 +26,7 @@ K8s_YAML_BUILDER_PATH = os.path.dirname(__file__)
 # http://s1.default.svc.cluster.local
 def customization_work_model(model, k8s_parameters):
     for service in model:
-        model[service].update({"url": f"http://{service}.{k8s_parameters['namespace']}.svc.{k8s_parameters['cluster_domain']}.local"})
+        model[service].update({"url": f"{service}.{k8s_parameters['namespace']}.svc.{k8s_parameters['cluster_domain']}.local"})
         model[service].update({"path": k8s_parameters['path']})
         model[service].update({"image": k8s_parameters['image']})
         model[service].update({"namespace": k8s_parameters['namespace']})

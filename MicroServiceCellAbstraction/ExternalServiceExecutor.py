@@ -11,42 +11,55 @@ work_model = dict()
 gRPC_connections = dict()
 
 # REQUEST_METHOD = "REST"
-REQUEST_METHOD = "gRPC"
+# REQUEST_METHOD = "gRPC"
+
+global request_function
 
 
-def request_REST(service):
-    return requests.get(f'{work_model[service]["url"]}{work_model[service]["path"]}')
+def init_REST():
+    print("Init REST FUNCTIONS")
+    global request_function
+    request_function = request_REST
 
 
-def request_gRPC(service):
-    print("sono rpc")
+def init_gRPC(my_service_mesh, workmodel):
 
+    global gRPC_connections, request_function
+    request_function = request_gRPC
 
-def init_gRPC(my_service_mesh, ID, work_model):
-
-    global gRPC_connections
     server_port = 51313
-    my_work_model = work_model[ID]
 
     for group in my_service_mesh:
-        print(group)
         for service in group["services"]:
-            print(service)
-            host = f'{work_model[service]["url"]}'
-            print(host)
+            host = f'{workmodel[service]["url"]}'
             # instantiate a channel
             channel = grpc.insecure_channel(
                 '{}:{}'.format(host, server_port))
             # bind the client and the server
             gRPC_connections[service] = pb2_grpc.MicroServiceStub(channel)
 
-    message = pb2.Message(message="CIAO")
-    print(f'{message}')
-    print(gRPC_connections["s2"].GetMicroServiceResponse(message))
+    print(gRPC_connections)
+    # message = pb2.Message(message="CIAO")
+    # print(f'{message}')
+    # print(gRPC_connections["s2"].GetMicroServiceResponse(message))
 
 
-def external_service(group, request_function):
+def request_REST(service):
+    return requests.get(f'http://{work_model[service]["url"]}{work_model[service]["path"]}')
+
+
+def request_gRPC(service):
+    print(f"sono gRPC ---> service: {service}")
+    print("CIAO")
+    print("-->", work_model[service]["url"].split("//")[-1])
+    message = pb2.Message(message=f"Ciao, sono il service: {service}")
+    # print(f'{message}')
+    print(gRPC_connections[service].GetMicroServiceResponse(message))
+
+
+def external_service(group):
     print("**** Start SERVICES nel thread: %s" % str(group))
+    global request_function
     seq_len = len(group["services"])
     if group["seq_len"] < len(group["services"]):
         seq_len = group["seq_len"]
@@ -54,6 +67,7 @@ def external_service(group, request_function):
     selected_services = random.sample(group["services"], k=seq_len)
     service_error_dict = dict()
     service_error_flag = False
+
     for service in selected_services:
         # sleep_time = random.randint(2, 5)
         # print("**** Service: %s -- Sleep for %d" % (service, sleep_time))
@@ -73,30 +87,22 @@ def external_service(group, request_function):
     return service_error_flag, service_error_dict
 
 
-def run_external_service_REST(services_group, model):
+def run_external_service(services_group, model):
     print("** EXTERNAL SERVICES")
     global work_model
     service_error_dict = dict()
 
-    if REQUEST_METHOD == "REST":
-        request_function = request_REST
-    elif REQUEST_METHOD == "gRPC":
-        request_function = request_gRPC
-    else:
-        print("Request Method not supported!")
-        return
-
     work_model = model
-    exit()
 
     number_of_groups = len(services_group)
     pool = ThreadPoolExecutor(number_of_groups)
 
     futures = list()
-
     for group in services_group:
-        futures.append(pool.submit(external_service, group, request_function))
-
+        print(group)
+        continue
+        futures.append(pool.submit(external_service, group))
+    exit()
     wait(futures)
 
     for x in as_completed(futures):
@@ -117,7 +123,7 @@ work_model_test = {
 
          }
       },
-      "url":"http://s0.default.svc.cluster.local",
+      "url":"s0.default.svc.cluster.local",
       "path":"/api/v1",
       "image":"lucapetrucci/microservice:latest",
       "namespace":"default"
@@ -132,7 +138,8 @@ work_model_test = {
             ]
          }
       },
-      "url":"http://s1.default.svc.cluster.local",
+      # "url":"s1.default.svc.cluster.local",
+      "url":"localhost",
       "path":"/api/v1",
       "image":"lucapetrucci/microservice:latest",
       "namespace":"default"
@@ -147,13 +154,25 @@ work_model_test = {
             ]
          }
       },
-      "url":"http://s2.default.svc.cluster.local",
+      "url":"s2.default.svc.cluster.local",
       "path":"/api/v1",
       "image":"lucapetrucci/microservice:latest",
       "namespace":"default"
-   }
+   },
+    "s3": {
+        "internal_service": {
+            "colosseum": {}
+        },
+        "url": "localhost",
+        "path": "/api/v1",
+        "image": "lucapetrucci/microservice:latest",
+        "namespace": "default"
+    }
 }
 
 # init_gRPC(my_service_mesh)
 # exit()
-# run_external_service_REST(my_service_mesh, work_model_test)
+# run_external_service(my_service_mesh, work_model_test)
+work_model = work_model_test
+init_gRPC(my_service_mesh, work_model_test)
+external_service(my_service_mesh[0])

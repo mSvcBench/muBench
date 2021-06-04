@@ -6,7 +6,7 @@ from threading import Thread
 from flask import Flask, make_response, json, request
 import traceback
 from InternalServiceExecutor import run_internal_service
-from ExternalServiceExecutor import run_external_service_REST, init_gRPC
+from ExternalServiceExecutor import run_external_service, init_gRPC, init_REST
 import sys
 # from MicroServiceCellAbstraction.ExternalJobExecutorClass import *
 import random
@@ -15,13 +15,6 @@ from pprint import pprint
 from prometheus_client import start_http_server, Gauge, Counter, Histogram, Summary
 import time
 
-# TODO
-# Non modificare il file workmodel, crare un nuovo file per passargli i parametri aggiunti dal builder
-# platform_bindings
-# cartella output con dentro i risultati dei singoli moduli
-# Non modificare direttamente il workmodel, creare un workmodel_k8s
-# TODO IMPORTANTE
-# implementare comunicazione gRPC
 
 def read_config_files():
     with open('MSConfig/servicemesh.json') as f:
@@ -146,7 +139,7 @@ class HttpThread(Thread):
             # Execute the external services
             print("*************** EXTERNAL SERVICES STARTED ***************")
             if len(my_service_mesh) > 0:
-                service_error_dict = external_service(my_service_mesh, work_model)
+                service_error_dict = run_external_service(my_service_mesh, work_model)
                 pprint(service_error_dict)
                 if len(service_error_dict):
                     HttpThread.app.logger.error("Error in request external services")
@@ -168,10 +161,11 @@ if __name__ == '__main__':
 
     if REQUEST_METHOD == "REST":
         # Function association
-        external_service = run_external_service_REST
+        init_REST()
+
     elif REQUEST_METHOD == "gRPC":
 
-        init_gRPC(my_service_mesh, ID, work_model)
+        init_gRPC(my_service_mesh, work_model)
     else:
         print("Error: Unsupported request method")
         sys.exit(0)

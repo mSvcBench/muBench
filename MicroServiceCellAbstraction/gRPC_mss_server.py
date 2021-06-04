@@ -14,8 +14,9 @@ class MicroServiceService(pb2_grpc.MicroServiceServicer):
 
         # get the string from the incoming request
         message = request.message
-        result = f'Hello I am up and running received "{message}" message from you'
+        result = f'Ciao sono up and running ed ho ricevuto --> "{message}"'
         result = {'body': result, 'received': True}
+        print("Messaggio ricevuto: ", message)
 
         return pb2.MessageResponse(**result)
 
