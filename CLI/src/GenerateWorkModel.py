@@ -40,7 +40,7 @@ def run(args):
 
         work_model = wmGen.get_work_model(v_numbers, parameters)
         with open(output_file, "w") as f:
-            f.write(json.dumps(work_model))
+            f.write(json.dumps(work_model, indent=2))
 
     except JSONDecodeError as err:
         print("Error: parameters MUST be in json.dumps() format!", err)
