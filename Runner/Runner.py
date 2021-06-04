@@ -44,6 +44,15 @@ except Exception as err:
     print("ERROR: in Runner,", err)
     exit(1)
 
+## Check if "workloads" is a directory path, if so take all the workload files inside it
+if os.path.isdir(workloads[0]):
+    dir_workloads = workloads[0]
+    workloads = list()
+    src_files = os.listdir(dir_workloads)
+    for file_name in src_files:
+        full_file_name = os.path.join(dir_workloads, file_name)
+        if os.path.isfile(full_file_name):
+            workloads.append(full_file_name)
 
 stats = list()
 start_time = 0.0
