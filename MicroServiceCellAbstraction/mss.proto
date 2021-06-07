@@ -15,6 +15,6 @@ message Message{
 }
 
 message MessageResponse{
- string body = 1;
- bool received = 2;
+ string text = 1;
+ bool status_code = 2;
 }

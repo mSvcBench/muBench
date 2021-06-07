@@ -30,5 +30,5 @@ class MicroServiceClient(object):
 
 if __name__ == '__main__':
     client = MicroServiceClient()
-    result = client.get_url(message="Ciao")
+    result = client.get_url(message="Ciao Luca!")
     print(f'{result}')

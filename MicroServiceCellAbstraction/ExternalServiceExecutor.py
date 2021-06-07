@@ -10,24 +10,20 @@ from pprint import pprint
 work_model = dict()
 gRPC_connections = dict()
 
-# REQUEST_METHOD = "REST"
-# REQUEST_METHOD = "gRPC"
 
 global request_function
 
 
 def init_REST():
-    print("Init REST FUNCTIONS")
+    print("Init REST function")
     global request_function
     request_function = request_REST
 
 
-def init_gRPC(my_service_mesh, workmodel):
-
+def init_gRPC(my_service_mesh, workmodel, server_port):
+    print("Init gRPC function")
     global gRPC_connections, request_function
     request_function = request_gRPC
-
-    server_port = 51313
 
     for group in my_service_mesh:
         for service in group["services"]:
@@ -38,23 +34,16 @@ def init_gRPC(my_service_mesh, workmodel):
             # bind the client and the server
             gRPC_connections[service] = pb2_grpc.MicroServiceStub(channel)
 
-    print(gRPC_connections)
-    # message = pb2.Message(message="CIAO")
-    # print(f'{message}')
-    # print(gRPC_connections["s2"].GetMicroServiceResponse(message))
-
 
 def request_REST(service):
     return requests.get(f'http://{work_model[service]["url"]}{work_model[service]["path"]}')
 
 
 def request_gRPC(service):
-    print(f"sono gRPC ---> service: {service}")
-    print("CIAO")
-    print("-->", work_model[service]["url"].split("//")[-1])
     message = pb2.Message(message=f"Ciao, sono il service: {service}")
     # print(f'{message}')
-    print(gRPC_connections[service].GetMicroServiceResponse(message))
+    response = gRPC_connections[service].GetMicroServiceResponse(message)
+    return response
 
 
 def external_service(group):
@@ -99,10 +88,7 @@ def run_external_service(services_group, model):
 
     futures = list()
     for group in services_group:
-        print(group)
-        continue
         futures.append(pool.submit(external_service, group))
-    exit()
     wait(futures)
 
     for x in as_completed(futures):
@@ -112,67 +98,3 @@ def run_external_service(services_group, model):
     wait(futures)
     print("--------> Threads Done!")
     return service_error_dict
-
-
-my_service_mesh = [{"seq_len": 2, "services": ["s1", "s3"]}, {"seq_len": 2, "services": ["s2"]}]
-
-work_model_test = {
-   "s0":{
-      "internal_service":{
-         "colosseum":{
-
-         }
-      },
-      "url":"s0.default.svc.cluster.local",
-      "path":"/api/v1",
-      "image":"lucapetrucci/microservice:latest",
-      "namespace":"default"
-   },
-   "s1":{
-      "internal_service":{
-         "compute_pi":{
-            "mean_bandwidth":11,
-            "range_complexity":[
-               600,
-               600
-            ]
-         }
-      },
-      # "url":"s1.default.svc.cluster.local",
-      "url":"localhost",
-      "path":"/api/v1",
-      "image":"lucapetrucci/microservice:latest",
-      "namespace":"default"
-   },
-   "s2":{
-      "internal_service":{
-         "compute_pi":{
-            "mean_bandwidth":11,
-            "range_complexity":[
-               101,
-               101
-            ]
-         }
-      },
-      "url":"s2.default.svc.cluster.local",
-      "path":"/api/v1",
-      "image":"lucapetrucci/microservice:latest",
-      "namespace":"default"
-   },
-    "s3": {
-        "internal_service": {
-            "colosseum": {}
-        },
-        "url": "localhost",
-        "path": "/api/v1",
-        "image": "lucapetrucci/microservice:latest",
-        "namespace": "default"
-    }
-}
-
-# init_gRPC(my_service_mesh)
-# exit()
-# run_external_service(my_service_mesh, work_model_test)
-work_model = work_model_test
-init_gRPC(my_service_mesh, work_model_test)
-external_service(my_service_mesh[0])

@@ -15,7 +15,7 @@ class MicroServiceService(pb2_grpc.MicroServiceServicer):
         # get the string from the incoming request
         message = request.message
         result = f'Ciao sono up and running ed ho ricevuto --> "{message}"'
-        result = {'body': result, 'received': True}
+        result = {'text': result, 'status_code': True}
         print("Messaggio ricevuto: ", message)
 
         return pb2.MessageResponse(**result)
@@ -24,7 +24,7 @@ class MicroServiceService(pb2_grpc.MicroServiceServicer):
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     pb2_grpc.add_MicroServiceServicer_to_server(MicroServiceService(), server)
-    server.add_insecure_port('[::]:51313')
+    server.add_insecure_port('[::]:51314')
     server.start()
     server.wait_for_termination()
 

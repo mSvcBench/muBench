@@ -81,6 +81,9 @@ spec:
   - port: 80
     targetPort: 8080
     nodePort:
-    name: tcp-input
+    name: tcp-input-rest
+  - port: 51313
+    targetPort: 51313
+    name: tcp-input-grpc
   selector:
     app: {{SERVICE_NAME}}-pod

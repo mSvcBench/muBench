@@ -2,14 +2,14 @@
    "K8sParameters": {
       "prefix_yaml_file":"MicroServiceDeployment",
       "namespace": "default",
-      "image": "lucapetrucci/microservice:latest",
+      "image": "lucapetrucci/microservice_v2:latest",
       "cluster_domain": "cluster",
       "path": "/api/v1"
    },
    "NFSConfigurations": {
-      "address": "192.168.0.144",
-      "mount_path": "/kubedata/MSSharedData"
+      "address": "10.3.0.4",
+      "mount_path": "/mnt/MSSharedData"
    },
-   "WorkModelPath": "../../WorkModelGenerator/workmodel.json",
+   "WorkModelPath": "../../SimulationWorkspace/workmodel.json",
    "OutputPath": "../../SimulationWorkspace"
 }

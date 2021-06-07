@@ -7,8 +7,9 @@
       },
       "colosseum": {
          "probability": 0.6
-      }
+      },
+      "request_method": "gRPC"
    },
-   "ServiceMeshFilePath": "../ServiceMeshGenerator/servicemesh.json",
+   "ServiceMeshFilePath": "../SimulationWorkspace/servicemesh.json",
    "OutputPath": "../SimulationWorkspace"
 }

@@ -32,21 +32,22 @@ def read_config_files():
 
 
 # Configuration Variable
-ID = "s0"  # Service ID
-# ID = os.environ["APP"]
-ZONE = "default"
-# ZONE = os.environ["ZONE"]  # Pod Zone
-K8S_APP = "s0-pod"
-# K8S_APP = os.environ["K8S_APP"]  # K8s label app
+# ID = "s0"  # Service ID
+ID = os.environ["APP"]
+# ZONE = "default"
+ZONE = os.environ["ZONE"]  # Pod Zone
+# K8S_APP = "s0-pod"
+K8S_APP = os.environ["K8S_APP"]  # K8s label app
 service_mesh, work_model = read_config_files()
 my_service_mesh = service_mesh[ID]
 my_work_model = work_model[ID]
+request_method = work_model[ID]["request_method"]
 
 ################################
 # Modifico my_work_model per i test
 # my_work_model["params"] = {'ave_luca': {"probability": 0.3, "ave_number": 13, "mean_bandwidth": 42}}
 # my_work_model["params"] = {'compute_pi': {"probability": 1, 'mean_bandwidth': 1, 'range_complexity': [101, 101]}}
-pprint(my_service_mesh)
+# pprint(my_service_mesh)
 pprint(my_work_model)
 # exit()
 ################################
@@ -93,7 +94,6 @@ def stop_timer(response):
 #     return response
 ############################
 
-REQUEST_METHOD = "gRPC"
 
 # Flask settings
 flask_host = "0.0.0.0"
@@ -163,70 +163,95 @@ class HttpThread(Thread):
             return json.dumps({"message": "Error"}), 500
 
 
-class gRPCThread(Thread):
+class gRPCThread(Thread, pb2_grpc.MicroServiceServicer):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
     def __init__(self):
         Thread.__init__(self)
 
-    # def run(self):
-    #     print("Thread http started")
-    #     global flask_host, flask_port
-    #
-    #     logging.basicConfig(level=logging.INFO)
-    #
-    #     self.app.run(host=flask_host, port=flask_port)
-    #     print("Thread '" + self.name + "closed")
+    def GetMicroServiceResponse(self, request, context):
+        try:
+            logging.info('Request Received')
+            mss_test_ingress.labels("s0").inc(1)  # Increment by 1
+            mss_test_summary.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr, ID).observe(100)
+            mss_test_ingress.inc(1)  # Increment by 1
+            # Execute the internal service
+            print("*************** INTERNAL SERVICE STARTED ***************")
+            start_local_processing = time.time()
+            body = run_internal_service(my_work_model["internal_service"])
+            local_processing_latency = time.time() - start_local_processing
+            LOCAL_PROCESSING.labels(ZONE, K8S_APP, request.method, request.path).observe(local_processing_latency)
+            RESPONSE_SIZE.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr, ID).observe(len(body))
+            print("len(body): %d" % len(body))
+            print("############### INTERNAL SERVICE FINISHED! ###############")
+
+            # Execute the external services
+            print("*************** EXTERNAL SERVICES STARTED ***************")
+            if len(my_service_mesh) > 0:
+                service_error_dict = run_external_service(my_service_mesh, work_model)
+                pprint(service_error_dict)
+                if len(service_error_dict):
+                    logging.error("Error in request external services")
+                    logging.error(service_error_dict)
+                    # return make_response(json.dumps({"message": "Error in same external services request"}), 500)
+
+                    # return json.dumps({"message": "Error in same external services request"}), 500
+                    result = {'text': f"Error in same external services request", 'status_code': False}
+                    return pb2.MessageResponse(**result)
+            print("############### EXTERNAL SERVICES FINISHED! ###############")
+
+            message = request.message
+            print(f'I am service: {ID} and I received this message: --> "{message}"')
+            result = {'text': body, 'status_code': True}
+            return pb2.MessageResponse(**result)
+        except Exception as err:
+            print("Error: in GetMicroServiceResponse,", err)
+            message = request.message
+            print(f'I am service: {ID} and I received this message: --> "{message}"')
+            result = {'text': f"Error: in GetMicroServiceResponse, {str(err)}", 'status_code': False}
+            return pb2.MessageResponse(**result)
+
 
     def run(self):
-        print("CIAO")
-        logging.basicConfig(level=logging.INFO)
-
-        # server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-        pb2_grpc.add_MicroServiceServicer_to_server(pb2_grpc.MicroServiceServicer(), self.server)
-        self.server.add_insecure_port('[::]:51313')
+        pb2_grpc.add_MicroServiceServicer_to_server(self, self.server)
+        self.server.add_insecure_port(f'[::]:{gRPC_port}')
         self.server.start()
-        self.server.wait_for_termination()
-        print(self.server)
 
 
+if __name__ == '__main__':
 
+    # Init Metrics
+    mss_test_ingress = Counter('mss_test_ingress_total', 'Number of application request', ['kubernetes_service'])
+    mss_test_summary = Summary('mss_test_summary', 'Number of application request', ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service'])
 
+    if request_method == "REST":
+        init_REST()
 
-gRPC_thread = gRPCThread()
-gRPC_thread.start()
+    elif request_method == "gRPC":
+        init_gRPC(my_service_mesh, work_model, gRPC_port)
+        # Start the gRPC server threads
+        grpc_thread = gRPCThread()
+        grpc_thread.run()
+        print("DOPO")
+    else:
+        print("Error: Unsupported request method")
+        sys.exit(0)
 
+    # Function
+    # If mode is gRPC the http thread is necessary for the entry point (s0) that receive a REST request
+    http_thread = HttpThread()
 
-# if __name__ == '__main__':
-#
-#     if REQUEST_METHOD == "REST":
-#         # Function association
-#         init_REST()
-#
-#     elif REQUEST_METHOD == "gRPC":
-#
-#         init_gRPC(my_service_mesh, work_model)
-#     else:
-#         print("Error: Unsupported request method")
-#         sys.exit(0)
-#
-#     exit()
-#     mss_test_ingress = Counter('mss_test_ingress_total', 'Number of application request', ['kubernetes_service'])
-#     mss_test_summary = Summary('mss_test_summary', 'Number of application request', ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service'])
-#
-#     # Function
-#     http_thread = HttpThread()
-#
-#     http_thread.app.before_request(start_timer)
-#     # http_thread.app.after_request(record_request_data)
-#     http_thread.app.after_request(stop_timer)
-#
-#     http_thread.start()
-#
-#     # Prometheus thread
-#     start_http_server(8081)
-#
-#     http_thread.join()
+    # Metrics configuration
+    http_thread.app.before_request(start_timer)
+    # http_thread.app.after_request(record_request_data)
+    http_thread.app.after_request(stop_timer)
+
+    http_thread.start()
+
+    # Prometheus thread
+    start_http_server(8081)
+
+    http_thread.join()
 
 # avg((increase(mss_test_summary_sum{endpoint="/api/v1"}[2m])/increase(mss_test_summary_count{endpoint="/api/v1"}[2m])) > 0) by (kubernetes_service)
 

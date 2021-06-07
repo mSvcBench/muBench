@@ -26,7 +26,7 @@ try:
     else:
         output_path = WORKMODEL_PATH
 except Exception as err:
-    print("ERROR: in creation of service mesh,", err)
+    print("ERROR: in creation of workmodel,", err)
     exit(1)
 
 workmodel = get_work_model(servicemesh, workmodel_parameters)
@@ -37,7 +37,7 @@ keyboard_input = "y"
 
 if keyboard_input == "y":
     with open(f"{output_path}/workmodel.json", "w") as f:
-        f.write(json.dumps(workmodel))
+        f.write(json.dumps(workmodel, indent=2))
 
     shutil.copy(parameters_file_path, f"{output_path}/")
 

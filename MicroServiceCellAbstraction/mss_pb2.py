@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\tmss.proto\x12\x0cmicroservice\"\x1a\n\x07Message\x12\x0f\n\x07message\x18\x01 \x01(\t\"1\n\x0fMessageResponse\x12\x0c\n\x04\x62ody\x18\x01 \x01(\t\x12\x10\n\x08received\x18\x02 \x01(\x08\x32\x61\n\x0cMicroService\x12Q\n\x17GetMicroServiceResponse\x12\x15.microservice.Message\x1a\x1d.microservice.MessageResponse\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\tmss.proto\x12\x0cmicroservice\"\x1a\n\x07Message\x12\x0f\n\x07message\x18\x01 \x01(\t\"4\n\x0fMessageResponse\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\x13\n\x0bstatus_code\x18\x02 \x01(\x08\x32\x61\n\x0cMicroService\x12Q\n\x17GetMicroServiceResponse\x12\x15.microservice.Message\x1a\x1d.microservice.MessageResponse\"\x00\x62\x06proto3'
 )
 
 
@@ -66,14 +66,14 @@ _MESSAGERESPONSE = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='body', full_name='microservice.MessageResponse.body', index=0,
+      name='text', full_name='microservice.MessageResponse.text', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='received', full_name='microservice.MessageResponse.received', index=1,
+      name='status_code', full_name='microservice.MessageResponse.status_code', index=1,
       number=2, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
@@ -92,7 +92,7 @@ _MESSAGERESPONSE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=55,
-  serialized_end=104,
+  serialized_end=107,
 )
 
 DESCRIPTOR.message_types_by_name['Message'] = _MESSAGE
@@ -122,8 +122,8 @@ _MICROSERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=106,
-  serialized_end=203,
+  serialized_start=109,
+  serialized_end=206,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetMicroServiceResponse',
