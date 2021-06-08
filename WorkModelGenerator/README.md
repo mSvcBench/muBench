@@ -15,25 +15,44 @@ So the input parameters of `compute_pi` are:
     
 ### Output Understanding
 The `WorkModelGenerator.py` creates the `workmodel.json` file that describes the work model, i.e. which is the internal-service of any service with related parameters.
+
 ```json
-{ "s0": {"internal-service": 
- { "compute_pi": { 
-    "mean_bandwidth": 11,
-    "range_complexity": [101, 101]
-    }
- }
+{
+  "s0": {
+      "internal_service": {
+         "compute_pi": { 
+            "mean_bandwidth": 11,
+            "range_complexity": [101, 101]
+         }
+      }
+  },
+  "s1": {
+      "internal_service": {
+         "colosseum": {}
+      }
+   }
 }
-```     
-This is an example of a part of a produced `workmodel.json` that related to the service s0. The internal-service of s0 is the function `compute_pi` that takes as input two parameters, namely `mean_bandwidth` and `range_complexity`. Other custom functions stored in python files in `NFS_SHARED_FOLDER/InternalServiceFunction` can use user-defined parameters (see e.g. `colosseum.py` [here](/Docs/MicroserviceModel.md#Custom-Functions)). 
+```
+
+This is an example of a part of a produced `workmodel.json` related to a service mesh composed of two services: `s0` and `s1`. The internal-service of `s0` is the function `compute_pi` that takes as input two parameters, namely `mean_bandwidth` and `range_complexity`. 
+Instead, for the service `s1`, the custom function `colosseum` is associated to it.
+Other custom functions are stored in python files located into the subfolder of the [NFS shared directory](/Docs/NFSConfig.md) `NFS_SHARED_FOLDER/InternalServiceFunction` with the possibility of using user-defined parameters (see e.g. `colosseum.py` [here](/Docs/MicroserviceModel.md#Custom-Functions)). 
 
 ### Input Parameters
-Edit the `WorkModelParameters.json` file before executing `RunWorkModelGen.py`. We use the next example to explain related parameters.
+Edit the `WorkModelParameters.json` file before executing `RunWorkModelGen.py`. The next example is given to explain its related parameters.
+
+As input, you must specify for the `ServiceMeshFilePath` key, the path of the `service-mesh` json file. Follow [these instructions](/ServiceMeshGenerator/README.md) if you haven't already created such file.
+
+Also, you must specify the `WorkModelParameters` whose values are the set of internal-service functions along with their parameters, which must include the `probability` key, used by the WorkModelGenerator for choosing which internal-service function assign to each service.
+In the following example, the Work Model assigns to a service the default `compute_pi` as internal-service with a 40% probability, whilst the custom function `colosseum` is chosen with a 60% probability.
+
+As input, it takes the `servicemesh.json` file located at the path specified by the `ServiceMeshFilePath` parameter, and saves the `workmodel.json` output file to the `OutputPath`.
 
 ```json
 {
    "WorkModelParameters":{
       "compute_pi":{
-         "probability":0.3,
+         "probability":0.4,
          "mean_bandwidth":11,
          "range_complexity":[101, 101]
       },
@@ -41,28 +60,15 @@ Edit the `WorkModelParameters.json` file before executing `RunWorkModelGen.py`. 
          "probability": 0.6
       }
    },
-   "ServiceMeshFilePath":"ServiceMeshGenerator/servicemesh.json"
+   "ServiceMeshFilePath": "../SimulationWorkspace/servicemesh.json",
+   "OutputPath": "../SimulationWorkspace"
 }
-```
-
-As input, you must specify in the key `ServiceMeshFilePath` the path of the service mesh json file. Follow [these instructions](/ServiceMeshGenerator/README.md) if you haven't already created the file.
-
-Also, you must specify the key `WorkModelParameters` whose value is the set of internal-service functions with their parameters, which must include the `probability` key. 
-
-For example:
-```
-parameters = {"compute_pi": {"probability": 1, "mean_bandwidth": 11, "range_complexity": [101, 101]},
-              "custom_function": {"probability": 0.6, "function_param1": 13, "function_param2": 42}
-              }
-
-servicemesh_file_path = "../ServiceMeshGenerator/servicemesh.json"
 ```
 
 ---
 ## Run the script
-Edit the `WorkModelParameters.json` file before running the `WorkModelGenerator`.
-
-Finally, run the script to obtain `workmodel.json` as follows:
+Edit the `WorkModelParameters.json` file before running the `WorkModelGenerator`. 
+Then, run the script to obtain `workmodel.json` as follows:
 
 ```
 python3 RunWorkModelGen.py
