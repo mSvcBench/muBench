@@ -3,6 +3,7 @@ import json
 from pprint import pprint
 import sys
 import os
+import shutil
 
 if len(sys.argv) > 1:
     parameters_file_path = sys.argv[1]
@@ -22,7 +23,9 @@ try:
             output_path = output_path[:-1]
         if not os.path.exists(output_path):
             os.makedirs(output_path)
+        out_work_model_path = f"{output_path}/{work_model_path.split('/')[-1]}"
     else:
+        out_work_model_path = work_model_path
         output_path = K8s_YAML_BUILDER_PATH
 except Exception as err:
     print("ERROR: in RunK8sYamlBuilder,", err)
@@ -35,7 +38,10 @@ customization_work_model(work_model, k8s_parameters)
 
 pprint(work_model)
 
-with open(work_model_path, "w") as f:
-    f.write(json.dumps(work_model))
+with open(out_work_model_path, "w") as f:
+    f.write(json.dumps(work_model, indent=2))
+
+if output_path != K8s_YAML_BUILDER_PATH:
+    shutil.copy(parameters_file_path, f"{output_path}/")
 
 create_deployment_yaml_files(work_model, k8s_parameters, nfs_conf, output_path)

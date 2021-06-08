@@ -45,7 +45,7 @@ def run(args):
         output_file = args.output_file
         service_mesh = smGen.get_service_mesh(params)
         with open(output_file, "w") as f:
-            f.write(json.dumps(service_mesh))
+            f.write(json.dumps(service_mesh, indent=2))
 
     except JSONDecodeError as err:
         print("Error: parameters MUST be in json.dumps() format!", err)

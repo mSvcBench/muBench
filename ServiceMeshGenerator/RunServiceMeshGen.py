@@ -37,9 +37,10 @@ pprint(servicemesh)
 keyboard_input = "y"
 if keyboard_input == "y":
     with open(f'{output_path}/servicemesh.json', "w") as f:
-        f.write(json.dumps(servicemesh))
+        f.write(json.dumps(servicemesh, indent=2))
 
-    shutil.copy(parameters_file_path, f"{output_path}/")
+    if output_path != SERVICEMESH_PATH:
+        shutil.copy(parameters_file_path, f"{output_path}/")
 
     print(f"'{output_path}/servicemesh.json'")
     print(f"'{output_path}/servicemesh.png'")

@@ -51,7 +51,7 @@ def run(args):
         workload = wlGen.get_workload(ingress_list, min_max, params)
         pprint(workload)
         with open(output_file, "w") as f:
-            f.write(json.dumps(workload))
+            f.write(json.dumps(workload, indent=2))
 
     except JSONDecodeError as err:
         print("Error: parameters MUST be in json.dumps() format!", err)
