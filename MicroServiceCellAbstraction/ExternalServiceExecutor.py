@@ -34,7 +34,6 @@ def init_gRPC(my_service_mesh, workmodel, server_port):
             # bind the client and the server
             gRPC_connections[service] = pb2_grpc.MicroServiceStub(channel)
 
-
 def request_REST(service):
     return requests.get(f'http://{work_model[service]["url"]}{work_model[service]["path"]}')
 
@@ -66,6 +65,10 @@ def external_service(group):
             # "path": "/api/v1",
             r = request_function(service)
             print("Service: %s -> Status_code: %s -- len(text): %d" % (service, r.status_code, len(r.text)))
+            if type(r.status_code) == bool and not r.status_code:
+                raise Exception(f"Error in request external service: {service} -- (gRPC) status_code: {r.status_code}")
+            elif type(r.status_code) == int and r.status_code != 200:
+                raise Exception(f"Error in request external service: {service} -- (REST) status_code: {r.status_code}")
 
         except Exception as err:
             service_error_dict[service] = err
