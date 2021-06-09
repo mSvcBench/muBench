@@ -29,9 +29,9 @@ Also, you can use the [K8s Autopilot](/Docs/GettingStarted.md#K8s-Autopilot) to 
       * [K8s Yaml Builder](/Docs/Deployment.md#K8s-Yaml-Builder)
       * [K8s Deployer](/Docs/Deployment.md#K8s-Deployer)
     * [Further Works](/Docs/Deployment.md#Further-Works)
-* [Monitoring](/Docs/Monitoring.md#Monitoring)
-    * [Prometheus](/Docs/Monitoring.md#Prometheus)
-    * [Grafana](/Docs/Monitoring.md#Grafana)
+* [Monitoring](/Docs/Monitoring/README.md#Monitoring)
+    * [Prometheus](/Docs/Monitoring/README.md#Prometheus)
+    * [Grafana](/Docs/Monitoring/README.md#Grafana)
 * [Getting Started](/Docs/GettingStarted.md#Getting-Started)
     * [Example](/Docs/GettingStarted.md#Example) - A step by step walkthrough
     * [K8s Autopilot](/Docs/GettingStarted.md#K8s-Autopilot) - The lazy shortcut
