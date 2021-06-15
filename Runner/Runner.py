@@ -15,9 +15,10 @@ RUNNER_PATH = os.path.dirname(__file__)
 
 if len(sys.argv) > 1:
     parameters_file_path = sys.argv[1]
-else:
+elif len(RUNNER_PATH) > 0:
     parameters_file_path = f'{RUNNER_PATH}/RunnerParameters.json'
-
+else:
+    parameters_file_path = 'RunnerParameters.json'
 
 last_print_time_ms = 0
 requests_processed = 0
@@ -31,6 +32,7 @@ try:
     workloads = runner_parameters["workload_files_path_list"]
     threads = runner_parameters["thread_pool_size"]
     round = runner_parameters["workload_rounds"]  # number of repetition rounds
+    result_file = runner_parameters["result_file"]  # number of repetition rounds
     if "OutputPath" in params.keys() and len(params["OutputPath"]) > 0:
         output_path = params["OutputPath"]
         if output_path.endswith("/"):
@@ -53,6 +55,7 @@ if os.path.isdir(workloads[0]):
         full_file_name = os.path.join(dir_workloads, file_name)
         if os.path.isfile(full_file_name):
             workloads.append(full_file_name)
+
 
 stats = list()
 start_time = 0.0
@@ -134,8 +137,8 @@ for cnt, workload_var in enumerate(workloads):
     #     if cnt != len(workloads) - 1 or x != round - 1:
     #         print("Sleep for 240 sec")
     #         time.sleep(240)
-    # if cnt != len(workloads) - 1:
-    #     print("Sleep for 240 sec")
-    #     time.sleep(240)
-with open(f"{output_path}/result.txt", "w") as f:
-    f.writelines("\n".join(stats))
+    if cnt != len(workloads) - 1:
+        print("Sleep for 120 sec")
+        time.sleep(100)
+    with open(f"{output_path}/{result_file}_{workload_var.split('/')[-1].split('.')[0]}.txt", "w") as f:
+        f.writelines("\n".join(stats))
