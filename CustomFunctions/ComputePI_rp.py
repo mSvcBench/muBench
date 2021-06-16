@@ -8,7 +8,6 @@ from concurrent.futures import ThreadPoolExecutor, wait
 
 
 def compute_pi_job(params):
-    time.sleep(5)
     cpu_load = random.randint(params["range_complexity"][0], params["range_complexity"][1])
     pi_greco = list()
 
