@@ -37,13 +37,13 @@ keyboard_input = "y"
 
 if keyboard_input == "y":
     # with open(f"workload_events_{stop_event}_mean_{mean_interarrival_time}.json", "w") as f:
-    with open(f"{output_path}/workload.json", "w") as f:
+    with open(f"{output_path}/workload_{workload_parameters['request_parameters']['mean_interarrival_time']}.json", "w") as f:
         f.write(json.dumps(workload, indent=2))
 
     if output_path != WORKLOAD_PATH:
         shutil.copy(parameters_file_path, f"{output_path}/")
 
-    print(f"'{output_path}/workload.json'")
+    print(f"'{output_path}/workload_{workload_parameters['request_parameters']['mean_interarrival_time']}.json'")
     print("File Saved!")
 
 

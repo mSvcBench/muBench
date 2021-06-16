@@ -1,15 +1,15 @@
 {
-   "ServiceMeshParameters":{
-      "external_service_groups":2,
-      "seq_len":2,
-      "vertices":10,
-      "power":0.05,
-      "zero_appeal":0.5,
-      "dbs":{
-         "nodb":1.0,
-         "sdb1":0.0,
-         "sdb2":0.0
+   "ServiceMeshParameters": {
+      "vertices": 10,
+      "external_service_groups": 10,
+      "power": 100,
+      "seq_len": 100,
+      "zero_appeal": 0.01,
+      "dbs": {
+         "nodb": 1.0,
+         "sdb1": 0.0,
+         "sdb2": 0.0
       }
    },
-   "OutputPath": "../SimulationWorkspace"
+   "OutputPath": "../SimulationWorkspace/ParallelMicroService"
 }

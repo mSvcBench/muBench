@@ -145,6 +145,7 @@ def copy_config_file_to_nfs(nfs_folder_path, servicemesh, workmodel, internal_se
         exit()
 
 
+
 ######## SCRIPT
 # try:
 # if True:

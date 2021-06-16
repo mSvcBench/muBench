@@ -7,7 +7,13 @@
       },
       "colosseum": {
          "probability": 0.6
-      }
+      },
+      "databases_function": {
+         "type": "database",
+         "probability": 0.6
+      },
+      "request_method": "gRPC",
+      "databases_prefix": "sdb"
    },
    "ServiceMeshFilePath": "../SimulationWorkspace/servicemesh.json",
    "OutputPath": "../SimulationWorkspace"

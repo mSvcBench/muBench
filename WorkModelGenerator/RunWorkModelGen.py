@@ -26,7 +26,7 @@ try:
     else:
         output_path = WORKMODEL_PATH
 except Exception as err:
-    print("ERROR: in creation of work model,", err)
+    print("ERROR: in creation of workmodel,", err)
     exit(1)
 
 workmodel = get_work_model(servicemesh, workmodel_parameters)
