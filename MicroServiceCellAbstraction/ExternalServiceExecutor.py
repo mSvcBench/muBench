@@ -8,7 +8,7 @@ import mss_pb2 as pb2
 from pprint import pprint
 
 work_model = dict()
-gRPC_connections = dict()
+service_stub = dict()
 
 
 global request_function
@@ -22,7 +22,7 @@ def init_REST():
 
 def init_gRPC(my_service_mesh, workmodel, server_port):
     print("Init gRPC function")
-    global gRPC_connections, request_function
+    global service_stub, request_function
     request_function = request_gRPC
 
     for group in my_service_mesh:
@@ -32,7 +32,8 @@ def init_gRPC(my_service_mesh, workmodel, server_port):
             channel = grpc.insecure_channel(
                 '{}:{}'.format(host, server_port))
             # bind the client and the server
-            gRPC_connections[service] = pb2_grpc.MicroServiceStub(channel)
+            service_stub[service] = pb2_grpc.MicroServiceStub(channel)
+
 
 def request_REST(service):
     return requests.get(f'http://{work_model[service]["url"]}{work_model[service]["path"]}')
@@ -41,7 +42,7 @@ def request_REST(service):
 def request_gRPC(service):
     message = pb2.Message(message=f"Ciao, sono il service: {service}")
     # print(f'{message}')
-    response = gRPC_connections[service].GetMicroServiceResponse(message)
+    response = service_stub[service].GetMicroServiceResponse(message)
     return response
 
 
