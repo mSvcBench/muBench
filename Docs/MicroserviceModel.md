@@ -10,16 +10,16 @@
 * [Building Tools](/Docs/BuildingTools.md#Building-Tools)
   * [Service Mesh Generator](/Docs/BuildingTools.md#Service-Mesh-Generator)
   * [Work Model Generator](/Docs/BuildingTools.md#Work-Model-Generator)
-  * [Workload Generator](/Docs/BuildingTools.md#Workload-Generator)
+  * [Workload Generator](/Docs/BuildingTools.md#WorkLoad-Generator)
   * [Runner](/Docs/BuildingTools.md#Runner)
 * [Deployment](/Docs/Deployment.md#Deployment)
     * [Kubernetes](/Docs/Deployment.md#Kubernetes)
       * [K8s Yaml Builder](/Docs/Deployment.md#K8s-Yaml-Builder)
       * [K8s Deployer](/Docs/Deployment.md#K8s-Deployer)
     * [Further Works](/Docs/Deployment.md#Further-Works)
-* [Monitoring](/Docs/Monitoring/README.md#Monitoring)
-    * [Prometheus](/Docs/Monitoring/README.md#Prometheus)
-    * [Grafana](/Docs/Monitoring/README.md#Grafana)
+* [Monitoring](/Monitoring/README.md#Monitoring)
+    * [Prometheus](/Monitoring/README.md#Prometheus)
+    * [Grafana](/Monitoring/README.md#Grafana)
 * [Getting Started](/Docs/GettingStarted.md#Getting-Started)
     * [Example](/Docs/GettingStarted.md#Example) - A step by step walkthrough
     * [K8s Autopilot](/Docs/GettingStarted.md#K8s-Autopilot) - The lazy shortcut
@@ -44,9 +44,16 @@ Only when created each service learns, from the `servicemesh.json` file, which s
 Upon a service request, each service locally executes an *internal-service* and then carries out a set of calls towards *external-services*.
 Visit [this section](/MicroServiceCellAbstraction/README.md) if you want to build your own version of the Docker image each service use.
 
+![service-cell-rest-grpc](microservices-rest-grpc.png)
+
+Services communicates within each others using synchronous request/response-based communication mechanisms, such as HTTP-based REST or gRPC.
+You can choose one or the other when you define the [Work Model](/WorkModelGenerator/README.md).
+In both cases, a single entry point is given as an API gateway for the clients, the [Runner](/Runner/README.md) in the example shown by the above figure.
+The NGINX gateway handles REST requests from the clients and routes them to the appropriate service or viceversa.
+
 ---
 ## Internal Service
-An internal-service is a task that users can define as a python function to be inserted in the [shared folder](/Docs/NFSConfig.md) `/mnt/MSSharedData/JobFunctions` (see also **custom functions** below for details). However, each service has a default internal-service that is named `compute_pi`.
+An internal-service is a task that users can define as a python function to be inserted in the [shared folder](/Docs/NFSConfig.md) `/mnt/MSSharedData/InternalServiceFunctions` (see also **custom functions** below for details). However, each service has a default internal-service that is named `compute_pi`.
 
 ### Custom Functions
 Each service of the microservice mesh executes an internal-service when called and by default it uses the `compute_pi` function. 
@@ -60,9 +67,6 @@ If you followed our [NFS configuration](/Docs/NFSConfig.md), create the subfolde
 ---
 ## External Services
 External-services are grouped into a configurable number of groups (`service_groups`). Services from different groups are called in parallel; services from the same group are called sequentially. To mimic random paths on the service mesh, not all external services of a `service_group` are called, but only a subset of them, whose number is `seq_len` and these are chosen randomly (uniform distribution) from those in the `service_group`. 
-
-External-services are grouped into a configurable number of groups (`service_groups`). Services from different groups are called in parallel; services from the same group are called sequentially. To mimic random paths on the service 
-, not all external services of a `service_group` are called, but only a subset of them, whose number is `seq_len` and these are chosen randomly (uniform distribution) from those in the `service_group`. 
 
 ---
 ### How to write your own custom job

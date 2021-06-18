@@ -10,16 +10,16 @@
 * [Building Tools](/Docs/BuildingTools.md#Building-Tools)
   * [Service Mesh Generator](/Docs/BuildingTools.md#Service-Mesh-Generator)
   * [Work Model Generator](/Docs/BuildingTools.md#Work-Model-Generator)
-  * [Workload Generator](/Docs/BuildingTools.md#Workload-Generator)
+  * [Workload Generator](/Docs/BuildingTools.md#WorkLoad-Generator)
   * [Runner](/Docs/BuildingTools.md#Runner)
 * [**Deployment**](/Docs/Deployment.md#Deployment)
     * [Kubernetes](/Docs/Deployment.md#Kubernetes)
-      * [K8s Yaml Builder](/Docs/Deployment.md#K8sYamlBuilder)
-      * [K8s Deployer](/Docs/Deployment.md#Kubernetes#K8sDeployer)
+      * [K8s Yaml Builder](/Docs/Deployment.md#K8s-Yaml-Builder)
+      * [K8s Deployer](/Docs/Deployment.md#K8s-Deployer)
     * [Further Works](/Docs/Deployment.md#Further-Works)
-* [Monitoring](/Docs/Monitoring/README.md#Monitoring)
-    * [Prometheus](/Docs/Monitoring/README.md#Prometheus)
-    * [Grafana](/Docs/Monitoring/README.md#Grafana)
+* [Monitoring](/Monitoring/README.md#Monitoring)
+    * [Prometheus](/Monitoring/README.md#Prometheus)
+    * [Grafana](/Monitoring/README.md#Grafana)
 * [Getting Started](/Docs/GettingStarted.md#Getting-Started)
     * [Example](/Docs/GettingStarted.md#Example) - A step by step walkthrough
     * [K8s Autopilot](/Docs/GettingStarted.md#K8s-Autopilot) - The lazy shortcut
@@ -29,9 +29,9 @@
 
 In this section, we'll describe how to create and deploy the *µBench* objects to a Kubernetes environment.
 
-Once you have (i), defined your service mesh topology with the [Service Mesh Generator](/ServiceMeshGenerator/README.md#Service-Mesh-Generator), (ii), described the behavior of each service using the [Work Model Generator](/WorkModelGenerator/README.md#Work-Model-Generator) and (iii), generated the simulation load with the [WorkLoad Generator](/WorkLoadGenerator/README.md#Workload-Generator) you are ready to deploy the service mesh on Kubernetes.
+Once you have (i), defined your service mesh topology with the [Service Mesh Generator](/ServiceMeshGenerator/README.md#Service-Mesh-Generator), (ii), described the behavior of each service using the [Work Model Generator](/WorkModelGenerator/README.md#Work-Model-Generator) and (iii), generated the simulation load with the [WorkLoad Generator](/WorkLoadGenerator/README.md#WorkLoad-Generator) you are ready to deploy the service mesh on Kubernetes.
 
-We'll use the [K8s Yaml Builder](/Docs/Deployment.md#K8sYamlBuilder) to translate the `workmodel` into K8s deployable objects.
+We'll use the [K8s Yaml Builder](/Docs/Deployment.md#K8s-Yaml-Builder) to translate the `workmodel` into K8s deployable objects.
 
 
 ### K8s Yaml Builder
@@ -41,7 +41,7 @@ In particular, it will create the following objects:
 * A `PersistentVolume` with its `PersistentVolumeClaim` to make the [NFS shared directory](/Docs/NFSConfig.md) visible as a volume for each pod, as it contains the configuration files;
 * The NGINX gateway of the microservice application as a `Deployment`, reachable from the outside of the cluster thanks to its related `NodePort` service;
 * The configuration of the NGINX gateway through a `ConfigMap`;
-* Each service of the service mesh as a `Deployment` associated to its `NodePort` service.
+* Each service of the service mesh as a `Deployment`.
 
 ## Input Parameters
 As input, the K8s Yaml Builder needs some information related to your environment, such as the the Docker `image`, the `namespace` of the deployment, as well as the K8s `cluster_domain` and the `path`, which, together with its [FQDN](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/), the service container inside each pod will use it to listen for incoming requests.

@@ -1,5 +1,3 @@
 # Kubernetes Functionalities
 
-## Kubernetes Builder
-
-## Kubernetes Deployer
+You can find further information [here](/Docs/Deployment.md#Kubernetes).

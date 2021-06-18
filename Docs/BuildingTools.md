@@ -10,16 +10,16 @@
 * [**Building Tools**](/Docs/BuildingTools.md#Building-Tools)
   * [Service Mesh Generator](/Docs/BuildingTools.md#Service-Mesh-Generator)
   * [Work Model Generator](/Docs/BuildingTools.md#Work-Model-Generator)
-  * [Workload Generator](/Docs/BuildingTools.md#Workload-Generator)
+  * [Workload Generator](/Docs/BuildingTools.md#WorkLoad-Generator)
   * [Runner](/Docs/BuildingTools.md#Runner)
 * [Deployment](/Docs/Deployment.md#Deployment)
     * [Kubernetes](/Docs/Deployment.md#Kubernetes)
       * [K8s Yaml Builder](/Docs/Deployment.md#K8s-Yaml-Builder)
       * [K8s Deployer](/Docs/Deployment.md#K8s-Deployer)
     * [Further Works](/Docs/Deployment.md#Further-Works)
-* [Monitoring](/Docs/Monitoring/README.md#Monitoring)
-    * [Prometheus](/Docs/Monitoring/README.md#Prometheus)
-    * [Grafana](/Docs/Monitoring/README.md#Grafana)
+* [Monitoring](/Monitoring/README.md#Monitoring)
+    * [Prometheus](/Monitoring/README.md#Prometheus)
+    * [Grafana](/Monitoring/README.md#Grafana)
 * [Getting Started](/Docs/GettingStarted.md#Getting-Started)
     * [Example](/Docs/GettingStarted.md#Example) - A step by step walkthrough
     * [K8s Autopilot](/Docs/GettingStarted.md#K8s-Autopilot) - The lazy shortcut
@@ -54,7 +54,7 @@ To learn more go to [Work Model Generator](/WorkModelGenerator/README.md#Work-Mo
 ## WorkLoad Generator
 The WorkLoadGenerator (`RunWorkLoadGen.py`) generates a `workload.json` file that describes the work load of the Microservice Application.
 
-To learn more go to [WorkLoad Generator](/WorkLoadGenerator/README.md#Workload-Generator).
+To learn more go to [WorkLoad Generator](/WorkLoadGenerator/README.md#WorkLoad-Generator).
 
 ---
 ## Runner
