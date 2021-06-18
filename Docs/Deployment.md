@@ -41,7 +41,7 @@ In particular, it will create the following objects:
 * A `PersistentVolume` with its `PersistentVolumeClaim` to make the [NFS shared directory](/Docs/NFSConfig.md) visible as a volume for each pod, as it contains the configuration files;
 * The NGINX gateway of the microservice application as a `Deployment`, reachable from the outside of the cluster thanks to its related `NodePort` service;
 * The configuration of the NGINX gateway through a `ConfigMap`;
-* Each service of the service mesh as a `Deployment` associated to its `NodePort` service.
+* Each service of the service mesh as a `Deployment`.
 
 ## Input Parameters
 As input, the K8s Yaml Builder needs some information related to your environment, such as the the Docker `image`, the `namespace` of the deployment, as well as the K8s `cluster_domain` and the `path`, which, together with its [FQDN](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/), the service container inside each pod will use it to listen for incoming requests.
