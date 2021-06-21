@@ -22,7 +22,8 @@
       "colosseum": {
          "probability": 0.0
       },
-      "request_method": "rest"
+      "request_method": "rest",
+      "databases_prefix": "sdb"
    },
 
    "WorkLoadParameters":{
