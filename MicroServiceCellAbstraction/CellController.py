@@ -8,7 +8,6 @@ import traceback
 from InternalServiceExecutor import run_internal_service
 from ExternalServiceExecutor import run_external_service, init_gRPC, init_REST
 import sys
-# from MicroServiceCellAbstraction.ExternalJobExecutorClass import *
 import random
 import os
 from pprint import pprint
@@ -32,11 +31,8 @@ def read_config_files():
 
 
 # Configuration Variable
-# ID = "s0"  # Service ID
 ID = os.environ["APP"]
-# ZONE = "default"
 ZONE = os.environ["ZONE"]  # Pod Zone
-# K8S_APP = "s0-pod"
 K8S_APP = os.environ["K8S_APP"]  # K8s label app
 service_mesh, work_model = read_config_files()
 my_service_mesh = service_mesh[ID]
@@ -47,28 +43,7 @@ else:
     request_method = "rest"
 
 
-################################
-# Modifico my_work_model per i test
-# my_work_model["params"] = {'ave_luca': {"probability": 0.3, "ave_number": 13, "mean_bandwidth": 42}}
-# my_work_model["params"] = {'compute_pi': {"probability": 1, 'mean_bandwidth': 1, 'range_complexity': [101, 101]}}
-# pprint(my_service_mesh)
-pprint(my_work_model)
-# exit()
-################################
-
 ########################### PROMETHEUS METRICS
-
-# request_latency_seconds_luca_sum/request_latency_seconds_luca_count
-# histogram_quantile(0.5, rate(request_latency_seconds_luca_bucket[10m])
-
-# Misuro la latenza media delle richieste, quindi mi memorizzo la somma dei tempi e il numero delle richieste
-# Latency --> Zona_pod, app_name, method, endpoint, from      -> Sommo la latency
-# Misuro il throughput quindi mi memorizzo il totale dei dati scambiati e il numero delle richieste
-# Throughput --> Zona_pod, app_name, method, endpoint, from   -> Sommo il body
-
-# Local Processing --> Misuro il tempo di esecuzione della funzione
-
-# tutti counter
 REQUEST_LATENCY = Summary('mss_request_latency_seconds', 'Request latency',
                           ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service']
                           )
@@ -94,13 +69,6 @@ def stop_timer(response):
     # REQUEST_LATENCY.labels('mss', request.path, request.remote_addr).observe(resp_time)
     REQUEST_LATENCY.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr, ID).observe(resp_time)
     return response
-
-
-# def record_response_data(response):
-#     REQUEST_LATENCY.labels(ZONE, 'mss', request.method, request.path, request.remote_addr).observe(body)
-#     return response
-############################
-
 
 # Flask settings
 flask_host = "0.0.0.0"
@@ -137,8 +105,7 @@ class HttpThread(Thread):
         try:
             start_request_processing = time.time()
             HttpThread.app.logger.info('Request Received')
-            # mss_test_ingress.labels(ID).inc(1)  # Increment by 1
-            # mss_test_summary.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr, ID).observe(100)
+
             # Execute the internal service
             print("*************** INTERNAL SERVICE STARTED ***************")
             start_local_processing = time.time()
@@ -165,8 +132,6 @@ class HttpThread(Thread):
             REQUEST_PROCESSING.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr, ID).observe(time.time() - start_request_processing)
 
             return response
-            # return json.dumps(body), 200
-            # return json.dumps(service_mesh[ID]), 200
         except Exception as err:
             print(traceback.format_exc())
             return json.dumps({"message": "Error"}), 500
@@ -185,8 +150,7 @@ class gRPCThread(Thread, pb2_grpc.MicroServiceServicer):
             message = req.message
             remote_address = context.peer().split(":")[1]
             print(f'I am service: {ID} and I received this message: --> "{message}"')
-            # mss_test_ingress.labels(ID).inc(1)  # Increment by 1
-            # mss_test_summary.labels(ZONE, K8S_APP, "grpc", "grpc", remote_address, ID).observe(100)
+
             # Execute the internal service
             print("*************** INTERNAL SERVICE STARTED ***************")
             start_local_processing = time.time()
@@ -205,26 +169,18 @@ class gRPCThread(Thread, pb2_grpc.MicroServiceServicer):
                     pprint(service_error_dict)
                     logging.error("Error in request external services")
                     logging.error(service_error_dict)
-                    # return make_response(json.dumps({"message": "Error in same external services request"}), 500)
-
-                    # return json.dumps({"message": "Error in same external services request"}), 500
                     result = {'text': f"Error in same external services request", 'status_code': False}
                     return pb2.MessageResponse(**result)
             print("############### EXTERNAL SERVICES FINISHED! ###############")
 
-            # message = req.message
-            # print(f'I am service: {ID} and I received this message: --> "{message}"')
             result = {'text': body, 'status_code': True}
             REQUEST_PROCESSING.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr, ID).observe(
                 time.time() - start_request_processing)
             return pb2.MessageResponse(**result)
         except Exception as err:
             print("Error: in GetMicroServiceResponse,", err)
-            # message = req.message
-            # print(f'I am service: {ID} and I received this message: --> "{message}"')
             result = {'text': f"Error: in GetMicroServiceResponse, {str(err)}", 'status_code': False}
             return pb2.MessageResponse(**result)
-
 
     def run(self):
         pb2_grpc.add_MicroServiceServicer_to_server(self, self.server)
@@ -233,10 +189,6 @@ class gRPCThread(Thread, pb2_grpc.MicroServiceServicer):
 
 
 if __name__ == '__main__':
-
-    # Init Metrics
-    # mss_test_ingress = Counter('mss_test_ingress_total', 'Number of application request', ['kubernetes_service'])
-    # mss_test_summary = Summary('mss_test_summary', 'Number of application request', ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service'])
 
     if request_method == "rest":
         init_REST()
@@ -265,6 +217,3 @@ if __name__ == '__main__':
     start_http_server(8081)
 
     http_thread.join()
-
-# avg((increase(mss_test_summary_sum{endpoint="/api/v1"}[2m])/increase(mss_test_summary_count{endpoint="/api/v1"}[2m])) > 0) by (kubernetes_service)
-
