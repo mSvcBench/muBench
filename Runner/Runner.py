@@ -8,6 +8,7 @@ import json
 import sys
 import os
 import shutil
+import importlib
 from pprint import pprint
 
 
@@ -23,6 +24,9 @@ else:
 last_print_time_ms = 0
 requests_processed = 0
 
+run_after_workload = None
+
+timing_error_number = 0
 
 try:
     with open(parameters_file_path) as f:
@@ -41,10 +45,24 @@ try:
             os.makedirs(output_path)
     else:
         output_path = RUNNER_PATH
+    if "AfterWorkloadFunction" in params.keys() and len(params["AfterWorkloadFunction"]) > 0:
+        sys.path.append(params["AfterWorkloadFunction"]["file_path"])
+        run_after_workload = getattr(importlib.import_module(params["AfterWorkloadFunction"]["file_path"].split("/")[-1]),
+                                     params["AfterWorkloadFunction"]["function_name"])
 
 except Exception as err:
     print("ERROR: in Runner,", err)
     exit(1)
+
+
+# Solo per i test
+run_after_workload({'run_duration_sec': 12.758957147598267,
+                    'last_print_time_ms': 1624377055204,
+                    'requests_processed': 12,
+                    'timing_error_number': timing_error_number,
+                    'runner_results_file': '4_Serial_complex_201/result_microservice_grpc_workload_threshold'})
+exit()
+
 
 ## Check if "workloads" is a directory path, if so take all the workload files inside it
 if os.path.isdir(workloads[0]):
@@ -59,6 +77,7 @@ if os.path.isdir(workloads[0]):
 
 stats = list()
 start_time = 0.0
+
 
 def do_requests(event, stats):
     global requests_processed, last_print_time_ms
@@ -81,12 +100,14 @@ def do_requests(event, stats):
 
 
 def job_assignment(v_pool, v_futures, event, stats):
+    global timing_error_number
     try:
         worker = v_pool.submit(do_requests, event, stats)
         # Wait for the thread state change
         time.sleep(0.0001)
         #  If thread status is PENDING i can not respect the timing requirements
         if worker._state == "PENDING":
+            timing_error_number += 1
             raise TimingError(event['time'])
         v_futures.append(worker)
     except TimingError as err:
@@ -120,10 +141,20 @@ def runner(workload=None):
     s.run()
 
     wait(futures)
+    run_duration_sec = time.time() - start_time
     print("###############################################")
     print("###########   Stop Forrest Stop!!   ###########")
     print("###############################################")
-    print("Run Duration (sec): %.6f" % (time.time() - start_time))
+    print("Run Duration (sec): %.6f" % run_duration_sec)
+
+    if run_after_workload is not None:
+        args = {"run_duration_sec": run_duration_sec,
+                "last_print_time_ms": last_print_time_ms,
+                "requests_processed": requests_processed,
+                "timing_error_number": timing_error_number,
+                "runner_results_file": f"{output_path}/{result_file}_{workload_var.split('/')[-1].split('.')[0]}"
+                }
+        run_after_workload(args)
 
 
 if output_path != RUNNER_PATH:
@@ -142,3 +173,11 @@ for cnt, workload_var in enumerate(workloads):
         time.sleep(100)
     with open(f"{output_path}/{result_file}_{workload_var.split('/')[-1].split('.')[0]}.txt", "w") as f:
         f.writelines("\n".join(stats))
+
+
+   # "AfterWorkloadFunction": {
+   #    "file_path": "Function",
+   #    "function_name": "get_prometheus_stats"
+   # }
+
+# "workload_files_path_list": ["NewWorkloads/workload_threshold.json","NewWorkloads/workload_350.json", "NewWorkloads/workload_300.json", "NewWorkloads/workload_250.json", "NewWorkloads/workload_200.json", "NewWorkloads/workload_150.json", "NewWorkloads/workload_100.json"],

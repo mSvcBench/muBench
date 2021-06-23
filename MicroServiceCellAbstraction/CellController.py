@@ -46,7 +46,6 @@ if "request_method" in my_work_model.keys():
 else:
     request_method = "rest"
 
-# request_method = "rest"
 
 ################################
 # Modifico my_work_model per i test
@@ -82,6 +81,9 @@ LOCAL_PROCESSING = Summary('mss_local_processing_latency_seconds', 'Local proces
                            ['zone', 'app_name', 'method', 'endpoint']
                            )
 
+REQUEST_PROCESSING = Summary('mss_request_processing_seconds', 'Request latency without the network latency',
+                           ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service']
+                           )
 
 def start_timer():
     request.start_time = time.time()
@@ -133,9 +135,10 @@ class HttpThread(Thread):
     @app.route(f"{my_work_model['path']}", methods=['GET'])
     def start_worker():
         try:
+            start_request_processing = time.time()
             HttpThread.app.logger.info('Request Received')
-            mss_test_ingress.labels(ID).inc(1)  # Increment by 1
-            mss_test_summary.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr, ID).observe(100)
+            # mss_test_ingress.labels(ID).inc(1)  # Increment by 1
+            # mss_test_summary.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr, ID).observe(100)
             # Execute the internal service
             print("*************** INTERNAL SERVICE STARTED ***************")
             start_local_processing = time.time()
@@ -159,6 +162,8 @@ class HttpThread(Thread):
 
             response = make_response(body)
             response.mimetype = "text/plain"
+            REQUEST_PROCESSING.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr, ID).observe(time.time() - start_request_processing)
+
             return response
             # return json.dumps(body), 200
             # return json.dumps(service_mesh[ID]), 200
@@ -175,12 +180,13 @@ class gRPCThread(Thread, pb2_grpc.MicroServiceServicer):
 
     def GetMicroServiceResponse(self, req, context):
         try:
+            start_request_processing = time.time()
             logging.info('Request Received')
             message = req.message
             remote_address = context.peer().split(":")[1]
             print(f'I am service: {ID} and I received this message: --> "{message}"')
-            mss_test_ingress.labels(ID).inc(1)  # Increment by 1
-            mss_test_summary.labels(ZONE, K8S_APP, "grpc", "grpc", remote_address, ID).observe(100)
+            # mss_test_ingress.labels(ID).inc(1)  # Increment by 1
+            # mss_test_summary.labels(ZONE, K8S_APP, "grpc", "grpc", remote_address, ID).observe(100)
             # Execute the internal service
             print("*************** INTERNAL SERVICE STARTED ***************")
             start_local_processing = time.time()
@@ -209,6 +215,8 @@ class gRPCThread(Thread, pb2_grpc.MicroServiceServicer):
             # message = req.message
             # print(f'I am service: {ID} and I received this message: --> "{message}"')
             result = {'text': body, 'status_code': True}
+            REQUEST_PROCESSING.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr, ID).observe(
+                time.time() - start_request_processing)
             return pb2.MessageResponse(**result)
         except Exception as err:
             print("Error: in GetMicroServiceResponse,", err)
@@ -227,8 +235,8 @@ class gRPCThread(Thread, pb2_grpc.MicroServiceServicer):
 if __name__ == '__main__':
 
     # Init Metrics
-    mss_test_ingress = Counter('mss_test_ingress_total', 'Number of application request', ['kubernetes_service'])
-    mss_test_summary = Summary('mss_test_summary', 'Number of application request', ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service'])
+    # mss_test_ingress = Counter('mss_test_ingress_total', 'Number of application request', ['kubernetes_service'])
+    # mss_test_summary = Summary('mss_test_summary', 'Number of application request', ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service'])
 
     if request_method == "rest":
         init_REST()
@@ -246,7 +254,7 @@ if __name__ == '__main__':
     # If mode is gRPC the http thread is necessary for the entry point (s0) that receive a REST request
     http_thread = HttpThread()
 
-    # Metrics configuration
+    # Metrics configuration (REQUEST_LATENCY)
     http_thread.app.before_request(start_timer)
     # http_thread.app.after_request(record_request_data)
     http_thread.app.after_request(stop_timer)
