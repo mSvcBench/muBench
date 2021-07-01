@@ -27,6 +27,7 @@ requests_processed = 0
 run_after_workload = None
 
 timing_error_number = 0
+error_request = 0
 
 try:
     with open(parameters_file_path) as f:
@@ -56,12 +57,14 @@ except Exception as err:
 
 
 # Solo per i test
-run_after_workload({'run_duration_sec': 12.758957147598267,
-                    'last_print_time_ms': 1624377055204,
-                    'requests_processed': 12,
-                    'timing_error_number': timing_error_number,
-                    'runner_results_file': '4_Serial_complex_201/result_microservice_grpc_workload_threshold'})
-exit()
+# run_after_workload({'run_duration_sec': 12.758957147598267,
+#                     'last_print_time_ms': 1624377055204,
+#                     'requests_processed': 12,
+#                     'timing_error_number': timing_error_number,
+#                     'total_request': 12,
+#                     'error_request': 0,
+#                     'runner_results_file': '4Bis_Parallel_complex_201/result_microservice_grpc_workload_threshold'})
+# exit()
 
 
 ## Check if "workloads" is a directory path, if so take all the workload files inside it
@@ -80,7 +83,7 @@ start_time = 0.0
 
 
 def do_requests(event, stats):
-    global requests_processed, last_print_time_ms
+    global requests_processed, last_print_time_ms, error_request
     # pprint(workload[event]["services"])
     # for services in event["services"]:
         # print(services)
@@ -88,8 +91,12 @@ def do_requests(event, stats):
     try:
         now_ms = time.time_ns() // 1_000_000
         r = requests.get(f"{ms_access_gateway}/{event['service']}")
+        if r.status_code != 200:
+            print("Response Status Code", r.status_code)
+            error_request += 1
+
         req_latency_ms = r.elapsed.total_seconds()*1000
-        stats.append(f"{now_ms} \t {req_latency_ms}")
+        stats.append(f"{now_ms} \t {req_latency_ms} \t {r.status_code}")
         if now_ms > last_print_time_ms + 10_000:
             print(f"Processed request {requests_processed}, latency {req_latency_ms} \n")
             last_print_time_ms = now_ms
@@ -117,6 +124,7 @@ def job_assignment(v_pool, v_futures, event, stats):
 def runner(workload=None):
     global start_time, stats
 
+    stats = list()
     print("###############################################")
     print("############   Run Forrest Run!!   ############")
     print("###############################################")
@@ -130,6 +138,7 @@ def runner(workload=None):
     s = sched.scheduler(time.time, time.sleep)
     pool = ThreadPoolExecutor(threads)
     futures = list()
+
     for event in workload:
         # in seconds
         # s.enter(event["time"], 1, job_assignment, argument=(pool, futures, event))
@@ -145,13 +154,15 @@ def runner(workload=None):
     print("###############################################")
     print("###########   Stop Forrest Stop!!   ###########")
     print("###############################################")
-    print("Run Duration (sec): %.6f" % run_duration_sec)
+    print("Run Duration (sec): %.6f" % run_duration_sec, "Total Requests: %d - Error Request: %d - Timing Error Requests: %d" % (len(workload), error_request, timing_error_number))
 
     if run_after_workload is not None:
         args = {"run_duration_sec": run_duration_sec,
                 "last_print_time_ms": last_print_time_ms,
                 "requests_processed": requests_processed,
                 "timing_error_number": timing_error_number,
+                "total_request": len(workload),
+                "error_request": error_request,
                 "runner_results_file": f"{output_path}/{result_file}_{workload_var.split('/')[-1].split('.')[0]}"
                 }
         run_after_workload(args)
@@ -163,13 +174,16 @@ if output_path != RUNNER_PATH:
 for cnt, workload_var in enumerate(workloads):
     for x in range(round):
         print("Round: %d -- workload: %s" % (x+1, workload_var))
+        requests_processed = 0
+        timing_error_number = 0
+        error_request = 0
         runner(workload_var)
         print("***************************************")
     #     if cnt != len(workloads) - 1 or x != round - 1:
     #         print("Sleep for 240 sec")
     #         time.sleep(240)
     if cnt != len(workloads) - 1:
-        print("Sleep for 120 sec")
+        print("Sleep for 100 sec")
         time.sleep(100)
     with open(f"{output_path}/{result_file}_{workload_var.split('/')[-1].split('.')[0]}.txt", "w") as f:
         f.writelines("\n".join(stats))
@@ -180,4 +194,4 @@ for cnt, workload_var in enumerate(workloads):
    #    "function_name": "get_prometheus_stats"
    # }
 
-# "workload_files_path_list": ["NewWorkloads/workload_threshold.json","NewWorkloads/workload_350.json", "NewWorkloads/workload_300.json", "NewWorkloads/workload_250.json", "NewWorkloads/workload_200.json", "NewWorkloads/workload_150.json", "NewWorkloads/workload_100.json"],
+# "workload_files_path_list": ["NewWorkloads/workload_threshold.json","NewWorkloads/workload_350.json", "NewWorkloads/workload_300.json", "NewWorkloads/workload_250.json", "NewWorkloads/workload_200.json", "NewWorkloads/workload_150.json", "NewWorkloads/workload_100.json", "NewWorkloads/workload_050.json"],

@@ -174,7 +174,7 @@ class gRPCThread(Thread, pb2_grpc.MicroServiceServicer):
             print("############### EXTERNAL SERVICES FINISHED! ###############")
 
             result = {'text': body, 'status_code': True}
-            REQUEST_PROCESSING.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr, ID).observe(
+            REQUEST_PROCESSING.labels(ZONE, K8S_APP, "grpc", "grpc", remote_address, ID).observe(
                 time.time() - start_request_processing)
             return pb2.MessageResponse(**result)
         except Exception as err:

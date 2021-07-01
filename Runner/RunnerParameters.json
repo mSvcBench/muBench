@@ -1,16 +1,15 @@
 {
    "RunnerParameters":{
-      "ms_access_gateway": "http://160.80.103.216:31113",
-      "workload_files_path_list": ["NewWorkloads/workload_threshold.json","NewWorkloads/workload_350.json", "NewWorkloads/workload_300.json", "NewWorkloads/workload_250.json", "NewWorkloads/workload_200.json", "NewWorkloads/workload_150.json", "NewWorkloads/workload_100.json", "NewWorkloads/workload_50.json"],
+      "ms_access_gateway": "http://0.0.0.0:31113",
+      "workload_files_path_list": ["NewWorkloads/workload_threshold.json","NewWorkloads/workload_650.json", "NewWorkloads/workload_500.json", "NewWorkloads/workload_350.json", "NewWorkloads/workload_200.json", "NewWorkloads/workload_050.json"],
       "workload_rounds": 1,
       "thread_pool_size": 450,
-      "result_file": "result_monolithic"
+      "result_file": "result_microservice_grpc"
    },
-   "OutputPath": "4_Serial_complex_201",
+   "OutputPath": "4Bis_Parallel_complex_201",
    "AfterWorkloadFunction": {
       "file_path": "Function",
       "function_name": "get_prometheus_stats"
    }
-
 }
 
