@@ -7,8 +7,10 @@ import shutil
 
 if len(sys.argv) > 1:
     parameters_file_path = sys.argv[1]
-else:
+elif len(WORKLOAD_PATH) > 0:
     parameters_file_path = f'{WORKLOAD_PATH}/WorkLoadParameters.json'
+else:
+    parameters_file_path = 'WorkLoadParameters.json'
 
 try:
     with open(parameters_file_path) as f:

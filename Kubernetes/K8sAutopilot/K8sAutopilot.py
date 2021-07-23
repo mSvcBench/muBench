@@ -12,8 +12,10 @@ AUTOPILOT_PATH = os.path.dirname(__file__)
 
 if len(sys.argv) > 1:
     parameters_file_path = sys.argv[1]
-else:
+elif len(AUTOPILOT_PATH) > 0:
     parameters_file_path = f'{AUTOPILOT_PATH}/K8sAutopilotConf.json'
+else:
+    parameters_file_path = 'K8sAutopilotConf.json'
 
 try:
     with open(parameters_file_path) as f:

@@ -7,8 +7,11 @@ import shutil
 
 if len(sys.argv) > 1:
     parameters_file_path = sys.argv[1]
-else:
+elif len(K8s_YAML_BUILDER_PATH) > 0:
     parameters_file_path = f'{K8s_YAML_BUILDER_PATH}/K8sParameters.json'
+else:
+    parameters_file_path = 'K8sParameters.json'
+
 
 try:
     with open(parameters_file_path) as f:
