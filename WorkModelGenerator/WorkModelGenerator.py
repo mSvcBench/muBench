@@ -52,7 +52,7 @@ def get_work_model(service_mesh, workmodel_params):
                 internal_service_pool = internal_services
 
             work_model[f"{vertex}"] = {"internal_service": select_internal_service(internal_service_pool),
-                                       "request_method": request_method},
+                                       "request_method": request_method}
     except Exception as err:
         print("ERROR: in creation work model,", err)
         exit(1)
