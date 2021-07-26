@@ -21,6 +21,8 @@ K8s_YAML_BUILDER_PATH = os.path.dirname(__file__)
 # # var_to_be_replaced = {"{{string_in_template}}": "new_value", ...}
 # var_to_be_replaced = {}
 
+SIDECAR_TEMPLATE = "- name: %s-pod\n          image: %s"
+
 
 # Add params to work_model json
 # http://s1.default.svc.cluster.local
@@ -41,6 +43,10 @@ def create_deployment_yaml_files(model, k8s_parameters, nfs, output_path):
             f = f.replace("{{SERVICE_NAME}}", service)
             f = f.replace("{{IMAGE}}", model[service]["image"])
             f = f.replace("{{NAMESPACE}}", namespace)
+            if "sidecar" in model[service].keys():
+                f = f.replace("{{SIDECAR}}", SIDECAR_TEMPLATE % (model[service]["sidecar"], model[service]["sidecar"]))
+            else:
+                f = f.replace("{{SIDECAR}}", "")
             # for key in args:
             #     f = f.replace(key, args[key])
 

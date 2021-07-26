@@ -45,6 +45,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.labels['app']
+        {{SIDECAR}}
 #      terminationGracePeriodSeconds: 0
       volumes:
         - name: podinfo
