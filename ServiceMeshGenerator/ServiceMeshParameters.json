@@ -11,5 +11,5 @@
          "sdb2": 0.0
       }
    },
-   "OutputPath": "../SimulationWorkspace/ParallelMicroService"
+   "OutputPath": "../SimulationWorkspace"
 }

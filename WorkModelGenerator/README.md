@@ -28,7 +28,7 @@ The `WorkModelGenerator.py` creates the `workmodel.json` file that describes the
       "request_method": "rest",
       "url": "s0.default.svc.cluster.local",
       "path": "/api/v1",
-      "image": "lucapetrucci/microservice_v2:latest",
+      "image": "msvcbench/microservice_v2:latest",
       "namespace": "default"
   },
   "s1": {
@@ -38,7 +38,7 @@ The `WorkModelGenerator.py` creates the `workmodel.json` file that describes the
       "request_method": "rest",
       "url": "s1.default.svc.cluster.local",
       "path": "/api/v1",
-      "image": "lucapetrucci/microservice_v2:latest",
+      "image": "msvcbench/microservice_v2:latest",
       "namespace": "default"
    }
 }
@@ -56,7 +56,7 @@ Edit the `WorkModelParameters.json` file before executing `RunWorkModelGen.py`. 
 
 As input, you must specify for the `ServiceMeshFilePath` key, the path of the `service-mesh` json file. Follow [these instructions](/ServiceMeshGenerator/README.md) if you haven't already created such file.
 
-Also, you must specify the `WorkModelParameters` whose values are the set of internal-service functions along with their parameters, which must include the `probability` key, used by the WorkModelGenerator for choosing which internal-service function assign to each service.
+Also, you must specify the `WorkModelParameters` whose values are the set of internal-service functions along with their parameters, which must include the `probability` key, used by the WorkModelGenerator for choosing which internal-service function assign to each service. Other keys are used by the specific internal-service function, e.g., the `compute_pi` function uses `mean_bandwidth` and `range_complexity`.
 
 Furthermore, you can list database-specific functions if you leave the `"type": "database"` property inside the function name key you want to use for the database services, in this case `databases_function`.
 
