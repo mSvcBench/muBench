@@ -205,3 +205,10 @@ Then, you can run the `K8sAutopilot.py` script:
 ```shell
 python3 K8sAutopilot.py
 ```
+
+Finally, run the `K8sAutopilot.py` script.
+You can specify your custom configuration file as argument otherwise, if you do not indicate any argument, it will use the default configuration file (`K8sAutopilotConf.json`) located inside its directory:
+
+```zsh
+python3 K8sAutopilot.py [PARAMETER_FILE]
+```

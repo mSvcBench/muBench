@@ -54,7 +54,7 @@ To learn more go to [Work Model Generator](/WorkModelGenerator/README.md#Work-Mo
 ## WorkLoad Generator
 The WorkLoadGenerator (`RunWorkLoadGen.py`) generates a `workload.json` file that describes the work load of the Microservice Application.
 
-To learn more go to [WorkLoad Generator](/WorkLoadGenerator/README.md#WorkLoad-Generator).
+To learn more go to [WorkLoad Generator](/WorkLoadGenerator/README.md#Workload-Generator).
 
 ---
 ## Runner

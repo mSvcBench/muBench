@@ -43,7 +43,7 @@ In particular, it will create the following objects:
 * The configuration of the NGINX gateway through a `ConfigMap`;
 * Each service of the service mesh as a `Deployment`.
 
-## Input Parameters
+#### Input Parameters
 As input, the K8s Yaml Builder needs some information related to your environment, such as the the Docker `image`, the `namespace` of the deployment, as well as the K8s `cluster_domain` and the `path`, which, together with its [FQDN](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/), the service container inside each pod will use it to listen for incoming requests.
 For example, a deployment of a µBench service called `s0` that uses the parameters of the example, will be listening at `http://s0.default.svc.cluster.local/api/v1`.
 
@@ -71,7 +71,7 @@ The K8sYamlBuilder will use as input the `workmodel.json` specified by the `Work
 }
 ```
 
-## Output Understanding
+#### Output Understanding
 
 Using the example above, the K8sYamlBuilder will generate the following files:
 
@@ -86,13 +86,14 @@ MicroServiceDeployment-s2.yaml
 ...
 ```
 
-## Run the script
-Edit the `WorkLoadParameters.json` file before running the `WorkLoadGenerator`.
+#### Run the script
+Edit the `K8sParameters.json` file before running the `RunK8sYamlBuilder.py`.
 
-Finally, run the script to obtain all the YAML files inside the `SimulationWorkspace/yamls`directory as follows:
+Finally, run the script to obtain all the YAML files inside the `<OutputPath>/yamls`directory.
+You can specify your custom configuration file as argument otherwise, if you do not indicate any argument, it will use the default configuration file (`K8sParameters.json`) located inside its directory:
 
-```
-python3 RunWorkModelGen.py
+```zsh
+python3 RunK8sYamlBuilder.py [PARAMETER_FILE]
 ```
 
 ### K8s Deployer

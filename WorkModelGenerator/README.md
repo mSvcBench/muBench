@@ -92,9 +92,9 @@ As input, the Work Model Generator takes the `servicemesh.json` file located at 
 
 ---
 ## Run the script
-Edit the `WorkModelParameters.json` file before running the `WorkModelGenerator`. 
-Then, run the script to obtain `workmodel.json` as follows:
+Finally, run the script to obtain `workmodel.json`.
+You can specify your custom configuration file as argument otherwise, if you do not indicate any argument, it will use the default configuration file (`WorkModelParameters.json`) located inside its directory:
 
-```
-python3 RunWorkModelGen.py
+```zsh
+python3 RunWorkModelGen.py [PARAMETER_FILE]
 ```
