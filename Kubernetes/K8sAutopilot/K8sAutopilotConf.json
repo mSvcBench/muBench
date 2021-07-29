@@ -37,7 +37,7 @@
    "K8sParameters": {
       "prefix_yaml_file":"MicroServiceDeployment",
       "namespace": "default",
-      "image": "lucapetrucci/microservice_v2:latest",
+      "image": "msvcbench/microservice_v2:latest",
       "cluster_domain": "cluster",
       "path": "/api/v1"
    },
@@ -46,5 +46,5 @@
       "mount_path": "/kubedata/MSSharedData"
    },
    "InternalServiceFilePath": "../../CustomFunctions",
-   "OutputPath": "../../SimulationWorkspace/ParallelMicroService"
+   "OutputPath": "../../SimulationWorkspace"
 }
