@@ -5,12 +5,36 @@ import sys
 import os
 import shutil
 
-if len(sys.argv) > 1:
-    parameters_file_path = sys.argv[1]
-elif len(WORKLOAD_PATH) > 0:
-    parameters_file_path = f'{WORKLOAD_PATH}/WorkLoadParameters.json'
-else:
-    parameters_file_path = 'WorkLoadParameters.json'
+import argparse
+import argcomplete
+
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument('-c', '--config-file', action='store', dest='parameters_file',
+                    help='The WorkLoad Parameters file', default=f'{WORKLOAD_PATH}/WorkLoadParameters.json')
+
+argcomplete.autocomplete(parser)
+
+try:
+    args = parser.parse_args()
+except ImportError:
+    print("Import error, there are missing dependencies to install.  'apt-get install python3-argcomplete "
+          "&& activate-global-python-argcomplete3' may solve")
+except AttributeError:
+    parser.print_help()
+except Exception as err:
+    print("Error:", err)
+
+parameters_file_path = args.parameters_file
+
+
+# if len(sys.argv) > 1:
+#     parameters_file_path = sys.argv[1]
+# elif len(WORKLOAD_PATH) > 0:
+#     parameters_file_path = f'{WORKLOAD_PATH}/WorkLoadParameters.json'
+# else:
+#     parameters_file_path = 'WorkLoadParameters.json'
 
 try:
     with open(parameters_file_path) as f:

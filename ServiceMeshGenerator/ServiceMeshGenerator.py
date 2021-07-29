@@ -2,7 +2,7 @@ from igraph import *
 import random
 import os
 
-SERVICEMESH_PATH = os.path.dirname(__file__)
+SERVICEMESH_PATH = os.path.dirname(os.path.abspath(__file__))
 
 def select_db(dbs):
     dbs_items = dbs.items()
