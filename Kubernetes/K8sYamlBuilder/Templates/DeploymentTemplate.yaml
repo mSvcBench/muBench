@@ -12,7 +12,7 @@ spec:
   selector:
     matchLabels:
       app: {{SERVICE_NAME}}-pod
-  replicas: 1
+  replicas: {{REPLICAS}}
   template:
     metadata:
       labels:

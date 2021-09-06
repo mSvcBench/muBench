@@ -19,7 +19,7 @@ def select_internal_service(internal_services):
         if random_extraction <= prev_interval + internal_service[1]["probability"]/p_total:
             tmp_param = dict(internal_service[1])
             tmp_param.pop("probability")
-            return {internal_service[0]: tmp_param}
+            return {internal_service[0]: tmp_param}, internal_service[0]
         prev_interval += round(internal_service[1]["probability"]/p_total, 10)
 
 
@@ -65,12 +65,17 @@ def get_work_model(service_mesh, workmodel_params):
                     continue
 
             if vertex.startswith(databases_prefix):
-                selected_internal_service = select_internal_service(internal_services_db)
+                selected_internal_service, internal_service_name = select_internal_service(internal_services_db)
             else:
-                selected_internal_service = select_internal_service(internal_services)
+                selected_internal_service, internal_service_name = select_internal_service(internal_services)
 
             work_model[f"{vertex}"].update({"internal_service": selected_internal_service,
                                             "request_method": request_method})
+            
+            if 'replicas' in selected_internal_service[internal_service_name].keys():
+                work_model[f"{vertex}"].update({"replicas": selected_internal_service[internal_service_name]['replicas']})
+                selected_internal_service[internal_service_name].pop('replicas')
+
     except Exception as err:
         print("ERROR: in get_work_model,", err)
         exit(1)

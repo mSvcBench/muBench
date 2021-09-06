@@ -17,7 +17,8 @@
          "probability":1.0,
          "trials": 10,
          "mean_bandwidth":0.01,
-         "range_complexity":[101, 101]
+         "range_complexity":[101, 101],
+         "replicas" : 5
       },
       "colosseum": {
          "probability": 0.0

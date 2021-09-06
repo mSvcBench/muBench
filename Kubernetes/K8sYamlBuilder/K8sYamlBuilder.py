@@ -29,7 +29,10 @@ def create_deployment_yaml_files(model, k8s_parameters, nfs, output_path):
                 f = f.replace("{{SIDECAR}}", SIDECAR_TEMPLATE % (model[service]["sidecar"], model[service]["sidecar"]))
             else:
                 f = f.replace("{{SIDECAR}}", "")
-
+            if "replicas" in model[service].keys():
+                f = f.replace("{{REPLICAS}}", str(model[service]["replicas"]))
+            else:
+                f = f.replace("{{REPLICAS}}", "1")
         if not os.path.exists(f"{output_path}/yamls"):
             os.makedirs(f"{output_path}/yamls")
 
