@@ -74,7 +74,8 @@ As input, the Work Model Generator takes the `servicemesh.json` file located at 
       "compute_pi":{
          "probability":0.4,
          "mean_bandwidth":11,
-         "range_complexity":[101, 101]
+         "range_complexity":[101, 101],
+         "replicas": 2
       },
       "colosseum": {
          "probability": 0.6
