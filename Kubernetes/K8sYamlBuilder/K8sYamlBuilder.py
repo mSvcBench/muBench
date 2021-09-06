@@ -2,27 +2,9 @@ import json
 import os
 from pprint import pprint
 
-K8s_YAML_BUILDER_PATH = os.path.dirname(__file__)
-
-# Variabili di test
-
-# work_model = {'s0': {'params': {'ave_luca': {'ave_number': 13, 'mean_bandwidth': 42}}},
-#               's1': {'params': {'compute_pi': {'mean_bandwidth': 11, 'range_complexity': [101, 101]}}},
-#               's2': {'params': {'compute_pi': {'mean_bandwidth': 11, 'range_complexity': [101, 101]}}},
-#               's3': {'params': {'compute_pi': {'mean_bandwidth': 11, 'range_complexity': [101, 101]}}},
-#               's4': {'params': {'compute_pi': {'mean_bandwidth': 11, 'range_complexity': [101, 101]}}}}
-
-
-# PREFIX_YAML_FILE = "MicroServiceDeployment"
-# NAMESPACE = "default"
-# IMAGE = "lucapetrucci/microservice:latest"
-# CLUSTER_DOMAIN = "cluster"
-# PATH = "/api/v1"
-# # var_to_be_replaced = {"{{string_in_template}}": "new_value", ...}
-# var_to_be_replaced = {}
+K8s_YAML_BUILDER_PATH = os.path.dirname(os.path.abspath(__file__))
 
 SIDECAR_TEMPLATE = "- name: %s-pod\n          image: %s"
-
 
 # Add params to work_model json
 # http://s1.default.svc.cluster.local
@@ -47,8 +29,6 @@ def create_deployment_yaml_files(model, k8s_parameters, nfs, output_path):
                 f = f.replace("{{SIDECAR}}", SIDECAR_TEMPLATE % (model[service]["sidecar"], model[service]["sidecar"]))
             else:
                 f = f.replace("{{SIDECAR}}", "")
-            # for key in args:
-            #     f = f.replace(key, args[key])
 
         if not os.path.exists(f"{output_path}/yamls"):
             os.makedirs(f"{output_path}/yamls")
@@ -97,10 +77,3 @@ def create_configmap_yaml(mesh, model, namespace, output_path):
         file.write(f)
 
     print("ConfigMap Created!")
-
-#
-# customization_work_model(work_model, PATH, NAMESPACE, CLUSTER_DOMAIN, IMAGE)
-# pprint(work_model)
-
-# create_deployment_yaml_files(work_model, PREFIX_YAML_FILE, var_to_be_replaced)
-

@@ -5,12 +5,35 @@ import sys
 import os
 import shutil
 
-if len(sys.argv) > 1:
-    parameters_file_path = sys.argv[1]
-elif len(WORKMODEL_PATH) > 0:
-    parameters_file_path = f'{WORKMODEL_PATH}/WorkModelParameters.json'
-else:
-    parameters_file_path = 'WorkModelParameters.json'
+import argparse
+import argcomplete
+
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument('-c', '--config-file', action='store', dest='parameters_file',
+                    help='The WorkModel Parameters file', default=f'{WORKMODEL_PATH}/WorkModelParameters.json')
+
+argcomplete.autocomplete(parser)
+
+try:
+    args = parser.parse_args()
+except ImportError:
+    print("Import error, there are missing dependencies to install.  'apt-get install python3-argcomplete "
+          "&& activate-global-python-argcomplete3' may solve")
+except AttributeError:
+    parser.print_help()
+except Exception as err:
+    print("Error:", err)
+
+parameters_file_path = args.parameters_file
+
+# if len(sys.argv) > 1:
+#     parameters_file_path = sys.argv[1]
+# elif len(WORKMODEL_PATH) > 0:
+#     parameters_file_path = f'{WORKMODEL_PATH}/WorkModelParameters.json'
+# else:
+#     parameters_file_path = 'WorkModelParameters.json'
 
 
 try:

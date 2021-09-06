@@ -1,7 +1,7 @@
 import random
 import os
 
-WORKMODEL_PATH = os.path.dirname(__file__)
+WORKMODEL_PATH = os.path.dirname(os.path.abspath(__file__))
 
 
 # Select exactly one service function according to the probability

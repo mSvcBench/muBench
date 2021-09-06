@@ -1,7 +1,7 @@
 import random
 import os
 
-WORKLOAD_PATH = os.path.dirname(__file__)
+WORKLOAD_PATH = os.path.dirname(os.path.abspath(__file__))
 
 # vertex_number -> N number of vertex
 # ingress_services -> {"sx": probability, ...}

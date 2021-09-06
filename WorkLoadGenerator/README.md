@@ -43,7 +43,10 @@ Each line of the `workload.json` file binds a time step in *ms* to the service t
 ## Run the script
 Edit the `WorkLoadParameters.json` file before running the `WorkLoadGenerator`.
 
-Finally, run the script to obtain and save to the `OutputPath` the `workload.json` as follows:
+Finally, run the script to obtain and save to the `OutputPath` the `workload.json`.
+You can specify your custom configuration file as argument otherwise, if you do not indicate any argument, it will use the default configuration file (`WorkLoadParameters.json`) located inside its directory:
+
+```zsh
+python3 RunWorkModelGen.py [PARAMETER_FILE]
 ```
-python3 RunWorkModelGen.py
-```
+

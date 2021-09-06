@@ -55,10 +55,11 @@ pip3 install -r requirements.txt
 ## Run the script
 Edit the `ServiceMeshParameters.json` file before running the `ServiceMeshGenerator`.
 
-Finally, run the script to obtain `servicemesh.json` and `servicemesh.png` as follows:
+Finally, run the script to obtain `servicemesh.json` and `servicemesh.png`.
+You can specify your custom configuration file as argument otherwise, if you do not indicate any argument, it will use the default configuration file (`ServiceMeshParameters.json`) located inside its directory:
 
 ```zsh
-python3 RunServiceMeshGen.py
+python3 RunServiceMeshGen.py [PARAMETER_FILE]
 ```
 
 ## Examples

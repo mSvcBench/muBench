@@ -75,8 +75,9 @@ pip3 install -r requirements.txt
 ## Run the script
 Edit the `RunnerParameters.json` file before executing the `Runner`.
 
-Finally, run the script to obtain the `result_file` saved to the `OutputPath` as follows:
+Finally, run the script to obtain the `result_file` saved to the `OutputPath`.
+You can specify your custom configuration file as argument otherwise, if you do not indicate any argument, it will use the default configuration file (`RunnerParameters.json`) located inside its directory:
 
 ```zsh
-python3 Runner.py
+python3 Runner.py [PARAMETER_FILE]
 ```

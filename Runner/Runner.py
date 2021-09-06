@@ -11,15 +11,36 @@ import shutil
 import importlib
 from pprint import pprint
 
+import argparse
+import argcomplete
 
-RUNNER_PATH = os.path.dirname(__file__)
+RUNNER_PATH = os.path.dirname(os.path.abspath(__file__))
 
-if len(sys.argv) > 1:
-    parameters_file_path = sys.argv[1]
-elif len(RUNNER_PATH) > 0:
-    parameters_file_path = f'{RUNNER_PATH}/RunnerParameters.json'
-else:
-    parameters_file_path = 'RunnerParameters.json'
+parser = argparse.ArgumentParser()
+
+parser.add_argument('-c', '--config-file', action='store', dest='parameters_file',
+                    help='The Runner Parameters file', default=f'{RUNNER_PATH}/RunnerParameters.json')
+
+argcomplete.autocomplete(parser)
+
+try:
+    args = parser.parse_args()
+except ImportError:
+    print("Import error, there are missing dependencies to install.  'apt-get install python3-argcomplete "
+          "&& activate-global-python-argcomplete3' may solve")
+except AttributeError:
+    parser.print_help()
+except Exception as err:
+    print("Error:", err)
+
+parameters_file_path = args.parameters_file
+
+# if len(sys.argv) > 1:
+#     parameters_file_path = sys.argv[1]
+# elif len(RUNNER_PATH) > 0:
+#     parameters_file_path = f'{RUNNER_PATH}/RunnerParameters.json'
+# else:
+#     parameters_file_path = 'RunnerParameters.json'
 
 last_print_time_ms = 0
 requests_processed = 0
@@ -56,7 +77,7 @@ except Exception as err:
     exit(1)
 
 
-# Solo per i test
+# Only for test
 # run_after_workload({'run_duration_sec': 12.758957147598267,
 #                     'last_print_time_ms': 1624377055204,
 #                     'requests_processed': 12,
