@@ -29,7 +29,7 @@ The `WorkModelGenerator.py` creates the `workmodel.json` file that describes the
       "url": "s0.default.svc.cluster.local",
       "path": "/api/v1",
       "image": "msvcbench/microservice_v2:latest",
-      "replicas": 2
+      "replicas": 2,
       "namespace": "default"
   },
   "s1": {
