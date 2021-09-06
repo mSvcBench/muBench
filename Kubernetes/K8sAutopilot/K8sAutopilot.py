@@ -1,12 +1,16 @@
+import sys
+import os
+import json
+import shutil
+# appending a path
+sys.path.append('../../')
+
 import ServiceMeshGenerator.ServiceMeshGenerator as smGen
 import WorkModelGenerator.WorkModelGenerator as wmGen
 import WorkLoadGenerator.WorkLoadGenerator as wlGen
 from Kubernetes.K8sYamlBuilder import K8sYamlBuilder as K8sBuilder
 from Kubernetes.K8sDeployer import K8sDeployer as K8sDeployer
-import sys
-import os
-import json
-import shutil
+
 
 AUTOPILOT_PATH = os.path.dirname(__file__)
 

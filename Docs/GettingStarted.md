@@ -180,7 +180,7 @@ Now, head over to the [Runner](/Docs/BuildingTools.md#Runner) to start the simul
 ## K8s Autopilot
 ### The lazy shortcut
 
-The K8s autopilot is an easy way to deploy all the component of the **µBench** simulator. 
+The K8s autopilot is an easy way to deploy all the component of the **µBench** tool. 
 To sum up, the autopilot will:
 * use the Service Mesh Generator to generate the `servicemesh.json`
 * use the Work Model Generator to generate the `workmodel.json`
