@@ -67,11 +67,11 @@ def undeploy_items(folder):
                 try:
                     if partial_yaml["kind"] == "Deployment":
                         dep_name = partial_yaml["metadata"]["name"]
-                        resp = k8s_apps_api.delete_namespaced_deployment(name=dep_name, namespace=partial_yaml["metadata"]["namespace"])
+                        resp = k8s_apps_api.delete_namespaced_deployment(name=dep_name, namespace=partial_yaml["metadata"]["namespace"], grace_period_seconds=0)
                         print(f"Deployment '{dep_name}' deleted. Status={resp.status}")
                     elif partial_yaml["kind"] == "Service":
                         svc_name = partial_yaml["metadata"]["name"]
-                        resp = k8s_core_api.delete_namespaced_service(name=svc_name, namespace=partial_yaml["metadata"]["namespace"])
+                        resp = k8s_core_api.delete_namespaced_service(name=svc_name, namespace=partial_yaml["metadata"]["namespace"], grace_period_seconds=0)
                         print(f"Service '{svc_name}' deleted. Status={resp.status}")
                         print("---")
                 except ApiException as err:
