@@ -1,7 +1,6 @@
 FROM python:slim
 
 RUN apt update
-RUN apt install -y screen
 COPY requirements.txt /app/
 
 WORKDIR /app
@@ -14,4 +13,4 @@ EXPOSE 51313
 COPY CellController.py ExternalServiceExecutor.py InternalServiceExecutor.py mss.proto mss_pb2.py \
 mss_pb2_grpc.py start.sh ./
 
-CMD [ "/bin/bash", "./start.sh"]
+CMD [ "/usr/local/bin/python3", "/app/CellController.py"]
