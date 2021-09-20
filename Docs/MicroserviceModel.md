@@ -28,10 +28,6 @@
 ![service-cell-abstraction](service-cell-abstraction.png)
 
 ## Service Cell
-
-
-The services interact with each other depending on the configuration parameters and the pattern of interaction forms the so-called *service mesh*.
-
 We modeled a microservice application as a complex system made up of service cells with a different ID, e.g. *s0, s1, s2... etc*. A service cell is a (Python) containerized program, which calls internal and external functions, i.e. of other cells. Which functions to call is specified in two global files, `servicemesh.json` and `workmodel.json`, which all service cells share via a storage volume. The `servicemesh.json` file describes the so-called *service mesh* that is made by nodes (the services) and links; there is a link between the services *sj* and *si*, if *sj* can call *sj* as external function. The `workmodel.json` describes the internal functions the service cells execute and the pattern used to call external functions (e.g. in sequence, in parallel, etc.). These two global files include information about each service cell and markers that allow a service cell to identify the information it is interested in and thus specialize in performing its intended internal and external functions. This configuration mechanism, which exploits the sharing of global files, allows a service cell to initialize and specialize autonomously, without the aid of a server, a feature that makes it possible to exploit the replication and fault management mechanisms offered by container orchestration platforms such as Kubernetes. We point out a slight analogy of our architecture with that of human cells, which are equal to each other, contain the entire DNA (our configuration files) and are also able to characterize themselves and perform specific tasks.   
 
 
