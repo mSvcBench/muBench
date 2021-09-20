@@ -8,7 +8,7 @@
    },
    "NFSConfigurations": {
       "address": "10.3.0.4",
-      "mount_path": "/mnt/mubSharedData"
+      "mount_path": "/kubedata/mubSharedData"
    },
    "WorkModelPath": "../../SimulationWorkspace/workmodel.json",
    "OutputPath": "../../SimulationWorkspace"

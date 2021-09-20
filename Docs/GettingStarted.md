@@ -34,7 +34,7 @@ If you leave the files unchanged, it will generate a Microservice composed of 5 
 
 Before we begin, export the path to your NFS shared folder as an environment variable.
 ```shell
-export NFS_SHARED_FOLDER="/mnt/mubSharedData" 
+export NFS_SHARED_FOLDER="/kubedata/mubSharedData" 
 ```
 
 ### Step 1: Generate the service mesh of the MicroService Application
@@ -148,7 +148,7 @@ As always, edit the input parameters in `K8sParameters.json` as advised [here](/
    },
    "NFSConfigurations": {
       "address": "10.3.0.4",
-      "mount_path": "/mnt/mubSharedData"
+      "mount_path": "/kubedata/mubSharedData"
    },
    "WorkModelPath": "../../SimulationWorkspace/workmodel.json",
    "OutputPath": "../../SimulationWorkspace"

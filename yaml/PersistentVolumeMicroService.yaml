@@ -12,7 +12,7 @@ spec:
   #storageClassName: slow
   nfs:
     server: 10.3.0.4
-    path: '/mnt/mubSharedData'
+    path: '/kubedata/mubSharedData'
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

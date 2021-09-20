@@ -53,7 +53,7 @@ The NGINX gateway handles REST requests from the clients and routes them to the 
 
 ---
 ## Internal Service
-An internal-service is a task that users can define as a python function to be inserted in the [shared folder](/Docs/NFSConfig.md) `/mnt/mubSharedData/InternalServiceFunctions` (see also **custom functions** below for details). However, each service has a default internal-service that is named `compute_pi`.
+An internal-service is a task that users can define as a python function to be inserted in the [shared folder](/Docs/NFSConfig.md) `/kubedata/mubSharedData/InternalServiceFunctions` (see also **custom functions** below for details). However, each service has a default internal-service that is named `compute_pi`.
 
 ### Custom Functions
 Each service of the microservice mesh executes an internal-service when called and by default it uses the `compute_pi` function. 
@@ -61,8 +61,8 @@ The default function keeps the CPU busy depending on the specified complexity of
 
 To try other scenarios, you can use your own specific functions to stress the aspect you whish to simulate: CPU, memory or storage. 
 In order to do so, you must write your own python function and save it to the subfolder `InternalServiceFunctions` inside your NFS shared directory.
-If you followed our [NFS configuration](/Docs/NFSConfig.md), create the subfolder into `/mnt/mubSharedData` using 
-`mkdir /mnt/mubSharedData/InternalServiceFunctions`, otherwise create it according to your NFS configurations.
+If you followed our [NFS configuration](/Docs/NFSConfig.md), create the subfolder into `/kubedata/mubSharedData` using 
+`mkdir /kubedata/mubSharedData/InternalServiceFunctions`, otherwise create it according to your NFS configurations.
 
 ---
 ## External Services
