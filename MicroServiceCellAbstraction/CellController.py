@@ -14,8 +14,8 @@ from pprint import pprint
 from prometheus_client import start_http_server, Gauge, Counter, Histogram, Summary
 import time
 
-import mss_pb2_grpc as pb2_grpc
-import mss_pb2 as pb2
+import mub_pb2_grpc as pb2_grpc
+import mub_pb2 as pb2
 import grpc
 from concurrent import futures
 
@@ -44,19 +44,19 @@ else:
 
 
 ########################### PROMETHEUS METRICS
-REQUEST_LATENCY = Summary('mss_request_latency_seconds', 'Request latency',
+REQUEST_LATENCY = Summary('mub_request_latency_seconds', 'Request latency',
                           ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service']
                           )
 
-RESPONSE_SIZE = Summary('mss_response_size', 'Response size',
+RESPONSE_SIZE = Summary('mub_response_size', 'Response size',
                         ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service']
                         )
 
-LOCAL_PROCESSING = Summary('mss_local_processing_latency_seconds', 'Local processing latency',
+LOCAL_PROCESSING = Summary('mub_local_processing_latency_seconds', 'Local processing latency',
                            ['zone', 'app_name', 'method', 'endpoint']
                            )
 
-REQUEST_PROCESSING = Summary('mss_request_processing_seconds', 'Request latency without the network latency',
+REQUEST_PROCESSING = Summary('mub_request_processing_seconds', 'Request latency without the network latency',
                            ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service']
                            )
 

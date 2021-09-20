@@ -44,7 +44,7 @@
    },
    "NFSConfigurations": {
       "address": "192.168.0.144",
-      "mount_path": "/kubedata/MSSharedData"
+      "mount_path": "/kubedata/mubSharedData"
    },
    "InternalServiceFilePath": "../../CustomFunctions",
    "OutputPath": "../../SimulationWorkspace"

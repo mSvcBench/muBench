@@ -64,7 +64,7 @@ The K8sYamlBuilder will use as input the `workmodel.json` specified by the `Work
    },
    "NFSConfigurations": {
       "address": "192.168.0.44",
-      "mount_path": "/mnt/MSSharedData"
+      "mount_path": "/mnt/mubSharedData"
    },
    "WorkModelPath": "../../SimulationWorkspace/workmodel.json",
    "OutputPath": "../../SimulationWorkspace"

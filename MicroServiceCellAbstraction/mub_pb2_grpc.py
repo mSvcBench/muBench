@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import mss_pb2 as mss__pb2
+import mub_pb2 as mub__pb2
 
 
 class MicroServiceStub(object):
@@ -16,8 +16,8 @@ class MicroServiceStub(object):
         """
         self.GetMicroServiceResponse = channel.unary_unary(
                 '/microservice.MicroService/GetMicroServiceResponse',
-                request_serializer=mss__pb2.Message.SerializeToString,
-                response_deserializer=mss__pb2.MessageResponse.FromString,
+                request_serializer=mub__pb2.Message.SerializeToString,
+                response_deserializer=mub__pb2.MessageResponse.FromString,
                 )
 
 
@@ -38,8 +38,8 @@ def add_MicroServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'GetMicroServiceResponse': grpc.unary_unary_rpc_method_handler(
                     servicer.GetMicroServiceResponse,
-                    request_deserializer=mss__pb2.Message.FromString,
-                    response_serializer=mss__pb2.MessageResponse.SerializeToString,
+                    request_deserializer=mub__pb2.Message.FromString,
+                    response_serializer=mub__pb2.MessageResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -63,7 +63,7 @@ class MicroService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/microservice.MicroService/GetMicroServiceResponse',
-            mss__pb2.Message.SerializeToString,
-            mss__pb2.MessageResponse.FromString,
+            mub__pb2.Message.SerializeToString,
+            mub__pb2.MessageResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
