@@ -3,8 +3,8 @@ import requests
 from concurrent.futures import ThreadPoolExecutor, wait, as_completed, FIRST_COMPLETED
 import time
 import grpc
-import mss_pb2_grpc as pb2_grpc
-import mss_pb2 as pb2
+import mub_pb2_grpc as pb2_grpc
+import mub_pb2 as pb2
 from pprint import pprint
 
 work_model = dict()

@@ -3,6 +3,7 @@ from kubernetes.client.rest import ApiException
 import yaml
 import json
 import os
+import time
 
 
 def deploy_items(folder):
@@ -40,7 +41,7 @@ def deploy_items(folder):
                     print("######################")
                     print(f"Exception raised deploying a {partial_yaml['kind']}: {api_exception_body['details']} -> {api_exception_body['reason']}")
                     print("######################")
-
+                time.sleep(5)
 
 def undeploy_items(folder):
     print("######################")
