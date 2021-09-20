@@ -48,20 +48,15 @@ The NGINX gateway handles REST requests from the clients and routes them to the 
 An internal-service is a task that users can define as a python function to be inserted in the [shared folder](/Docs/NFSConfig.md) `/kubedata/mubSharedData/InternalServiceFunctions` (see also **custom functions** below for details). However, each service has a default internal-service that is named `compute_pi`.
 
 ### Custom Functions
-Each service of the microservice mesh executes an internal-service when called and by default it uses the `compute_pi` function. 
-The default function keeps the CPU busy depending on the specified complexity of operations.
+Each service cell executes an internal-service that by default is the `compute_pi` function. 
+This default function keeps the CPU busy depending on the specified complexity of operations.
 
 To try other scenarios, you can use your own specific functions to stress the aspect you whish to simulate: CPU, memory or storage. 
 In order to do so, you must write your own python function and save it to the subfolder `InternalServiceFunctions` inside your NFS shared directory.
 If you followed our [NFS configuration](/Docs/NFSConfig.md), create the subfolder into `/kubedata/mubSharedData` using 
 `mkdir /kubedata/mubSharedData/InternalServiceFunctions`, otherwise create it according to your NFS configurations.
 
----
-## External Services
-External-services are grouped into a configurable number of groups (`service_groups`). Services from different groups are called in parallel; services from the same group are called sequentially. To mimic random paths on the service mesh, not all external services of a `service_group` are called, but only a subset of them, whose number is `seq_len` and these are chosen randomly (uniform distribution) from those in the `service_group`. 
-
----
-### How to write your own custom job
+### How to write your own custom function
 
 As **input**, your function receives a dictionary with the parameters specified in the [work model generator](/WorkModelGenerator/README.md).
 
@@ -80,3 +75,8 @@ def custom_function(params):
 
     return response_body
 ```
+---
+## External Services
+External-services are grouped into a configurable number of groups (`service_groups`). Services from different groups are called in parallel; services from the same group are called sequentially. To mimic random paths on the service mesh, not all external-services of a `service_group` are called, but only a subset of them, whose number is `seq_len` and these are chosen randomly (uniform distribution) from those in the `service_group`. 
+
+
