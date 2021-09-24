@@ -91,8 +91,9 @@ if not os.path.exists(f"{builder_module_path}/yamls"):
     folder_not_exist = True
 folder = f"{builder_module_path}/yamls"
 
-if output_path != K8sBuilder.K8s_YAML_BUILDER_PATH:
-    shutil.copy(parameters_file_path, f"{output_path}/")
+if not os.path.samefile(parameters_file_path,f"{output_path}/{os.path.basename(parameters_file_path)}"):
+    shutil.copyfile(parameters_file_path, f"{output_path}/{os.path.basename(parameters_file_path)}")
+
 
 
 def create_deployment_config():

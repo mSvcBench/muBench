@@ -21,21 +21,19 @@ from concurrent import futures
 
 
 def read_config_files():
-    with open('MSConfig/servicemesh.json') as f:
-        servicemesh = json.load(f)
 
     with open('MSConfig/workmodel.json') as f:
         workmodel = json.load(f)
 
-    return servicemesh, workmodel
+    return workmodel
 
 
 # Configuration Variable
 ID = os.environ["APP"]
 ZONE = os.environ["ZONE"]  # Pod Zone
 K8S_APP = os.environ["K8S_APP"]  # K8s label app
-service_mesh, work_model = read_config_files()
-my_service_mesh = service_mesh[ID]
+work_model = read_config_files()
+my_service_mesh = work_model[ID]['external_services']
 my_work_model = work_model[ID]
 if "request_method" in my_work_model.keys():
     request_method = my_work_model["request_method"].lower()
@@ -94,9 +92,9 @@ class HttpThread(Thread):
     @app.route("/update", methods=['GET'])
     def update():
         print("updatePath")
-        global service_mesh, work_model, my_work_model, my_service_mesh
-        service_mesh, work_model = read_config_files()
-        my_service_mesh = service_mesh[ID]
+        global work_model, my_work_model, my_service_mesh
+        work_model = read_config_files()
+        my_service_mesh = work_model[ID]['external_services']
         my_work_model = work_model[ID]
         return f'{json.dumps("Successfully Update ServiceMesh and WorkModel variables! :)")}\n', 200
 

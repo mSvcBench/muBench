@@ -65,8 +65,8 @@ if keyboard_input == "y":
     with open(f"{output_path}/workmodel.json", "w") as f:
         f.write(json.dumps(workmodel, indent=2))
 
-    if output_path != WORKMODEL_PATH:
-        shutil.copy(parameters_file_path, f"{output_path}/")
+    if not os.path.samefile(parameters_file_path,f"{output_path}/{os.path.basename(parameters_file_path)}"):
+        shutil.copyfile(parameters_file_path, f"{output_path}/{os.path.basename(parameters_file_path)}")
 
     print(f"'{output_path}/workmodel.json'")
     print("File Saved!")

@@ -1,11 +1,10 @@
 # Work Model Generator
 
-The working model defines which internal-services are executed by the Microservice Application services. To allow the continuous integration, the internal services are python functions stored into the NFS shared directory `NFS_SHARED_FOLDER/InternalServiceFunction`. In addition, any service-cell incorporates a default `compute_pi` function that computes a configurable number of python decimal digits. A service uses one of these possible functions as an internal-service, and the choice is made during generation of the work model file according to configurable probabilities given to any python function.
+The working model defines which internal and external services are executed by the service of a µBench Microservice Application. An internal-service is a Python funtion stored into files of the NFS shared directory `NFS_SHARED_FOLDER/InternalServiceFunction`. In addition, any service-cell includes a default `compute_pi` function that computes a configurable number of python decimal digits. A service-cell uses one of these possible functions as an internal-service.
 
 ### Internal-service model
-A function that implements an internal-service can do some work such as, dummy calculations, read/write operations, etc. At the end of these jobs, the function returns a dummy amount of kBytes in a string, which will be sent back to the service caller after both the internal-service and external-services are completed.
-Thus, by appropriately designing an internal-service function, we are able to decide what to stress, including the CPU, I/O, or network. 
-Each function takes some user-defined parameters as input and must return a string.  
+A function that implements an internal-service can do some work such as, dummy calculations, read/write operations, etc. At the end of these jobs, the function returns a dummy amount of kBytes in a string, which are sent back bay a service-cell to the service caller after both the internal-service and external-services are completed.
+Thus, by appropriately designing an internal-service function, we are able to decide what to stress, including the CPU, I/O, or network. Each function takes some user-defined parameters as input and must return a string.  
 
 ### compute_pi
 The built-in function `compute_pi` computes an `N` number of decimals of the *π*, where `N` is a integer, randomly chosen in an interval [`X`,`Y`] for each execution. The larger the interval, the greater the complexity and the stress on the CPU. After the computation, the `compute_pi` function returns a dummy string made of `B` kBytes, where `B` is a sample of an exponential random variable whose average is the `mean_bandwidth` parameter.    

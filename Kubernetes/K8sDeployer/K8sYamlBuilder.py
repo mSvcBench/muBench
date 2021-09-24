@@ -1,10 +1,13 @@
 import json
 import os
+import yaml
 from pprint import pprint
+
 
 K8s_YAML_BUILDER_PATH = os.path.dirname(os.path.abspath(__file__))
 
 SIDECAR_TEMPLATE = "- name: %s-pod\n          image: %s"
+NODE_AFFINITY_TEMPLATE = {'affinity': {'nodeAffinity': {'requiredDuringSchedulingIgnoredDuringExecution': {'nodeSelectorTerms': [{'matchExpressions': [{'key': 'kubernetes.io/hostname','operator': 'In','values': ['']}]}]}}}}
 
 # Add params to work_model json
 # http://s1.default.svc.cluster.local
@@ -33,6 +36,12 @@ def create_deployment_yaml_files(model, k8s_parameters, nfs, output_path):
                 f = f.replace("{{REPLICAS}}", str(model[service]["replicas"]))
             else:
                 f = f.replace("{{REPLICAS}}", "1")
+            if "node_affinity" in model[service].keys():
+                NODE_AFFINITY_TEMPLATE_TO_ADD = NODE_AFFINITY_TEMPLATE
+                NODE_AFFINITY_TEMPLATE_TO_ADD['affinity']['nodeAffinity']['requiredDuringSchedulingIgnoredDuringExecution']['nodeSelectorTerms'][0]['matchExpressions'][0].update({"values" : model[service]["node_affinity"]})
+                f = f.replace("{{NODE_AFFINITY}}", str(yaml.dump(NODE_AFFINITY_TEMPLATE_TO_ADD)).rstrip().replace('\n','\n   '))
+            else:
+                f = f.replace("{{NODE_AFFINITY}}", "")
         if not os.path.exists(f"{output_path}/yamls"):
             os.makedirs(f"{output_path}/yamls")
 

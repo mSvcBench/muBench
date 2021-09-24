@@ -40,14 +40,14 @@ def request_REST(service):
 
 
 def request_gRPC(service):
-    message = pb2.Message(message=f"Ciao, sono il service: {service}")
+    message = pb2.Message(message=f"Hello service: {service}")
     # print(f'{message}')
     response = service_stub[service].GetMicroServiceResponse(message)
     return response
 
 
 def external_service(group):
-    print("**** Start SERVICES nel thread: %s" % str(group))
+    print("**** Start SERVICES in thread: %s" % str(group))
     global request_function
     seq_len = len(group["services"])
     if group["seq_len"] < len(group["services"]):

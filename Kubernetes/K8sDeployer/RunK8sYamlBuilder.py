@@ -11,7 +11,7 @@ import argcomplete
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-c', '--config-file', action='store', dest='parameters_file',
-                    help='The Autopilot Parameters file', default=f'{K8s_YAML_BUILDER_PATH}/K8sParameters.json')
+                    help='The K8s Parameters file', default=f'{K8s_YAML_BUILDER_PATH}/K8sParameters.json')
 
 argcomplete.autocomplete(parser)
 
@@ -26,15 +26,6 @@ except Exception as err:
     print("Error:", err)
 
 parameters_file_path = args.parameters_file
-
-
-# if len(sys.argv) > 1:
-#     parameters_file_path = sys.argv[1]
-# elif len(K8s_YAML_BUILDER_PATH) > 0:
-#     parameters_file_path = f'{K8s_YAML_BUILDER_PATH}/K8sParameters.json'
-# else:
-#     parameters_file_path = 'K8sParameters.json'
-
 
 try:
     with open(parameters_file_path) as f:
@@ -71,3 +62,8 @@ if output_path != K8s_YAML_BUILDER_PATH:
     shutil.copy(parameters_file_path, f"{output_path}/")
 
 create_deployment_yaml_files(work_model, k8s_parameters, nfs_conf, output_path)
+
+# k8s yamls created, proceed to deploy
+
+
+ 

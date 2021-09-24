@@ -1,9 +1,10 @@
-# Microservice Model
+# µBench Manual
 
+<!---
 ### Table of Content
 * [Introduction](/README.md)
 * [**Microservice Model**](/Docs/MicroserviceModel.md#Microservice-Model)
-  * [Service Cell](/Docs/MicroserviceModel.md#Service-Cell)
+  * [Service-Cell Anatomy](/Docs/MicroserviceModel.md#Service-Cell)
   * [Internal Service](/Docs/MicroserviceModel.md#Internal-Service)
   * [External Services](/Docs/MicroserviceModel.md#External-Services)
   * [Custom Functions](/Docs/MicroserviceModel.md#Custom-Functions)
@@ -24,41 +25,148 @@
     * [Example](/Docs/GettingStarted.md#Example) - A step by step walkthrough
     * [K8s Autopilot](/Docs/GettingStarted.md#K8s-Autopilot) - The lazy shortcut
 ---
+--->
 
-![service-cell-abstraction](service-cell-abstraction.png)
-
-## Service Cell
-We modeled a microservice application as a complex system made up of *service cells* with a different ID, e.g. *s0, s1, s2... etc*. A service cell is a program, which calls internal and external functions, i.e. of other cells. Which functions to call is specified in two global files, `servicemesh.json` and `workmodel.json`, which all service cells access via a [shared folder](/Docs/NFSConfig.md) (e.g., `/kubedata/mubSharedData/`) mounted as storage volume. The `servicemesh.json` file describes the so-called *service mesh* that is made by nodes (the services) and links; there is a link between the services *sj* and *si*, if *sj* can call *si* as external function. The `workmodel.json` describes the internal functions the service cells execute and the pattern used to call external functions (e.g. in sequence, in parallel, etc.). These two global files include information about each service cell and markers that allow a service cell to identify the information it is interested in and thus specialize in performing its intended internal and external functions. This configuration mechanism, which exploits the sharing of global files, allows a service cell to initialize and specialize autonomously, without the aid of a server, a feature that makes it possible to exploit the replication and fault management mechanisms offered by container orchestration platforms such as Kubernetes. We point out a slight analogy of our architecture with that of human cells, which are equal to each other, contain the entire DNA (our configuration files) and are also able to characterize themselves and perform specific tasks.   
-
-
-Service cells are packaged as [Docker containers](https://www.docker.com/resources/what-container) that use the same image, which contains a Python code.  
-When created, a service cell learns, from the `servicemesh.json` file, which services it is connected to (*external-services*) and, from the `workmodel.json`, all the useful information for being fully functionable inside the application, like the function they must perform (*internal-service*) and the url used to listen to requests of connected services.
-Upon a service request, each service locally executes an *internal-service* and then carries out a set of calls towards *external-services*, i.e., towards other service cells.
-Visit [this section](/MicroServiceCellAbstraction/README.md) if you want to build your own version of the Docker image each service use.
+## Microservice Model
 
 ![service-cell-rest-grpc](microservices-rest-grpc.png)
 
-Services communicates within each others using synchronous request/response-based communication mechanisms, such as HTTP-based REST or gRPC.
-You can choose one or the other when you define the [Work Model](/WorkModelGenerator/README.md).
-In both cases, a single entry point is given as an API gateway for the clients, the [Runner](/Runner/README.md) in the example shown by the above figure.
-The NGINX gateway handles REST requests from the clients and routes them to the appropriate service or viceversa.
+µBench models a microservice application as a complex system made up of services with a different ID, e.g. *s0, s1, s2, sdb1, ... etc*. The task of each service consists in: 
+
+- executing an *internal-service*, i.e. a function, that stresses specific *computing* resources (CPU, disk, memory, etc.) and produces an amount of dummy bytes to stress *network* resources
+- calling a set of *external-services*, i.e.  the services of other service-cells, and wait for their results
+- sending back the amount of dummy bytes produced by the internal-service to the callers
+
+Services communicates within each others using either HTTP REST request/response mechanisms or gRPC. Users can access the µBench microservice application through an API gateway, an NGINX server, that exposes an HTTP enpoint per service, e.g. *NGINX_ip:port/s0*, *NGINX_ip:port/s1*, etc. These endpoints can be used by software for performance evaluation that load the system with service requests, such as our [Runner](/Docs/BuildingTools.md#Runner).
+Service-cells reports their observed performance to a global [Prometheus](/Monitoring/README.md#Prometheus) monitoring system. The underlaying platform (e.g. Kubernetes) running the µBench microservice applicaiton can report its metrics to Prometheus too.
 
 ---
-## Internal Service
-An internal-service is a task that users can define as a python function to be inserted in the [shared folder](/Docs/NFSConfig.md) `/kubedata/mubSharedData/InternalServiceFunctions` (see also **custom functions** below for details). However, each service has a default internal-service that is named `compute_pi`.
+## Service-Cell
 
-### Custom Functions
-Each service cell executes an internal-service that by default is the `compute_pi` function. 
-This default function keeps the CPU busy depending on the specified complexity of operations.
+![service-cell-abstraction](service-cell-abstraction.png)
+Each service is implemented by a software unit that we call *service-cell*. A service-cell is a [Docker container](/MicroServiceCellAbstraction/README.md) which contains a Python code executing the internal and external services that user chosen for the specific service-cell. 
 
-To try other scenarios, you can use your own specific functions to stress the aspect you whish to simulate: CPU, memory or storage. 
-In order to do so, you must write your own python function and save it to the subfolder `InternalServiceFunctions` inside your NFS shared directory.
-If you followed our [NFS configuration](/Docs/NFSConfig.md), create the subfolder into `/kubedata/mubSharedData` using 
-`mkdir /kubedata/mubSharedData/InternalServiceFunctions`, otherwise create it according to your NFS configurations.
+Service-cells are connected to each other by a TCP/IP network and they access a common storage space (e.g., a Kubernetes Volume) where they find some files describing the work that each of them has to do. These files are `workmodel.json`, and a set of python files imported by the service-cell that include the definition of all *custom functions* possibly used as interal-service.
+
+For performance monitoring, service-cells expose a set of metrics to a Prometheus server. 
+
+---
+## Work Model
+
+The description of internal and external services run by service-cells is contained in a global file `workmodel.json`, which all service-cells access via a [shared folder](/Docs/NFSConfig.md) (e.g., `/kubedata/mubSharedData/`) mounted as storage volume. This configuration mechanism, which exploits the sharing of global files, allows a service-cell to initialize and specialize autonomously, without the aid of a configuration server, a feature that makes it possible to exploit the replication and fault management mechanisms offered by container orchestration platforms such as Kubernetes. We point out a slight analogy of our architecture with that of human cells, which are equal to each other, contain the entire DNA (our configuration files) and are also able to characterize themselves and perform specific tasks.
+The `workmodel.json` is made by a key per service as shown below.
+
+```json
+{
+  "s0": {
+    "external_services": [
+      {
+        "seq_len": 100,
+        "services": [
+          "s1"
+        ]
+      },
+      {
+        "seq_len": 1,
+        "services": [
+          "sdb1"
+        ]
+      }
+    ],
+    "internal_service": {
+      "compute_pi": {
+        "mean_bandwidth": 10,
+        "range_complexity": [
+          50,
+          100
+        ]
+      }
+    },
+    "request_method": "rest",
+    "url": "s0.default.svc.cluster.local",
+    "path": "/api/v1",
+    "image": "msvcbench/microservice_v2:latest",
+    "namespace": "default"
+  },
+  "sdb1": {
+    "external_services": [],
+    "internal_service": {
+      "compute_pi": {
+        "mean_bandwidth": 1,
+        "range_complexity": [
+          1,
+          10
+        ]
+      }
+    },
+    "request_method": "rest",
+    "url": "sdb1.default.svc.cluster.local",
+    "path": "/api/v1",
+    "image": "msvcbench/microservice_v2:latest",
+    "namespace": "default"
+  },
+  "s1": {
+    "external_services": [
+      {
+        "seq_len": 100,
+        "services": [
+          "s2"
+        ]
+      }
+    ],
+    "internal_service": {
+      "colosseum": {
+        "mean_bandwidth": 10
+      }
+    },
+    "request_method": "rest",
+    "url": "s1.default.svc.cluster.local",
+    "path": "/api/v1",
+    "image": "msvcbench/microservice_v2:latest",
+    "namespace": "default"
+  },
+  "s2": {
+    "external_services": [
+      {
+        "seq_len": 1,
+        "services": [
+          "sdb1"
+        ]
+      }
+    ],
+    "internal_service": {
+      "compute_pi": {
+        "mean_bandwidth": 15,
+        "range_complexity": [
+          10,
+          20
+        ]
+      }
+    },
+    "request_method": "rest",
+    "url": "s1.default.svc.cluster.local",
+    "path": "/api/v1",
+    "image": "msvcbench/microservice_v2:latest",
+    "namespace": "default"
+  }
+}
+```
+
+In this example, the µBench application is made by four services: *s0*, *s1*, *s2* and *sdb1* (that mimics a database). The internal-service of s0 is the function  *compute_pi* with parameters `range_complexity` (uniform random interval of number of pigreco digits to generate; the higer this number the higer the CPU stress) and `mean_bandwidth` (average value of an expneg distribution used to generate the amount of bytes to return to the caller).
+
+The external-services called by s0 are organized in two *external-service-groups* decribed by JSON objects contained by an array. The first group contains only the external-service *s1*. The second group contains only the external-service *sdb1*. To mimic random paths on the service mesh, for each group, a dedicated processing thread of the service-cell randomly selects `seq_len` external-services from it and invokes (e.g., HTTP call) them *sequentially*. These per-group threads are executed in parallel, one per group. In this way a service-cell can emulate sequential and parallel calls of external-services.
+
+The IP address of a service-cell is associated to a `url` and its service an be (internally) requested on a specific `path` ot that url. For instace, the service *s0* is called by other services by using http://s0.default.svc.cluster.local/api/v1. Additonal information includes the Docker `image` to use, the `request_method` it uses to call other services (can be `gRPC` or `rest` and, currently, must be equal for all), additional variables (e.g., `namespace`) that underlying execution platform can use. 
+
+---
+## Internal-Service functions
+
+An internal-service is a function that users can define as a Python function to be inserted in the [shared folder](/Docs/NFSConfig.md) `/kubedata/mubSharedData/InternalServiceFunctions`. The Docker image of the service-cell provides a default function named `compute_pi` that compute a configurable number of decimals of pigreco to keep the CPU busy. 
+To stress other aspects (e.g. memory, storage, etc.), the user can develop his *custom functions* and save them into files of the subfolder `InternalServiceFunctions` inside the NFS shared directory. In this way, µBench supports the continuos integratin of new benchmark functions without the need of changing the remaining code.
 
 ### How to write your own custom function
 
-As **input**, your function receives a dictionary with the parameters specified in the [work model generator](/WorkModelGenerator/README.md).
+As **input**, your function receives a dictionary with the parameters specified in the `workmodel.json` file [work model generator](/WorkModelGenerator/README.md).
 
 As **output**, your function must return a string used as body for the response given back by a service.
 
@@ -75,8 +183,337 @@ def custom_function(params):
 
     return response_body
 ```
+
+### compute_pi
+The built-in function `compute_pi` computes an `N` number of decimals of the *π*, where `N` is a integer, randomly chosen in an interval [`X`,`Y`] for each execution. The larger the interval, the greater the complexity and the stress on the CPU. After the computation, the `compute_pi` function returns a dummy string made of `B` kBytes, where `B` is a sample of an exponential random variable whose average is the `mean_bandwidth` parameter.
+
+So the input parameters of `compute_pi` are:
+- `"range_complexity": [X, Y]`  
+- `"average_bandwidth": value`
+
+### Real Internal-Service functions
+
+µBench can support the execution of real software within a service-cell by using *sidecar* containers that share the namespaces with the main container of the service-cell. For instance, a user can include a MongoDB database in the *sdb1* service changing the `workmodel.json` as follows:
+
+```json
+  "sdb1": {
+    "external_services": [],
+    "sidecar": "mongodb",
+    "internal_service": {
+      "mongo_fun": {
+        "nreads": [10,20],
+        "nwrites": [10,20]
+      }
+    }
+```
+
+where `sidecar` is the name of the docker image to be used as sidecar and `mongo_fun` is a possible (TODO) function executed by the service-cell as internal-service, which interact the sidecar mongoDB by executing a random number of read and write operations within the uniform interval 10,20. However, any internal-service function can be used.  
+
 ---
-## External Services
-External-services are grouped into a configurable number of groups (`service_groups`). Services from different groups are called in parallel; services from the same group are called sequentially. To mimic random paths on the service mesh, not all external-services of a `service_group` are called, but only a subset of them, whose number is `seq_len` and these are chosen randomly (uniform distribution) from those in the `service_group`. 
+## Application Deployment
+
+![deployer](deployer.png)
+µBench exploits a underlying container orchestration platform to deploy the service-cells. The deployment task is done by a per-platform deployment tool that takes as input the `workmodel.json`, possible platform configuratin files, and eventally uses the platform API to carry out the final deployment. Currently, µBench software includes a Kubernetes deployment tool, named K8sDeployer.
+
+### Kubernetes Deployer
+
+The K8sDeployer uses the `workmodel.json` file and other config files to build YAML files of the service-cells and then to deploy them on a Kubernetes platform. The K8SDeployer creates aslo the shared Volume that contains the `workmodel.json` file and the definition of custom functions; and deploys also the NGINX API gateway.
+
+In particular, the K8sDeployer starts up the following Kubernetes resources:
+
+- A `PersistentVolume` with its `PersistentVolumeClaim` to make the [NFS shared directory](/Docs/NFSConfig.md) visible as a volume for each pod, as it contains the configuration files;
+- The NGINX gateway as a `Deployment`, reachable from the outside of the cluster thanks to its related `NodePort` service; the configuration of the NGINX gateway through a `ConfigMap`;
+- Each service-cell as a `Deployment` with associated `NodePort` service.
+
+**Input Parameters**
+
+```json
+{
+   "K8sParameters": {
+      "prefix_yaml_file":"MicroServiceDeployment",
+      "namespace": "default",
+      "image": "msvcbench/microservice_v2:latest",
+      "cluster_domain": "cluster",
+      "path": "/api/v1"
+   },
+   "NFSConfigurations": {
+      "address": "192.168.0.46",
+      "mount_path": "/kubedata/mubSharedData"
+   },
+   "InternalServiceFilePath": "../CustomFunctions",
+   "OutputPath": "../SimulationWorkspace",
+   "WorkModelPath": "../SimulationWorkspace/workmodel.json"
+}
+```
+
+The K8sDeployer takes as input a json file which contains information about the IP address and path of NFS server on the K8s Master node used by the service-cells' Volume; the path
+of the `workmodel.json` file (`WorkModelPath`) and custom functions (`InternalServiceFilePath`) to be stored in the volume, and Kubernetes parameters.  
+
+These Kubernetes parameters are the the Docker `image` of the service-cell, the `namespace` of the deployment, as well as the K8s `cluster_domain` and the `path` used to triggers the service. Some information, such as `image` and `path`, can be already contained in the `workmodel.json` file and, if different, will be overwritten.
+
+User can change the name of the output YAML files by specifying the `prefix_yaml_file` and these files will be inserted in the `OutputPath` directory.
+
+**How to Run**
+Edit the `K8sParameters.json` file the run`RunK8sDeployer.py` from the K8s Master node as follows
+
+```zsh
+python3 RunK8sDeployer.py -c [PARAMETERS_FILE]
+```
+
+If the K8sDeployer found YAML files in the YAML folder, it will ask wheter the user prefers to undeploy them before to proceed.
+
+---
+## Toolchain
+
+To simulate large microservice application, µBench provides a toolchain made by two software, *ServiceMechGenerator* and *WorkLoadGenerator*,that support the creation of complex `workmodel.json` files by using random distributions whose parameters can be configured by the user.
+The following figure shows how they can be sequentially used with the K8sDeployer to have a µBench running on a Kubernetes cluster. 
+
+![toolchain](toolchain.png)
+
+### Service Mesh Generator
+
+The ServiceMeshGenerator generates a random *service mesh* of a µBench microservice application. A service mesh is usually defined as the set of external-services called by each service. It is represented as a graph, whose nodes are the services and a link exist between service A and B if service *A* call service *B*, i.e., *B* is an external-service of *A*. The ServiceMeshGenerator creates a `servicemesh.json` files that includes this topological informations and also other information concerning the strategy used to call the possible external-services, in order to mimic a random travelling of the service-mesh.
+
+**Service Mesh Topology**
+
+Literature [studies](https://researchcommons.waikato.ac.nz/bitstream/handle/10289/13981/EVOKE_CASCON_2020_paper_37_WeakestLink.pdf?sequence=11&isAllowed=y) show that the building of a realistic mesh can be done by using the Barabási-Albert (BA) algorithm, which uses a power-law distribution and results in a topology that follows a preferential-attachment model. For this reason we chose to model the service mesh as a BA graph.
+If we change the values of the BA model, we are able to generate microservice applications with different mesh topologies. 
+
+The BA algorithm builds the mesh topology as follows: at each step a new service is added as a vertex of a directed tree. This new service is connected with an edge to a single *parent* service already present in the topology. The edge direction is from the parent service to the new *child* service, this means that the parent service includes the new service in its external-services.  
+The parent service is chosen according to a preferred attachment strategy using a *power-law* distribution. Specifically, vertex *i* is chosen as a parent with a (non-normalized) probability equal to *P<sub>i</sub> = d<sub>i</sub><sup>&alpha;</sup> + a*, where *d<sub>i* is the number of services that have already chosen the service *i* as a parent, *&alpha;* is the power-law exponent, and *a* is the zero-appeal parameters i.e., the probability of a service being chosen as a parent when no other service has yet chosen it.
+
+**Service Mesh Travel Strategy**
+
+To simulate parallel and sequential calls of external-services, the whole set of external-services of a service is organized in a number of *external-service-groups**. Each group contains a different set of external-services and the insertion of external-services in groups is made according to a water-filling algorithm.
+When a service request is received, a service executes its internal-service and then the external-services contained in the external-service groups. For each group, a dedicated thread randomly selects `seq_len` external-services from it and invokes (e.g., HTTP call) them sequentially. These threads are executed in parallel, one per group. If the number of external-services is less than the configured number of service groups, some service groups do not exist and existing groups contain only a single external-service (water-filling). If the number of external-services in a group is lower than `seq_len`, all external-services in the service group are invoked sequentially.
+
+**Databases**
+
+To simulate the presence of databases in a µBench microservice application, we added to the above topology some *database-services* that only execute their internal-service. Other services, select one of these databases with a configurable probability.
+
+**Input Parameters**
+
+The ServicMeshGenrator takes as input a json configuration file (`ServiceMeshParameters.json`) as the following one:
+
+```json
+{
+   "ServiceMeshParameters": {
+      "vertices": 2,
+      "external_service_groups": 1,
+      "power": 0.05,
+      "seq_len": 100,
+      "zero_appeal": 3.25,
+      "dbs": {
+         "nodb": 0.2,
+         "sdb1": 0.79,
+         "sdb2": 0.01
+      }
+   },
+   "OutputPath": "../SimulationWorkspace"
+}
+```
+
+There are two services (`vertices = 2`), each service has a single `external_service_groups=1`, and for each group `seq_len=100` external-services are sequentially called (when `seq_len` > `vertices` all external-service of a service group are sequentially called).
+
+The configuration allows also the presence of two database, `sdb1` and `sdb2`. sdb1 is used by a service with probability 0.79, `sdb2` with probability 0.01, in the remainig cases the service doent use any database. 
+
+The figure below reports a possible service mesh generated with these parameters where `sdb2` has been never chosen. 
+
+<img width="270" src="../ServiceMeshGenerator/servicemesh-demo.png">
+
+The ServiceMeshGenerator generates and save to the `OutputPath` directory two files: the `servicemesh.json` and the `servicemesh.png` for an easier visualization of the generated service mesh, like the one shown before.
+
+This is an example of the `servicemesh.json` file generated by the ServiceMeshGenerator. The related mesh is shown in the above figure. We note that this is a part of the `workmodel.json` file previusly presented. The other part will ge created by the WorkModelGenerator.
+
+```json
+{
+  "s0": {
+    "external_services": [
+      {
+        "seq_len": 100,
+        "services": [
+          "s1"
+        ]
+      },
+      {
+        "seq_len": 1,
+        "services": [
+          "sdb1"
+        ]
+      }
+    ]
+  },
+  "sdb1": {
+    "external_services": []
+  },
+  "s1": {
+    "external_services": [
+      {
+        "seq_len": 1,
+        "services": [
+          "sdb1"
+        ]
+      }
+    ]
+  }
+}
+```
+
+**How to run** 
+Edit the `ServiceMeshParameters.json` file before running the `ServiceMeshGenerator`.
+Finally, run 
+```zsh
+python3 RunServiceMeshGen.py -c [PARAMETER_FILE]
+```
+
+**Examples**
+We illustrate four examples of different service mesh topologies:
+
+##### An highly-centralized hierarchical architectures with most of the services linked to one service (excluded the db services):
+
+```json
+{
+   "ServiceMeshParameters":{
+      "external_service_groups":1,
+      "seq_len":1,
+      "vertices":10,
+      "power":0.05,
+      "zero_appeal":0.01,
+      "dbs":{
+         "nodb":0.2,
+         "sdb1":0.6,
+         "sdb2":0.4
+      }
+   },
+   "OutputPath": "../SimulationWorkspace"
+}
+```
+
+<img width="400" src="../Docs/service_mesh_example_1.png">
+
+##### An applications that rely on a common logging service
 
 
+```json
+{
+   "ServiceMeshParameters":{
+      "external_service_groups":1,
+      "seq_len":1,
+      "vertices":10,
+      "power":0.9,
+      "zero_appeal":0.01,
+      "dbs":{
+         "nodb":0.2,
+         "sdb1":0.6,
+         "sdb2":0.4
+      }
+   },
+   "OutputPath": "../SimulationWorkspace"
+}
+```
+
+<img width="400" src="../Docs/service_mesh_example_2.png">
+
+##### An application with several auxiliary services:
+
+```json
+{
+   "ServiceMeshParameters":{
+      "external_service_groups":1,
+      "seq_len":1,
+      "vertices":10,
+      "power":0.05,
+      "zero_appeal":3.25,
+      "dbs":{
+         "nodb":0.2,
+         "sdb1":0.6,
+         "sdb2":0.4
+      }
+   },
+   "OutputPath": "../SimulationWorkspace"
+}
+```
+
+<img width="400" src="../Docs/service_mesh_example_3.png">
+
+##### An application organized in the conventional multi-tier fashion:
+
+```json
+{
+   "ServiceMeshParameters":{
+      "external_service_groups":1,
+      "seq_len":1,
+      "vertices":10,
+      "power":0.9,
+      "zero_appeal":3.25,
+      "dbs":{
+         "nodb":0.2,
+         "sdb1":0.6,
+         "sdb2":0.4
+      }
+   },
+   "OutputPath": "../SimulationWorkspace"
+}
+```
+
+<img width="400" src="../Docs/service_mesh_example_4.png">
+
+### Work Model Generator
+
+The WorkModelGenerator generates the `workmodel.json` describing internal and external-services of service-cells and that is used by deployers to eventually run the microservice application. For the configuration of external-services, the WorkModelGenerator imports those specified in a `servicemesh.json` file manually made of automatically generated by the ServiceMeshGenerator. For the selection of functions to be associated to internal-services of service-cells, the WorkModelGenerator singles out these functions at random and according to configurable probabilities. 
+
+**Input Parameters**
+
+The WorkModelGenerator takes as input a configuration file (`WorkModelParameters.json`) as the folowing one
+
+```json
+{
+   "WorkModelParameters":{
+      "f0":{
+         "function": "compute_pi",
+         "recipient": "service",
+         "probability":1,
+         "mean_bandwidth":10,
+         "range_complexity":[50, 100]
+      },
+      "f1": {
+         "function": "colosseum",
+         "recipient": "service",
+         "probability": 0.0
+      },
+      "f2": {
+         "function": "compute_pi",
+         "recipient": "database",
+         "probability":1,
+         "mean_bandwidth":1,
+         "range_complexity":[1, 10]
+      },
+      "request_method": "rest",
+      "databases_prefix": "sdb",
+      "override": {
+         "sdb1": {"sidecar": "mongo"},
+         "s0": {"function_id": "f1"}
+      }
+   },
+   "ServiceMeshFilePath": "../SimulationWorkspace/servicemesh.json",
+   "OutputPath": "../SimulationWorkspace"
+}
+```
+This file includes a set of *function-instances* that can be assigned to service-cells with a given probability to implement their internal-service. Many function-instances can evetually run the same function (e.g. compute_pi) but with different parameters. Each function-instance is represented as JSON object with a unique ID key (`f0`, `f1`, `f2`) and whose values are: the `recipient` of the function-instance (`database` or plain `service`);  the function to be executed (available in Python files of the NFS folder `/kubedata/mubSharedData/`); the `probability` to be associated to a service-cell; the optional key `replicas` (not shown) for choosing the number of replicas of service-cells that have chosen the specific function-instance; and other parameters that are the paramenters used by the function of the function-instance, e.g., the `compute_pi` function uses `mean_bandwidth` and `range_complexity`.
+
+The description of external-services is imported through a `servicemesh.json` file located in `ServiceMeshFilePath` that can be manually made or automatically generated by the ServiceMeshGenerator. 
+
+The method used to carry oud external-service calls is specified in `request_method` ("rest" or "gRPC"). Prefix to identify databases is in `databases_prefix`.  
+
+The `override` key can be used to enforce the use of a specific function for a service avoiding the random selection and to assign sidecar containers to a service cell. In the above example, the service-cell that implements the database idetified as `sdb1` has a mongo sidecar container. Moreover, the service-cell that implements the service `s0` uses the function-instace with ID `f1`.  
+
+The final `workmodel.json` file produced by the tool will be saved in the `OutputPath`.
+
+** How to run **
+
+Edit the `WorkModelParameters.json` file before running the `WorkModelGenerator`.
+Finally, run 
+
+```zsh
+python3 RunWorkModelGen.py -c [PARAMETER_FILE]
+```

@@ -26,7 +26,7 @@ def deploy_items(folder):
     for yaml_to_create in items:
         with open(yaml_to_create) as f:
             # print(yaml_to_create)
-            complete_yaml = yaml.load_all(f)
+            complete_yaml = yaml.load_all(f,Loader=yaml.FullLoader)
             for partial_yaml in complete_yaml:
                 try:
                     if partial_yaml["kind"] == "Deployment":
@@ -151,7 +151,7 @@ def deploy_nginx_gateway(folder):
     for yaml_to_create in items:
         with open(yaml_to_create) as f:
             # print(yaml_to_create)
-            complete_yaml = yaml.load_all(f)
+            complete_yaml = yaml.load_all(f,Loader=yaml.FullLoader)
             for partial_yaml in complete_yaml:
                 try:
                     try:

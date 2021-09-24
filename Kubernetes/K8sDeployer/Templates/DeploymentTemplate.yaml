@@ -13,6 +13,7 @@ spec:
     matchLabels:
       app: {{SERVICE_NAME}}-pod
   replicas: {{REPLICAS}}
+  {{NODE_AFFINITY}}
   template:
     metadata:
       labels:
