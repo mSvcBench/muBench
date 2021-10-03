@@ -53,8 +53,8 @@ For performance monitoring, service-cells expose a set of metrics to a Prometheu
 ---
 ## Work Model
 
-The description of internal and external services run by service-cells is contained in a global file `workmodel.json`, which all service-cells access via a [shared folder](/Docs/NFSConfig.md) (e.g., `/kubedata/mubSharedData/`) mounted as storage volume. This configuration mechanism, which exploits the sharing of global files, allows a service-cell to initialize and specialize autonomously, without the aid of a configuration server, a feature that makes it possible to exploit the replication and fault management mechanisms offered by container orchestration platforms such as Kubernetes. We point out a slight analogy of our architecture with that of human cells, which are equal to each other, contain the entire DNA (our configuration files) and are also able to characterize themselves and perform specific tasks.
-The `workmodel.json` is made by a key per service as shown below.
+The description of a µBench application, i.e. the set of internal and external services run by service-cells, is contained in a global file named `workmodel.json`, which all service-cells access via a NFS [shared folder](/Docs/NFSConfig.md) (e.g., `/kubedata/mubSharedData/`), internally mounted by the container runtime as storage volume. This configuration mechanism, which exploits the sharing of global files, allows a service-cell to initialize and specialize autonomously, without the aid of a configuration server, a feature that makes it possible to exploit the replication and fault management mechanisms offered by container orchestration platforms such as Kubernetes. We point out a slight analogy of our architecture with that of human cells, which are equal to each other, contain the entire DNA (our configuration files) and are also able to characterize themselves and perform specific tasks.
+The `workmodel.json` file describing a µBench application is made by a key per service as shown below.
 
 ```json
 {
@@ -166,7 +166,7 @@ To stress other aspects (e.g. memory, storage, etc.), the user can develop his *
 
 ### How to write your own custom function
 
-As **input**, your function receives a dictionary with the parameters specified in the `workmodel.json` file [work model generator](/WorkModelGenerator/README.md).
+As **input**, your function receives a dictionary with the parameters specified in the `workmodel.json` file.
 
 As **output**, your function must return a string used as body for the response given back by a service.
 
@@ -212,7 +212,10 @@ where `sidecar` is the name of the docker image to be used as sidecar and `mongo
 ---
 ## Application Deployment
 
-![deployer](deployer.png)
+<p align="center">
+<img width="350" src="deployer.png">
+</p>
+
 µBench exploits a underlying container orchestration platform to deploy the service-cells. The deployment task is done by a per-platform deployment tool that takes as input the `workmodel.json`, possible platform configuratin files, and eventally uses the platform API to carry out the final deployment. Currently, µBench software includes a Kubernetes deployment tool, named K8sDeployer.
 
 ### Kubernetes Deployer
@@ -240,9 +243,9 @@ In particular, the K8sDeployer starts up the following Kubernetes resources:
       "address": "192.168.0.46",
       "mount_path": "/kubedata/mubSharedData"
    },
-   "InternalServiceFilePath": "../CustomFunctions",
-   "OutputPath": "../SimulationWorkspace",
-   "WorkModelPath": "../SimulationWorkspace/workmodel.json"
+   "InternalServiceFilePath": "CustomFunctions",
+   "OutputPath": "SimulationWorkspace",
+   "WorkModelPath": "SimulationWorkspace/workmodel.json"
 }
 ```
 
@@ -265,7 +268,7 @@ If the K8sDeployer found YAML files in the YAML folder, it will ask wheter the u
 ---
 ## Toolchain
 
-To simulate large microservice application, µBench provides a toolchain made by two software, *ServiceMechGenerator* and *WorkLoadGenerator*,that support the creation of complex `workmodel.json` files by using random distributions whose parameters can be configured by the user.
+To simulate large microservice applications, µBench provides a toolchain made by two software, *ServiceMechGenerator* and *WorkLoadGenerator*,that support the creation of complex `workmodel.json` files by using random distributions whose parameters can be configured by the user.
 The following figure shows how they can be sequentially used with the K8sDeployer to have a µBench running on a Kubernetes cluster. 
 
 ![toolchain](toolchain.png)
@@ -309,7 +312,7 @@ The ServicMeshGenrator takes as input a json configuration file (`ServiceMeshPar
          "sdb2": 0.01
       }
    },
-   "OutputPath": "../SimulationWorkspace"
+   "OutputPath": "SimulationWorkspace"
 }
 ```
 
@@ -317,9 +320,11 @@ There are two services (`vertices = 2`), each service has a single `external_ser
 
 The configuration allows also the presence of two database, `sdb1` and `sdb2`. sdb1 is used by a service with probability 0.79, `sdb2` with probability 0.01, in the remainig cases the service doent use any database. 
 
-The figure below reports a possible service mesh generated with these parameters where `sdb2` has been never chosen. 
+The figure below reports a possible service mesh generated with these parameters where `sdb2` has been never chosen by services and therefore not included in the microservice applicaiton.
 
-<img width="270" src="../ServiceMeshGenerator/servicemesh-demo.png">
+<p align="center">
+<img width="270" src="../Docs/servicemesh-demo.png">
+</p>
 
 The ServiceMeshGenerator generates and save to the `OutputPath` directory two files: the `servicemesh.json` and the `servicemesh.png` for an easier visualization of the generated service mesh, like the one shown before.
 
@@ -363,7 +368,7 @@ This is an example of the `servicemesh.json` file generated by the ServiceMeshGe
 Edit the `ServiceMeshParameters.json` file before running the `ServiceMeshGenerator`.
 Finally, run 
 ```zsh
-python3 RunServiceMeshGen.py -c [PARAMETER_FILE]
+python3 ServiceMeshGenerator/RunServiceMeshGen.py -c Configs/ServiceMeshParameters.json
 ```
 
 **Examples**
@@ -385,14 +390,15 @@ We illustrate four examples of different service mesh topologies:
          "sdb2":0.4
       }
    },
-   "OutputPath": "../SimulationWorkspace"
+   "OutputPath": "SimulationWorkspace"
 }
 ```
 
+<p align="center">
 <img width="400" src="../Docs/service_mesh_example_1.png">
+</p>
 
 ##### An applications that rely on a common logging service
-
 
 ```json
 {
@@ -408,11 +414,13 @@ We illustrate four examples of different service mesh topologies:
          "sdb2":0.4
       }
    },
-   "OutputPath": "../SimulationWorkspace"
+   "OutputPath": "SimulationWorkspace"
 }
 ```
 
+<p align="center">
 <img width="400" src="../Docs/service_mesh_example_2.png">
+</p>
 
 ##### An application with several auxiliary services:
 
@@ -430,11 +438,13 @@ We illustrate four examples of different service mesh topologies:
          "sdb2":0.4
       }
    },
-   "OutputPath": "../SimulationWorkspace"
+   "OutputPath": "SimulationWorkspace"
 }
 ```
 
+<p align="center">
 <img width="400" src="../Docs/service_mesh_example_3.png">
+</p>
 
 ##### An application organized in the conventional multi-tier fashion:
 
@@ -452,11 +462,13 @@ We illustrate four examples of different service mesh topologies:
          "sdb2":0.4
       }
    },
-   "OutputPath": "../SimulationWorkspace"
+   "OutputPath": "SimulationWorkspace"
 }
 ```
 
+<p align="center">
 <img width="400" src="../Docs/service_mesh_example_4.png">
+</p>
 
 ### Work Model Generator
 
@@ -491,14 +503,15 @@ The WorkModelGenerator takes as input a configuration file (`WorkModelParameters
       "request_method": "rest",
       "databases_prefix": "sdb",
       "override": {
-         "sdb1": {"sidecar": "mongo"},
+         "sdb1": {"sidecar": "mongo:4.4.9"},
          "s0": {"function_id": "f1"}
       }
    },
-   "ServiceMeshFilePath": "../SimulationWorkspace/servicemesh.json",
-   "OutputPath": "../SimulationWorkspace"
+   "ServiceMeshFilePath": "SimulationWorkspace/servicemesh.json",
+   "OutputPath": "SimulationWorkspace"
 }
 ```
+
 This file includes a set of *function-instances* that can be assigned to service-cells with a given probability to implement their internal-service. Many function-instances can evetually run the same function (e.g. compute_pi) but with different parameters. Each function-instance is represented as JSON object with a unique ID key (`f0`, `f1`, `f2`) and whose values are: the `recipient` of the function-instance (`database` or plain `service`);  the function to be executed (available in Python files of the NFS folder `/kubedata/mubSharedData/`); the `probability` to be associated to a service-cell; the optional key `replicas` (not shown) for choosing the number of replicas of service-cells that have chosen the specific function-instance; and other parameters that are the paramenters used by the function of the function-instance, e.g., the `compute_pi` function uses `mean_bandwidth` and `range_complexity`.
 
 The description of external-services is imported through a `servicemesh.json` file located in `ServiceMeshFilePath` that can be manually made or automatically generated by the ServiceMeshGenerator. 
@@ -509,11 +522,37 @@ The `override` key can be used to enforce the use of a specific function for a s
 
 The final `workmodel.json` file produced by the tool will be saved in the `OutputPath`.
 
-** How to run **
+**How to run**
 
 Edit the `WorkModelParameters.json` file before running the `WorkModelGenerator`.
 Finally, run 
 
 ```zsh
-python3 RunWorkModelGen.py -c [PARAMETER_FILE]
+python3 WorkModelGenerator/RunWorkModelGen.py -c Configs/WorkModelParameters.json
+```
+
+### Autopilots
+
+Autopilots are sequential executors of the toolchain. An autopilot sequentially runs the `ServiceMeshGenerator`, the `WorkModelGenerator` and the `Deployer`.
+
+**K8sAutopilot**
+
+Currently, the `Autopilots` folder contains an Autopilot tool for Kubernetes in the subfolder `K8sAutopilot`.
+It uses the following configuration `K8sAutopilotConf.json` file whose keys specify the paths of the run tools and their configuration files.
+
+```json
+{
+   "RunServiceMeshGeneratorFilePath": "ServiceMeshGenerator/RunServiceMeshGen.py",
+   "RunWorkModelGeneratorFilePath": "WorkModelGenerator/RunWorkModelGen.py",
+   "RunK8sDeployerFilePath": "Deployers/K8sDeployer/RunK8sDeployer.py",
+   "ServiceMeshParametersFilePath": "Configs/ServiceMeshParameters.json",
+   "WorkModelParametersFilePath": "Configs/WorkModelParameters.json",
+   "K8sParametersFilePath": "Configs/K8sParameters.json"
+}
+```
+
+If necessary, edit this file before running the `K8sAutopilot` with
+
+```zsh
+python3 Autopilots/K8sAutopilot/K8sAutopilot.py -c Configs/K8sAutopilotConf.json
 ```

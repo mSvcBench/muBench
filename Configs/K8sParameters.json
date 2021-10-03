@@ -7,9 +7,10 @@
       "path": "/api/v1"
    },
    "NFSConfigurations": {
-      "address": "10.3.0.4",
+      "address": "192.168.0.46",
       "mount_path": "/kubedata/mubSharedData"
    },
-   "WorkModelPath": "../../SimulationWorkspace/workmodel.json",
-   "OutputPath": "../../SimulationWorkspace"
+   "InternalServiceFilePath": "CustomFunctions",
+   "OutputPath": "SimulationWorkspace",
+   "WorkModelPath": "SimulationWorkspace/workmodel.json"
 }

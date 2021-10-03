@@ -136,7 +136,7 @@ if not os.path.exists(f"{builder_module_path}/yamls"):
     folder_not_exist = True
 folder = f"{builder_module_path}/yamls"
 
-if not os.path.samefile(parameters_file_path,f"{output_path}/{os.path.basename(parameters_file_path)}"):
+if parameters_file_path != f"{output_path}/{os.path.basename(parameters_file_path)}":
     shutil.copyfile(parameters_file_path, f"{output_path}/{os.path.basename(parameters_file_path)}")
 
 if folder_not_exist or len(os.listdir(folder)) == 0:

@@ -1,0 +1,8 @@
+{
+   "RunServiceMeshGeneratorFilePath": "ServiceMeshGenerator/RunServiceMeshGen.py",
+   "RunWorkModelGeneratorFilePath": "WorkModelGenerator/RunWorkModelGen.py",
+   "RunK8sDeployerFilePath": "Deployers/K8sDeployer/RunK8sDeployer.py",
+   "ServiceMeshParametersFilePath": "Configs/ServiceMeshParameters.json",
+   "WorkModelParametersFilePath": "Configs/WorkModelParameters.json",
+   "K8sParametersFilePath": "Configs/K8sParameters.json"
+}

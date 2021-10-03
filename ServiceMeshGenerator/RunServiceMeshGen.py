@@ -63,7 +63,7 @@ if keyboard_input == "y":
     with open(f'{output_path}/servicemesh.json', "w") as f:
         f.write(json.dumps(servicemesh, indent=2))
 
-    if not os.path.samefile(parameters_file_path,f"{output_path}/{os.path.basename(parameters_file_path)}"):
+    if parameters_file_path != f"{output_path}/{os.path.basename(parameters_file_path)}":
         shutil.copyfile(parameters_file_path, f"{output_path}/{os.path.basename(parameters_file_path)}")
 
     print(f"'{output_path}/servicemesh.json'")
