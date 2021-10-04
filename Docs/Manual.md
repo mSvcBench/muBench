@@ -258,6 +258,8 @@ python3 RunK8sDeployer.py -c [PARAMETERS_FILE]
 
 If the K8sDeployer found YAML files in the YAML folder, it will ask wheter the user prefers to undeploy them before to proceed.
 
+Take care of controlling the eventual completion the deployement/undeployment operation with `kubectl get pods` command.
+
 ---
 ## Toolchain
 

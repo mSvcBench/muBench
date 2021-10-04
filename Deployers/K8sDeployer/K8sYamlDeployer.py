@@ -32,6 +32,7 @@ def deploy_items(folder):
                     if partial_yaml["kind"] == "Deployment":
                         k8s_apps_api.create_namespaced_deployment(namespace=partial_yaml["metadata"]["namespace"], body=partial_yaml)
                         print(f"Deployment '{partial_yaml['metadata']['name']}' created.")
+                        time.sleep(5) # used to avoid API server overload
                     elif partial_yaml["kind"] == "Service":
                         k8s_core_api.create_namespaced_service(namespace=partial_yaml["metadata"]["namespace"], body=partial_yaml)
                         print(f"Service '{partial_yaml['metadata']['name']}' created.")
@@ -40,8 +41,7 @@ def deploy_items(folder):
                     api_exception_body = json.loads(err.body)
                     print("######################")
                     print(f"Exception raised deploying a {partial_yaml['kind']}: {api_exception_body['details']} -> {api_exception_body['reason']}")
-                    print("######################")
-                time.sleep(5)
+                    print("######################")                
 
 def undeploy_items(folder):
     print("######################")

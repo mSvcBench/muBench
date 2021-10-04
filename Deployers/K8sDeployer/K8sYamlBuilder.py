@@ -6,7 +6,7 @@ from pprint import pprint
 
 K8s_YAML_BUILDER_PATH = os.path.dirname(os.path.abspath(__file__))
 
-SIDECAR_TEMPLATE = "- name: %s-pod\n          image: %s"
+SIDECAR_TEMPLATE = "- name: %s-sidecar\n          image: %s"
 NODE_AFFINITY_TEMPLATE = {'affinity': {'nodeAffinity': {'requiredDuringSchedulingIgnoredDuringExecution': {'nodeSelectorTerms': [{'matchExpressions': [{'key': 'kubernetes.io/hostname','operator': 'In','values': ['']}]}]}}}}
 
 # Add params to work_model json
@@ -29,7 +29,7 @@ def create_deployment_yaml_files(model, k8s_parameters, nfs, output_path):
             f = f.replace("{{IMAGE}}", model[service]["image"])
             f = f.replace("{{NAMESPACE}}", namespace)
             if "sidecar" in model[service].keys():
-                f = f.replace("{{SIDECAR}}", SIDECAR_TEMPLATE % (model[service]["sidecar"], model[service]["sidecar"]))
+                f = f.replace("{{SIDECAR}}", SIDECAR_TEMPLATE % (service, model[service]["sidecar"]))
             else:
                 f = f.replace("{{SIDECAR}}", "")
             if "replicas" in model[service].keys():
