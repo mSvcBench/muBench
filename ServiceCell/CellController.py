@@ -42,31 +42,21 @@ else:
 
 
 ########################### PROMETHEUS METRICS
-REQUEST_LATENCY = Summary('mub_request_latency_seconds', 'Request latency',
-                          ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service']
-                          )
 
 RESPONSE_SIZE = Summary('mub_response_size', 'Response size',
                         ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service']
                         )
 
-LOCAL_PROCESSING = Summary('mub_local_processing_latency_seconds', 'Local processing latency',
+INTERNAL_PROCESSING = Summary('mub_internal_processing_latency_seconds', 'Latency of internal service',
+                           ['zone', 'app_name', 'method', 'endpoint']
+                           )
+EXTERNAL_PROCESSING = Summary('mub_external_processing_latency_seconds', 'Latency of external services',
                            ['zone', 'app_name', 'method', 'endpoint']
                            )
 
-REQUEST_PROCESSING = Summary('mub_request_processing_seconds', 'Request latency without the network latency',
+REQUEST_PROCESSING = Summary('mub_request_processing_latency_seconds', 'Request latency including external and internal service',
                            ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service']
                            )
-
-def start_timer():
-    request.start_time = time.time()
-
-
-def stop_timer(response):
-    resp_time = time.time() - request.start_time
-    # REQUEST_LATENCY.labels('mss', request.path, request.remote_addr).observe(resp_time)
-    REQUEST_LATENCY.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr, ID).observe(resp_time)
-    return response
 
 # Flask settings
 flask_host = "0.0.0.0"
@@ -109,12 +99,13 @@ class HttpThread(Thread):
             start_local_processing = time.time()
             body = run_internal_service(my_work_model["internal_service"])
             local_processing_latency = time.time() - start_local_processing
-            LOCAL_PROCESSING.labels(ZONE, K8S_APP, request.method, request.path).observe(local_processing_latency)
+            INTERNAL_PROCESSING.labels(ZONE, K8S_APP, request.method, request.path).observe(local_processing_latency)
             RESPONSE_SIZE.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr, ID).observe(len(body))
             print("len(body): %d" % len(body))
             print("############### INTERNAL SERVICE FINISHED! ###############")
 
             # Execute the external services
+            start_external_request_processing = time.time()
             print("*************** EXTERNAL SERVICES STARTED ***************")
             if len(my_service_mesh) > 0:
                 service_error_dict = run_external_service(my_service_mesh, work_model)
@@ -127,6 +118,7 @@ class HttpThread(Thread):
 
             response = make_response(body)
             response.mimetype = "text/plain"
+            EXTERNAL_PROCESSING.labels(ZONE, K8S_APP, request.method, request.path).observe(time.time() - start_external_request_processing)
             REQUEST_PROCESSING.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr, ID).observe(time.time() - start_request_processing)
 
             return response
@@ -154,13 +146,14 @@ class gRPCThread(Thread, pb2_grpc.MicroServiceServicer):
             start_local_processing = time.time()
             body = run_internal_service(my_work_model["internal_service"])
             local_processing_latency = time.time() - start_local_processing
-            LOCAL_PROCESSING.labels(ZONE, K8S_APP, "grpc", "grpc").observe(local_processing_latency)
+            INTERNAL_PROCESSING.labels(ZONE, K8S_APP, "grpc", "grpc").observe(local_processing_latency)
             RESPONSE_SIZE.labels(ZONE, K8S_APP, "grpc", "grpc", remote_address, ID).observe(len(body))
             print("len(body): %d" % len(body))
             print("############### INTERNAL SERVICE FINISHED! ###############")
 
             # Execute the external services
             print("*************** EXTERNAL SERVICES STARTED ***************")
+            start_external_request_processing = time.time()
             if len(my_service_mesh) > 0:
                 service_error_dict = run_external_service(my_service_mesh, work_model)
                 if len(service_error_dict):
@@ -172,6 +165,7 @@ class gRPCThread(Thread, pb2_grpc.MicroServiceServicer):
             print("############### EXTERNAL SERVICES FINISHED! ###############")
 
             result = {'text': body, 'status_code': True}
+            EXTERNAL_PROCESSING.labels(ZONE, K8S_APP, "grpc", "grpc").observe(time.time() - start_external_request_processing)
             REQUEST_PROCESSING.labels(ZONE, K8S_APP, "grpc", "grpc", remote_address, ID).observe(
                 time.time() - start_request_processing)
             return pb2.MessageResponse(**result)
@@ -203,11 +197,6 @@ if __name__ == '__main__':
     # Function
     # If mode is gRPC the http thread is necessary for the entry point (s0) that receive a REST request
     http_thread = HttpThread()
-
-    # Metrics configuration (REQUEST_LATENCY)
-    http_thread.app.before_request(start_timer)
-    # http_thread.app.after_request(record_request_data)
-    http_thread.app.after_request(stop_timer)
 
     http_thread.start()
 

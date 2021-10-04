@@ -550,8 +550,8 @@ Run the `K8sAutopilot` with:
 ```zsh
 python3 Autopilots/K8sAutopilot/K8sAutopilot.py -c Configs/K8sAutopilotConf.json
 ```
-
-# Traffic Generator and Runner
+---
+## Traffic Generator and Runner
 
 `TrafficGenerator` and `Runner` are two tools used to load a µBench miscoservice application with a sequence of HTTP requests and observe its performance both through simple metrics offered by the Runner and by Prometheus metrics.  
 
@@ -650,3 +650,51 @@ The `TrafficGenerator` can be executed as follows:
 python3 TrafficGenerator/RunTrafficGen.py -c Configs/TrafficParameters.json
 ```
 
+With the following steps you will deploy on your Kubernetes environment: [Prometheus](https://prometheus.io/), [Prometheus Adapter](https://github.com/kubernetes-sigs/prometheus-adapter) and [Grafana](https://grafana.com/)
+
+---
+## Prometheus
+µBench service cells export some metrics to a Prometheus server running in the cluster.
+
+### Cluster Configuration
+First, create a new namespace called `monitoring` where we will deploy all the monitoring resources. Prometheus will be available at: `http://<access-gateway-ip>:30000` after the successful deployment of the following commands:
+
+```bash
+kubectl create namespace monitoring
+kubectl apply -f Monitoring/kubernetes-prometheus
+```
+
+**Prometheus Adapter**
+
+Prometheus Adapter is suitable for use with the [Kubernetes Horizontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/).
+It can also replace the metrics server on clusters that already run Prometheus and collect the appropriate metrics.
+You can install it using [Helm](https://helm.sh/docs/intro/install/).
+We'll use the `prometheus-adapter-values.yaml` file for defining the µBench custom metrics to analyze.
+
+
+```bash
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+helm install --namespace monitoring -f kubernetes-prometheus-adapter/prometheus-adapter-values.yaml prometheus-adapter prometheus-community/prometheus-adapter
+
+# to check the status of the release
+$ helm status prometheus-adapter --namespace monitoring
+```
+
+**Grafana**
+
+Prometheus metrics can be shown by using [Grafana](https://grafana.com/) tool.
+To install Grafana in the Kubernetes cluster use the following command and Grafana services will be available at: `http://<access-gateway-ip>:30001`
+
+```bash
+kubectl create namespace monitoring
+kubectl apply -f Monitoring/kubernetes-grafana
+```
+
+### Service Cell metrics
+A service cell exports the following Prometheus Summary metrics:
+
+- *mub_response_size* : size of the request response in bytes;
+- *mub_request_latency_seconds* : request latency including the execution of internal and extrenal services; 
+- *mub_internal_processing_latency_seconds* : duration of the execution of the internal-service
+- *mub_external_processing_latency_seconds* :  duration of the execution of the external-service
