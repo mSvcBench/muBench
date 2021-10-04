@@ -8,7 +8,6 @@ import shutil
 import argparse
 import argcomplete
 
-
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-c', '--config-file', action='store', dest='parameters_file',
@@ -28,14 +27,6 @@ except Exception as err:
 
 parameters_file_path = args.parameters_file
 
-
-# if len(sys.argv) > 1:
-#     parameters_file_path = sys.argv[1]
-# elif len(Traffic_PATH) > 0:
-#     parameters_file_path = f'{Traffic_PATH}/TrafficParameters.json'
-# else:
-#     parameters_file_path = 'TrafficParameters.json'
-
 try:
     with open(parameters_file_path) as f:
         params = json.load(f)
@@ -48,13 +39,15 @@ try:
             os.makedirs(output_path)
     else:
         output_path = Traffic_PATH
+    if "OutputFile" in params.keys() and len(params["OutputFile"]) > 0:
+        output_file = params["OutputFile"]
+    else:
+        output_file = "workload.json"
 
 except Exception as err:
     print("ERROR: in RunTrafficGen,", err)
     exit(1)
 
-
-# Traffic = get_Traffic(ingress_list, {"min": 1, "max": 3}, request_parameters)
 Traffic = get_Traffic(Traffic_parameters)
 pprint(Traffic)
 print("# Events: %d" % len(Traffic))
@@ -62,14 +55,13 @@ print("# Events: %d" % len(Traffic))
 keyboard_input = "y"
 
 if keyboard_input == "y":
-    # with open(f"Traffic_events_{stop_event}_mean_{mean_interarrival_time}.json", "w") as f:
-    with open(f"{output_path}/Traffic_{Traffic_parameters['request_parameters']['mean_interarrival_time']}.json", "w") as f:
+    with open(f"{output_path}/{output_file}", "w") as f:
         f.write(json.dumps(Traffic, indent=2))
 
-    if output_path != Traffic_PATH:
-        shutil.copy(parameters_file_path, f"{output_path}/")
+    #if output_path != Traffic_PATH:
+    #    shutil.copy(parameters_file_path, f"{output_path}/")
 
-    print(f"'{output_path}/Traffic_{Traffic_parameters['request_parameters']['mean_interarrival_time']}.json'")
+    print(f"'{output_path}/{output_file}")
     print("File Saved!")
 
 

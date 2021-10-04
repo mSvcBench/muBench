@@ -48,24 +48,28 @@ try:
             os.makedirs(output_path)
     else:
         output_path = SERVICEMESH_PATH
+    if "OutputFile" in params.keys() and len(params["OutputFile"]) > 0:
+        output_file = params["OutputFile"]
+    else:
+        output_file = "servicemesh.json"
 except Exception as err:
     print("ERROR: in RunServiceMeshGen,", err)
     exit(1)
 
-
-servicemesh = get_service_mesh(graph_parameters, output_path)
+output_file_png = f'{os.path.splitext(output_file)[0]}.png'
+servicemesh = get_service_mesh(graph_parameters, output_path, output_file_png)
 
 pprint(servicemesh)
 
 # keyboard_input = input("Save service mesh on file? (y) ") or "y"
 keyboard_input = "y"
 if keyboard_input == "y":
-    with open(f'{output_path}/servicemesh.json', "w") as f:
+    with open(f'{output_path}/{output_file}', "w") as f:
         f.write(json.dumps(servicemesh, indent=2))
 
-    if parameters_file_path != f"{output_path}/{os.path.basename(parameters_file_path)}":
-        shutil.copyfile(parameters_file_path, f"{output_path}/{os.path.basename(parameters_file_path)}")
+    #if parameters_file_path != f"{output_path}/{os.path.basename(parameters_file_path)}":
+    #    shutil.copyfile(parameters_file_path, f"{output_path}/{os.path.basename(parameters_file_path)}")
 
-    print(f"'{output_path}/servicemesh.json'")
-    print(f"'{output_path}/servicemesh.png'")
+    print(f"'{output_path}/{output_file}'")
+    print(f"'{output_path}/{output_file_png}'")
     print("Files Saved!")

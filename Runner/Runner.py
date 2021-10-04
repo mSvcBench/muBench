@@ -200,19 +200,9 @@ for cnt, workload_var in enumerate(workloads):
         error_request = 0
         runner(workload_var)
         print("***************************************")
-    #     if cnt != len(workloads) - 1 or x != round - 1:
-    #         print("Sleep for 240 sec")
-    #         time.sleep(240)
     if cnt != len(workloads) - 1:
-        print("Sleep for 100 sec")
+        print("Sleep for 100 sec to allow completion of previus requests")
         time.sleep(100)
     with open(f"{output_path}/{result_file}_{workload_var.split('/')[-1].split('.')[0]}.txt", "w") as f:
         f.writelines("\n".join(stats))
-
-
-   # "AfterWorkloadFunction": {
-   #    "file_path": "Function",
-   #    "function_name": "get_prometheus_stats"
-   # }
-
-# "workload_files_path_list": ["NewWorkloads/workload_threshold.json","NewWorkloads/workload_350.json", "NewWorkloads/workload_300.json", "NewWorkloads/workload_250.json", "NewWorkloads/workload_200.json", "NewWorkloads/workload_150.json", "NewWorkloads/workload_100.json", "NewWorkloads/workload_050.json"],
+ 

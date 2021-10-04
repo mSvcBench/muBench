@@ -25,9 +25,11 @@ def edges_reversal(graph):
         graph.add_edges([(edge[1], edge[0])])
 
 
-def get_service_mesh(graph_params, output_path=None):
+def get_service_mesh(graph_params, output_path=None, output_file_png=None):
     if output_path is None:
         output_path = SERVICEMESH_PATH
+    if output_file_png is None:
+        output_file_png = "servicemesh.png"
     # Takes as inputs the graph parameters and generates its json file accordingly
     g = Graph.Barabasi(n=graph_params["vertices"], power=graph_params["power"], m=1,
                        zero_appeal=graph_params["zero_appeal"], directed=True)
@@ -70,7 +72,7 @@ def get_service_mesh(graph_params, output_path=None):
 
     g.vs["label"] = list(range(graph_params["vertices"])) + graph_added_dbs
     g.vs["size"] = 35
-    plot(g, f"{output_path}/servicemesh.png")
+    plot(g, f"{output_path}/{output_file_png}")
     # print(g)
     print("Service Mesh Created!")
     return service_mesh

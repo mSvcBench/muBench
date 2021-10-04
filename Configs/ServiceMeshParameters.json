@@ -11,5 +11,6 @@
          "sdb2": 0.0
       }
    },
-   "OutputPath": "SimulationWorkspace"
+   "OutputPath": "SimulationWorkspace",
+   "OutputFile": "servicemesh.json"
 }
