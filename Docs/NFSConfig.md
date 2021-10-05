@@ -17,15 +17,15 @@ sudo apt install nfs-kernel-server
    This is also referred to as the export directory and it’s in this directory that we shall 
    later create files which will be accessible by client systems.
 ```bash
-sudo mkdir -p /mnt/mubSharedData
-sudo chown nobody:nogroup /mnt/mubSharedData
-sudo chmod 777 /mnt/mubSharedData
+sudo mkdir -p /kubedata/mubSharedData
+sudo chown nobody:nogroup /kubedata/mubSharedData
+sudo chmod 777 /kubedata/mubSharedData
 ```
 
 3. Edit the */etc/exports* file to grant the permissions for accessing the NFS server
 ```shell
-/mnt/mubSharedData pod_subnet(rw,sync,no_subtree_check,no_root_squash,insecure)
-/mnt/mubSharedData node_subnet(rw,sync,no_subtree_check,no_root_squash,insecure)
+/kubedata/mubSharedData pod_subnet(rw,sync,no_subtree_check,no_root_squash,insecure)
+/kubedata/mubSharedData node_subnet(rw,sync,no_subtree_check,no_root_squash,insecure)
 ```
 Edit this two params according to your configuration:
 * **node_subnet:** Subnet of K8s nodes (e.g. 10.3.0.0/24)

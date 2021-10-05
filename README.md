@@ -1,12 +1,12 @@
 # **µBench** - A high customizable Microservice simulator
 
-**µBench** is a high customizable simulator of microservice applications.
-This project aims at facilitating the process of modeling, deploying and monitoring, to reproduce the behavior of complex applications. 
+**µBench** is a high customizable benchmark tool of microservice applications.
+The project aims at facilitating the process of modeling, deploying and monitoring, to reproduce the behavior of complex microservice applications. 
 
 You can shape the mesh topology of interconnected services that describes a microservice application.
 You can define the behaviors of the application thanks to the ability of implementing your own stress functions which gives you total control on the aspect to stress, e.g. the CPU, memory, I/O, network, etc.
 
-To simulate real case scenarios, **µBench** deploys the modeled applications on top of distributed environments, like [Kubernetes](https://kubernetes.io).
+To emulate real case scenarios, **µBench** deploys the modeled applications on top of distributed environments, like [Kubernetes](https://kubernetes.io).
 
 In this repository, you can learn more about [how µBench abstracts](/Docs/MicroserviceModel.md#Microservice-Model) the workflow of the microservice applications, [the architecture](/Docs/BuildingTools.md#Building-Tools) of µBench and a [step by step example](/Docs/GettingStarted.md#Example) that walk you through the potentialities of µBench.
 Also, you can use the [K8s Autopilot](/Docs/GettingStarted.md#K8s-Autopilot) to perform all the steps of the [example](/Docs/GettingStarted.md#Example) automatically up to the deployment of the microservice to your Kubernetes cluster.

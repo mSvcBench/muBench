@@ -28,20 +28,12 @@
 ![service-cell-abstraction](service-cell-abstraction.png)
 
 ## Service Cell
+We modeled a microservice application as a complex system made up of *service cells* with a different ID, e.g. *s0, s1, s2... etc*. A service cell is a program, which calls internal and external functions, i.e. of other cells. Which functions to call is specified in two global files, `servicemesh.json` and `workmodel.json`, which all service cells access via a [shared folder](/Docs/NFSConfig.md) (e.g., `/kubedata/mubSharedData/`) mounted as storage volume. The `servicemesh.json` file describes the so-called *service mesh* that is made by nodes (the services) and links; there is a link between the services *sj* and *si*, if *sj* can call *si* as external function. The `workmodel.json` describes the internal functions the service cells execute and the pattern used to call external functions (e.g. in sequence, in parallel, etc.). These two global files include information about each service cell and markers that allow a service cell to identify the information it is interested in and thus specialize in performing its intended internal and external functions. This configuration mechanism, which exploits the sharing of global files, allows a service cell to initialize and specialize autonomously, without the aid of a server, a feature that makes it possible to exploit the replication and fault management mechanisms offered by container orchestration platforms such as Kubernetes. We point out a slight analogy of our architecture with that of human cells, which are equal to each other, contain the entire DNA (our configuration files) and are also able to characterize themselves and perform specific tasks.   
 
-A microservice application is made up as a collection of loosely coupled identical services which, at the time of their creation, only differ from their different IDs, e.g. *s0, s1, s2... etc*.
-The services are interconnected to each other depending on the configuration parameters and their combinations compose the *service mesh*.
 
-We'll use the analogy of the cell and its DNA.
-Almost every cell in a person’s body has *the same DNA*.
-Although having the same DNA, each cell becomes specialized in order to perform different functions.  
-
-With this in mind, we thought of a service like a cell, since it is the building block of a microservice application.
-Every service share two common files: the `servicemesh.json` and the `workmodel.json` that, as the DNA of a cell, contain all the information needed for the service to stand out from the others and shape the application.
-
-All the services are [Docker containers](https://www.docker.com/resources/what-container) that use the same image.
-Only when created each service learns, from the `servicemesh.json` file, which services it is connected to (*external-services*) and, from the `workmodel.json`, all the useful information for being fully functionable inside the application, like the function they must perform (*internal-service*) and the url used to listen to requests of connected services.
-Upon a service request, each service locally executes an *internal-service* and then carries out a set of calls towards *external-services*.
+Service cells are packaged as [Docker containers](https://www.docker.com/resources/what-container) that use the same image, which contains a Python code.  
+When created, a service cell learns, from the `servicemesh.json` file, which services it is connected to (*external-services*) and, from the `workmodel.json`, all the useful information for being fully functionable inside the application, like the function they must perform (*internal-service*) and the url used to listen to requests of connected services.
+Upon a service request, each service locally executes an *internal-service* and then carries out a set of calls towards *external-services*, i.e., towards other service cells.
 Visit [this section](/MicroServiceCellAbstraction/README.md) if you want to build your own version of the Docker image each service use.
 
 ![service-cell-rest-grpc](microservices-rest-grpc.png)
@@ -53,23 +45,18 @@ The NGINX gateway handles REST requests from the clients and routes them to the 
 
 ---
 ## Internal Service
-An internal-service is a task that users can define as a python function to be inserted in the [shared folder](/Docs/NFSConfig.md) `/mnt/mubSharedData/InternalServiceFunctions` (see also **custom functions** below for details). However, each service has a default internal-service that is named `compute_pi`.
+An internal-service is a task that users can define as a python function to be inserted in the [shared folder](/Docs/NFSConfig.md) `/kubedata/mubSharedData/InternalServiceFunctions` (see also **custom functions** below for details). However, each service has a default internal-service that is named `compute_pi`.
 
 ### Custom Functions
-Each service of the microservice mesh executes an internal-service when called and by default it uses the `compute_pi` function. 
-The default function keeps the CPU busy depending on the specified complexity of operations.
+Each service cell executes an internal-service that by default is the `compute_pi` function. 
+This default function keeps the CPU busy depending on the specified complexity of operations.
 
 To try other scenarios, you can use your own specific functions to stress the aspect you whish to simulate: CPU, memory or storage. 
 In order to do so, you must write your own python function and save it to the subfolder `InternalServiceFunctions` inside your NFS shared directory.
-If you followed our [NFS configuration](/Docs/NFSConfig.md), create the subfolder into `/mnt/mubSharedData` using 
-`mkdir /mnt/mubSharedData/InternalServiceFunctions`, otherwise create it according to your NFS configurations.
+If you followed our [NFS configuration](/Docs/NFSConfig.md), create the subfolder into `/kubedata/mubSharedData` using 
+`mkdir /kubedata/mubSharedData/InternalServiceFunctions`, otherwise create it according to your NFS configurations.
 
----
-## External Services
-External-services are grouped into a configurable number of groups (`service_groups`). Services from different groups are called in parallel; services from the same group are called sequentially. To mimic random paths on the service mesh, not all external services of a `service_group` are called, but only a subset of them, whose number is `seq_len` and these are chosen randomly (uniform distribution) from those in the `service_group`. 
-
----
-### How to write your own custom job
+### How to write your own custom function
 
 As **input**, your function receives a dictionary with the parameters specified in the [work model generator](/WorkModelGenerator/README.md).
 
@@ -88,3 +75,8 @@ def custom_function(params):
 
     return response_body
 ```
+---
+## External Services
+External-services are grouped into a configurable number of groups (`service_groups`). Services from different groups are called in parallel; services from the same group are called sequentially. To mimic random paths on the service mesh, not all external-services of a `service_group` are called, but only a subset of them, whose number is `seq_len` and these are chosen randomly (uniform distribution) from those in the `service_group`. 
+
+

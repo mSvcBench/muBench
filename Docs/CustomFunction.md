@@ -6,8 +6,8 @@ The default function keeps the CPU busy depending on the specified complexity of
 
 To try other scenarios, you can use your own specific functions to stress the aspect you whish to simulate: CPU, memory or storage. 
 In order to do so, you must write your own python function and save it to the subfolder `InternalServiceFunctions` inside your NFS shared directory.
-If you followed our [NFS configuration](NFSConfig.md), create the subfolder into `/mnt/mubSharedData` using 
-`mkdir /mnt/mubSharedData/InternalServiceFunctions`, otherwise create it according to your NFS configurations.
+If you followed our [NFS configuration](NFSConfig.md), create the subfolder into `/kubedata/mubSharedData` using 
+`mkdir /kubedata/mubSharedData/InternalServiceFunctions`, otherwise create it according to your NFS configurations.
 
 ## How to write your own custom job
 
