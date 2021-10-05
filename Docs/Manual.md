@@ -788,4 +788,4 @@ curl http://127.0.0.1:31113/s0
 <img width="400" src="test.png">
 </p>
 
-For other tests refers to [Benchmarks](#benchmarks-tools) tools.
+For other tests refer to [Benchmarks](#benchmarks-tools) tools.
