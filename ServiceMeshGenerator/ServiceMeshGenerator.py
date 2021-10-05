@@ -25,9 +25,11 @@ def edges_reversal(graph):
         graph.add_edges([(edge[1], edge[0])])
 
 
-def get_service_mesh(graph_params, output_path=None):
+def get_service_mesh(graph_params, output_path=None, output_file_png=None):
     if output_path is None:
         output_path = SERVICEMESH_PATH
+    if output_file_png is None:
+        output_file_png = "servicemesh.png"
     # Takes as inputs the graph parameters and generates its json file accordingly
     g = Graph.Barabasi(n=graph_params["vertices"], power=graph_params["power"], m=1,
                        zero_appeal=graph_params["zero_appeal"], directed=True)
@@ -49,7 +51,7 @@ def get_service_mesh(graph_params, output_path=None):
             service_list[current_service_group]["services"].append(f"s{service_id}")
             current_service_group = (current_service_group + 1) % graph_params["external_service_groups"]
                 
-        service_mesh[f"s{vertex}"] = service_list
+        service_mesh[f"s{vertex}"] = {'external_services': service_list}
 
         if "dbs" in graph_params.keys() and len(graph_params["dbs"]) > 0:
             selected_db = select_db(graph_params["dbs"])
@@ -59,16 +61,18 @@ def get_service_mesh(graph_params, output_path=None):
             if selected_db not in graph_added_dbs:
                 graph_added_dbs.append(selected_db)
                 g.add_vertices(1)
-                service_mesh[selected_db] = list()
+                service_mesh[selected_db] = {'external_services': []}
             new_vertex = g.vcount() - 1
             g.add_edges([(vertex, new_vertex)])
-            service_mesh[f"s{vertex}"].append({'seq_len': 1, "services": [selected_db]})
+            if 'external_services' not in service_mesh[f"s{vertex}"]:
+                service_mesh[f"s{vertex}"] = {'external_services': []}
+            service_mesh[f"s{vertex}"]['external_services'].append({'seq_len': 1, "services": [selected_db]})
 
     # print("THE MESH:\n", json.dumps(service_mesh))
 
     g.vs["label"] = list(range(graph_params["vertices"])) + graph_added_dbs
     g.vs["size"] = 35
-    plot(g, f"{output_path}/servicemesh.png")
+    plot(g, f"{output_path}/{output_file_png}")
     # print(g)
     print("Service Mesh Created!")
     return service_mesh

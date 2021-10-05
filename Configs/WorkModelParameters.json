@@ -1,0 +1,31 @@
+{
+   "WorkModelParameters":{
+      "f0":{
+         "function": "compute_pi",
+         "recipient": "service",
+         "probability":1,
+         "mean_bandwidth":10,
+         "range_complexity":[50, 100]
+      },
+      "f1": {
+         "function": "colosseum",
+         "recipient": "service",
+         "probability": 0.0
+      },
+      "f2": {
+         "function": "compute_pi",
+         "recipient": "database",
+         "probability":1,
+         "mean_bandwidth":1,
+         "range_complexity":[1, 10]
+      },
+      "request_method": "rest",
+      "databases_prefix": "sdb",
+      "override": {
+         "sdb1": {"sidecar": "mongo:4.4.9"},
+         "s0": {"function_id": "f1"}
+      }
+   },
+   "ServiceMeshFilePath": "SimulationWorkspace/servicemesh.json",
+   "OutputPath": "SimulationWorkspace"
+}

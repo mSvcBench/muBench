@@ -1,0 +1,91 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{SERVICE_NAME}}-dep
+  namespace: {{NAMESPACE}}
+  labels:
+    zone: default
+    app: {{SERVICE_NAME}}
+  annotations:
+    something: something
+spec:
+  selector:
+    matchLabels:
+      app: {{SERVICE_NAME}}-pod
+  replicas: {{REPLICAS}}
+  {{NODE_AFFINITY}}
+  template:
+    metadata:
+      labels:
+        zone: default
+        app: {{SERVICE_NAME}}-pod
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8081'
+    spec:
+      containers:
+        - name: {{SERVICE_NAME}}-pod
+          image: {{IMAGE}}
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: podinfo
+              mountPath: /etc/podinfo
+#            - name: config-volume
+#              mountPath: /etc/MSconfig
+            - name: microservice-volume
+              mountPath: /app/MSConfig
+          env:
+            - name: APP
+              value: {{SERVICE_NAME}}
+            - name: ZONE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['zone']
+            - name: K8S_APP
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['app']
+        {{SIDECAR}}
+#      terminationGracePeriodSeconds: 0
+      volumes:
+        - name: podinfo
+          downwardAPI:
+            items:
+              - path: "labels"
+                fieldRef:
+                  fieldPath: metadata.labels
+              - path: "annotations"
+                fieldRef:
+                  fieldPath: metadata.annotations
+#        - name: config-volume
+#          configMap:
+#            name: microservices-configmap
+#            items:
+#            - key: service-mesh
+#              path: servicemesh
+#            - key: work-model
+#              path: workmodel
+        - name: microservice-volume
+          persistentVolumeClaim:
+            claimName: nfs-pvc-ms
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{SERVICE_NAME}}
+  namespace: {{NAMESPACE}}
+  labels:
+    app: {{SERVICE_NAME}}-pod
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 8080
+    nodePort:
+    name: tcp-input-rest
+  - port: 51313
+    targetPort: 51313
+    name: tcp-input-grpc
+  selector:
+    app: {{SERVICE_NAME}}-pod

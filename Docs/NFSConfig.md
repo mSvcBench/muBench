@@ -1,40 +1,50 @@
 # Configure NFS Server
-The MicroServiceSimulator use the NFS Server to share the configuration files between services, in particular 
-the nfs shared directory contains the work model and service mesh files, and a directory with the optional
-internal job functions.
+µBench uses the NFS Server to share the configuration files among services, in particular 
+the nfs shared directory (`/kubedata/mubSharedData`) contains the `workmodel.json`, and a directory with the custom
+internal functions.
 
 ## Install NFS Server
-For simplicity and compatibility with the K8s Autopilot script. 
-1. We will install the **nfs-kernel-server** package on the master node.
+Install the **nfs-kernel-server** package on a node of the cluster, e.g. the K8s master node.
 
 ```bash
 sudo apt update
 sudo apt install nfs-kernel-server
 ```
 
-2. We will be creating a directory that will be shared among client systems and we grant all permission to the 
-   content inside the directory and the directory itself. 
-   This is also referred to as the export directory and it’s in this directory that we shall 
-   later create files which will be accessible by client systems.
+Create the `/kubedata/mubSharedData` directory that is shared among NFS clients and grant all permission to the contents inside the directory and the directory itself. 
+
 ```bash
 sudo mkdir -p /kubedata/mubSharedData
 sudo chown nobody:nogroup /kubedata/mubSharedData
 sudo chmod 777 /kubedata/mubSharedData
 ```
 
-3. Edit the */etc/exports* file to grant the permissions for accessing the NFS server
-```shell
-/kubedata/mubSharedData pod_subnet(rw,sync,no_subtree_check,no_root_squash,insecure)
-/kubedata/mubSharedData node_subnet(rw,sync,no_subtree_check,no_root_squash,insecure)
-```
-Edit this two params according to your configuration:
-* **node_subnet:** Subnet of K8s nodes (e.g. 10.3.0.0/24)
-* **pod_subnet:** Subnet of K8s pods (e.g. 10.244.0.0/16)
+Edit the */etc/exports* file to grant the permissions for accessing the NFS server
 
-4. Finally export the NFS share directory and restart the NFS kernel server for 
-   the changes to come into effect
+```shell
+/kubedata/mubSharedData *(rw,sync,no_subtree_check,no_root_squash,insecure)
+```
+
+Finally export the NFS share directory and restart the NFS kernel server for the changes to come into effect
 
 ```bash
 sudo exportfs -a
 sudo systemctl restart nfs-kernel-server
 ```
+
+## Configure NFS Clients
+
+Client nodes must have nfs-common package and a `/kubedata/mubSharedData` directory used to mount the NFS folder   
+
+```bash
+sudo apt update
+sudo apt install nfs-common
+```
+
+Edit the */etc/fstab* file to automount the NFS server folder automatically. Here we assumed that the IP address of the NFS server is  192.168.0.46
+
+```bash
+192.168.0.46:/kubedata /kubedata nfs defaults 0 2
+```
+
+To test the configuratin put a file in the folder of the NFS server node and see if client nodes can access it.

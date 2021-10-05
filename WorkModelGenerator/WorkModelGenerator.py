@@ -19,7 +19,10 @@ def select_internal_service(internal_services):
         if random_extraction <= prev_interval + internal_service[1]["probability"]/p_total:
             tmp_param = dict(internal_service[1])
             tmp_param.pop("probability")
-            return {internal_service[0]: tmp_param}, internal_service[0]
+            tmp_param.pop("recipient")
+            function_name = tmp_param['function']
+            tmp_param.pop("function")           
+            return {function_name:tmp_param}, function_name
         prev_interval += round(internal_service[1]["probability"]/p_total, 10)
 
 
@@ -41,26 +44,30 @@ def get_work_model(service_mesh, workmodel_params):
     internal_services_db = dict()
 
     for x in workmodel_params.items():
-        if "type" in dict(x[1]) and dict(x[1])["type"] == "database":
-            x[1].pop("type")
+        if "function" not in dict(x[1]): 
+            continue
+        if "recipient" in dict(x[1]) and dict(x[1])["recipient"] == "database":
             internal_services_db[x[0]] = x[1]
-        else:
+        elif "recipient" in dict(x[1]) and dict(x[1])["recipient"] == "service":
             internal_services[x[0]] = x[1]
 
     if len(internal_services_db) == 0:
         internal_services_db = internal_services
     try:
         for vertex in service_mesh.keys():
-            work_model[f"{vertex}"] = {}
+            work_model[f"{vertex}"] = {'external_services':service_mesh.get(vertex)['external_services']}
             if vertex in override.keys():
                 if "sidecar" in override[vertex].keys():
                     work_model[f"{vertex}"].update({"sidecar": override[vertex]["sidecar"]})
 
-                if "function" in override[vertex].keys():
-                    tmp_param = workmodel_params[override[vertex]["function"]].copy()
+                if "function_id" in override[vertex].keys():
+                    
+                    tmp_param = dict(internal_services[override[vertex]['function_id']])
                     tmp_param.pop("probability")
-                    selected_internal_service = {override[vertex]["function"]: tmp_param}
-                    work_model[f"{vertex}"].update({"internal_service": selected_internal_service,
+                    tmp_param.pop("recipient")
+                    function_name = tmp_param['function']
+                    tmp_param.pop("function")
+                    work_model[f"{vertex}"].update({"internal_service": {function_name:tmp_param},
                                                     "request_method": request_method})
                     continue
 

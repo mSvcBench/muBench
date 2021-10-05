@@ -1,0 +1,16 @@
+{
+   "K8sParameters": {
+      "prefix_yaml_file":"MicroServiceDeployment",
+      "namespace": "default",
+      "image": "msvcbench/microservice_v2:latest",
+      "cluster_domain": "cluster",
+      "path": "/api/v1"
+   },
+   "NFSConfigurations": {
+      "address": "192.168.0.46",
+      "mount_path": "/kubedata/mubSharedData"
+   },
+   "InternalServiceFilePath": "CustomFunctions",
+   "OutputPath": "SimulationWorkspace",
+   "WorkModelPath": "SimulationWorkspace/workmodel.json"
+}

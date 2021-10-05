@@ -1,4 +1,4 @@
-from WorkModelGenerator import get_work_model, WORKMODEL_PATH
+from TrafficGenerator import get_Traffic, Traffic_PATH
 import json
 from pprint import pprint
 import sys
@@ -8,11 +8,10 @@ import shutil
 import argparse
 import argcomplete
 
-
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-c', '--config-file', action='store', dest='parameters_file',
-                    help='The WorkModel Parameters file', default=f'{WORKMODEL_PATH}/WorkModelParameters.json')
+                    help='The Traffic Parameters file', default=f'{Traffic_PATH}/TrafficParameters.json')
 
 argcomplete.autocomplete(parser)
 
@@ -28,21 +27,10 @@ except Exception as err:
 
 parameters_file_path = args.parameters_file
 
-# if len(sys.argv) > 1:
-#     parameters_file_path = sys.argv[1]
-# elif len(WORKMODEL_PATH) > 0:
-#     parameters_file_path = f'{WORKMODEL_PATH}/WorkModelParameters.json'
-# else:
-#     parameters_file_path = 'WorkModelParameters.json'
-
-
 try:
     with open(parameters_file_path) as f:
         params = json.load(f)
-    workmodel_parameters = params['WorkModelParameters']
-    servicemesh_file_path = params['ServiceMeshFilePath']
-    with open(servicemesh_file_path) as f:
-        servicemesh = json.load(f)
+    Traffic_parameters = params['TrafficParameters']
     if "OutputPath" in params.keys() and len(params["OutputPath"]) > 0:
         output_path = params["OutputPath"]
         if output_path.endswith("/"):
@@ -50,27 +38,30 @@ try:
         if not os.path.exists(output_path):
             os.makedirs(output_path)
     else:
-        output_path = WORKMODEL_PATH
+        output_path = Traffic_PATH
     if "OutputFile" in params.keys() and len(params["OutputFile"]) > 0:
         output_file = params["OutputFile"]
     else:
-        output_file = "workmodel.json"
+        output_file = "workload.json"
+
 except Exception as err:
-    print("ERROR: in creation of workmodel,", err)
+    print("ERROR: in RunTrafficGen,", err)
     exit(1)
 
-workmodel = get_work_model(servicemesh, workmodel_parameters)
-pprint(workmodel)
-
+Traffic = get_Traffic(Traffic_parameters)
+pprint(Traffic)
+print("# Events: %d" % len(Traffic))
 # keyboard_input = input("Save work model on file? (y)") or "y"
 keyboard_input = "y"
 
 if keyboard_input == "y":
     with open(f"{output_path}/{output_file}", "w") as f:
-        f.write(json.dumps(workmodel, indent=2))
+        f.write(json.dumps(Traffic, indent=2))
 
-    #if parameters_file_path != f"{output_path}/{os.path.basename(parameters_file_path)}":
-    #    shutil.copyfile(parameters_file_path, f"{output_path}/{os.path.basename(parameters_file_path)}")
+    #if output_path != Traffic_PATH:
+    #    shutil.copy(parameters_file_path, f"{output_path}/")
 
-    print(f"'{output_path}/{output_file}'")
+    print(f"'{output_path}/{output_file}")
     print("File Saved!")
+
+

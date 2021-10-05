@@ -1,0 +1,16 @@
+{
+   "RunnerParameters":{
+      "ms_access_gateway": "http://160.80.103.216:31113",
+      "workload_files_path_list": ["SimulationWorkspace/workload.json"],
+      "workload_rounds": 1,
+      "thread_pool_size": 450,
+      "result_file": "result"
+   },
+   "OutputPath": "Result",
+   "_AfterWorkloadFunction": {
+      "_comment": "remove _ from the object name to execute the funcions",
+      "file_path": "Function",
+      "function_name": "get_prometheus_stats"
+   }
+}
+
