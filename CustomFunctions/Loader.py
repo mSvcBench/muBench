@@ -7,6 +7,7 @@ import time
 import os
 from concurrent.futures import ThreadPoolExecutor, wait
 import jsonmerge
+import string
 
 def cpu_loader_job(params):
     cpu_load = random.randint(params["range_complexity"][0], params["range_complexity"][1])
@@ -67,7 +68,9 @@ def memory_loader(params):
 def disk_loader(params):
         print("--------> Disk stress start")
         print("--------> Write stress start")
-        filename = params["tmp_file_name"]
+        filename_base = params["tmp_file_name"]
+        rnd_str = ''.join(random.choice(string.ascii_lowercase) for i in range(10))
+        filename = f"{rnd_str}-{filename_base}"
         blocks_count = params["disk_write_block_count"]
         block_size = params["disk_write_block_size"]
         f = os.open(filename, os.O_CREAT | os.O_WRONLY, 0o777)  # low-level I/O
@@ -109,5 +112,5 @@ def loader(params):
         disk_loader(params['disk_stress'])
     return bandwidth_loader(params)
 
-#if __name__ == '__main__':
-#    loader({})
+if __name__ == '__main__':
+    loader({})
