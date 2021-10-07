@@ -35,7 +35,7 @@ The disk stress is performed by creating the file `tmp_file_name`. Writing `disk
 
 The return is a string whose length is a sample of an exp neg random variable with mean `mean_bandwidth` kBytes.
 
-*Function name* : `compute_pi_rp`
+*Function name* : `loader`
 
 *Default Input Paramenters* :
 
@@ -57,5 +57,3 @@ The return is a string whose length is a sample of an exp neg random variable wi
         },
         "mean_bandwidth": 11}
 ```
-
-*Default values*
