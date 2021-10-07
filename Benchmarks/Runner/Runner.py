@@ -188,10 +188,6 @@ def runner(workload=None):
                 }
         run_after_workload(args)
 
-
-if output_path != RUNNER_PATH:
-    shutil.copy(parameters_file_path, f"{output_path}/")
-
 for cnt, workload_var in enumerate(workloads):
     for x in range(round):
         print("Round: %d -- workload: %s" % (x+1, workload_var))
