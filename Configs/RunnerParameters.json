@@ -6,7 +6,7 @@
       "thread_pool_size": 450,
       "result_file": "result"
    },
-   "OutputPath": "Result",
+   "OutputPath": "SimulationWorkspace/Result",
    "_AfterWorkloadFunction": {
       "_comment": "remove _ from the object name to execute the funcions",
       "file_path": "Function",
