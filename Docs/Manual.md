@@ -161,8 +161,9 @@ As **input**, your function receives a dictionary with the parameters specified 
 
 As **output**, your function must return a string used as body for the response given back by a service.
 
-> Note: each custom function must have a **unique name**, otherwise conflicts will occur.
+> Note1: each custom function must have a **unique name**, otherwise conflicts will occur.
 Also, you can specify more than one custom function inside the same python file.
+> Note2: the python libraries (imports) needed to the custom function must be included in the service-cell container. If necessary edit the `requirement.txt` file of `ServiceCell` and rebuild the container. Then, push it to your own repository, and use this new image in `Configs/K8sParameters.json`. 
 
 ```python
 def custom_function(params):

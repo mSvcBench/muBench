@@ -18,7 +18,7 @@
             "request": "launch",
             "program": "Autopilots/K8sAutopilot/K8sAutopilot.py",
             "console": "integratedTerminal",
-            "args": ["-c", "Configs/K8sAutopilotConf.json"]
+            "args": ["-c", "myConfigs/K8sAutopilotConf.json"]
         },
         {
             "name": "Runner",
@@ -26,7 +26,7 @@
             "request": "launch",
             "program": "Runner/Runner.py",
             "console": "integratedTerminal",
-            "args": ["-c", "Configs/RunnerParameters.json"]
+            "args": ["-c", "myConfigs/RunnerParameters.json"]
         },
         {
             "name": "WorkModelGenerator",
@@ -34,7 +34,7 @@
             "request": "launch",
             "program": "WorkModelGenerator/RunWorkModelGen.py",
             "console": "integratedTerminal",
-            "args": ["-c", "Configs/WorkModelParameters.json"]
+            "args": ["-c", "myConfigs/WorkModelParameters.json"]
         },
         {
             "name": "ServiceMeshGen",
@@ -42,7 +42,7 @@
             "request": "launch",
             "program": "ServiceMeshGenerator/RunServiceMeshGen.py",
             "console": "integratedTerminal",
-            "args": ["-c", "Configs/ServiceMeshParameters.json"]
+            "args": ["-c", "myConfigs/ServiceMeshParameters.json"]
         },
         {
             "name": "K8sDeployer",
@@ -50,7 +50,7 @@
             "request": "launch",
             "program": "Deployers/K8sDeployer/RunK8sDeployer.py",
             "console": "integratedTerminal",
-            "args": ["-c", "Configs/K8sParameters.json"]
+            "args": ["-c", "myConfigs/K8sParameters.json"]
         },
         {
             "name": "TrafficGenerator",
@@ -58,7 +58,7 @@
             "request": "launch",
             "program": "TrafficGenerator/RunTrafficGen.py",
             "console": "integratedTerminal",
-            "args": ["-c", "Configs/TrafficParameters.json"]
+            "args": ["-c", "myConfigs/TrafficParameters.json"]
         }
     ]
 }

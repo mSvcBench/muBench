@@ -16,4 +16,5 @@ urllib3==1.26.2
 Werkzeug==1.0.1
 grpcio==1.38.0
 grpcio-tools==1.38.0
+jsonmerge==1.8.0
 
