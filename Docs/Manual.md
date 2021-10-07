@@ -620,7 +620,7 @@ The `result_file` produced by the `Runner` contains three columns: the first one
 The `Runner` can be executed by using:
 
 ```zsh
-python3 Runner/Runner.py -c Configs/RunnerParameters.json
+python3 Benchmarks/Runner/Runner.py -c Configs/RunnerParameters.json
 ```
 
 > We recommend executing the `Runner` outside the nodes of the cluster where the microservices application is running, with the purpose of not holding resources from the running services and bias the test results.
@@ -651,7 +651,7 @@ The `TrafficGenerator` will generate a file called `workload.json` and it will s
 The `TrafficGenerator` can be executed as follows:
 
 ```zsh
-python3 TrafficGenerator/RunTrafficGen.py -c Configs/TrafficParameters.json
+python3 Benchmarks/TrafficGenerator/RunTrafficGen.py -c Configs/TrafficParameters.json
 ```
 
 With the following steps, you will deploy on your Kubernetes environment: [Prometheus](https://prometheus.io/), [Prometheus Adapter](https://github.com/kubernetes-sigs/prometheus-adapter) and [Grafana](https://grafana.com/)
