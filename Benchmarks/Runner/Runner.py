@@ -91,10 +91,11 @@ if os.path.isdir(workloads[0]):
 
 
 stats = list()
+local_latency_stats = list()
 start_time = 0.0
 
 
-def do_requests(event, stats):
+def do_requests(event, stats,local_latency_stats):
     global requests_processed, last_print_time_ms, error_request
     # pprint(workload[event]["services"])
     # for services in event["services"]:
@@ -109,6 +110,7 @@ def do_requests(event, stats):
 
         req_latency_ms = r.elapsed.total_seconds()*1000
         stats.append(f"{now_ms} \t {req_latency_ms} \t {r.status_code}")
+        local_latency_stats.append(req_latency_ms)
         if now_ms > last_print_time_ms + 10_000:
             print(f"Processed request {requests_processed}, latency {req_latency_ms} \n")
             last_print_time_ms = now_ms
@@ -118,10 +120,10 @@ def do_requests(event, stats):
         print("Error: %s" % err)
 
 
-def job_assignment(v_pool, v_futures, event, stats):
+def job_assignment(v_pool, v_futures, event, stats, local_latency_stats):
     global timing_error_number
     try:
-        worker = v_pool.submit(do_requests, event, stats)
+        worker = v_pool.submit(do_requests, event, stats, local_latency_stats)
         # Wait for the thread state change
         time.sleep(0.0001)
         #  If thread status is PENDING i can not respect the timing requirements
@@ -133,7 +135,7 @@ def job_assignment(v_pool, v_futures, event, stats):
         print("Error: %s" % err)
 
 def runner(workload=None):
-    global start_time, stats
+    global start_time, stats, local_latency_stats
 
     stats = list()
     print("###############################################")
@@ -154,7 +156,7 @@ def runner(workload=None):
         # in seconds
         # s.enter(event["time"], 1, job_assignment, argument=(pool, futures, event))
         # in milliseconds
-        s.enter((event["time"]/1000+2), 1, job_assignment, argument=(pool, futures, event, stats))
+        s.enter((event["time"]/1000+2), 1, job_assignment, argument=(pool, futures, event, stats, local_latency_stats))
 
     start_time = time.time()
     print("Start Time:", datetime.now().strftime("%H:%M:%S.%f - %g/%m/%Y"))
@@ -162,10 +164,12 @@ def runner(workload=None):
 
     wait(futures)
     run_duration_sec = time.time() - start_time
+    avg_latency = 1.0*sum(local_latency_stats)/len(local_latency_stats)
+
     print("###############################################")
     print("###########   Stop Forrest Stop!!   ###########")
     print("###############################################")
-    print("Run Duration (sec): %.6f" % run_duration_sec, "Total Requests: %d - Error Request: %d - Timing Error Requests: %d" % (len(workload), error_request, timing_error_number))
+    print("Run Duration (sec): %.6f" % run_duration_sec, "Total Requests: %d - Error Request: %d - Timing Error Requests: %d - Average Latency (ms): %.6f" % (len(workload), error_request, timing_error_number, avg_latency))
 
     if run_after_workload is not None:
         args = {"run_duration_sec": run_duration_sec,
@@ -179,7 +183,7 @@ def runner(workload=None):
         run_after_workload(args)
 
 def greedy_runner():
-    global start_time, stats
+    global start_time, stats, local_latency_stats
 
     stats = list()
     print("###############################################")
@@ -194,7 +198,7 @@ def greedy_runner():
         # in seconds
         # s.enter(event["time"], 1, job_assignment, argument=(pool, futures, event))
         # in milliseconds
-        s.enter(0, 1, job_assignment, argument=(pool, futures, event, stats))
+        s.enter(0, 1, job_assignment, argument=(pool, futures, event, stats, local_latency_stats))
 
     start_time = time.time()
     print("Start Time:", datetime.now().strftime("%H:%M:%S.%f - %g/%m/%Y"))
@@ -202,10 +206,13 @@ def greedy_runner():
 
     wait(futures)
     run_duration_sec = time.time() - start_time
+    avg_latency = 1.0*sum(local_latency_stats)/len(local_latency_stats)
+
     print("###############################################")
     print("###########   Stop Forrest Stop!!   ###########")
     print("###############################################")
-    print("Run Duration (sec): %.6f" % run_duration_sec, "Total Requests: %d - Error Request: %d - Timing Error Requests: %d" % (workload_events, error_request, timing_error_number))
+    
+    print("Run Duration (sec): %.6f" % run_duration_sec, "Total Requests: %d - Error Request: %d - Timing Error Requests: %d - Average Latency (ms): %.6f" % (workload_events, error_request, timing_error_number, avg_latency))
 
     if run_after_workload is not None:
         args = {"run_duration_sec": run_duration_sec,
