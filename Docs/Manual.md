@@ -560,7 +560,10 @@ python3 Autopilots/K8sAutopilot/K8sAutopilot.py -c Configs/K8sAutopilotConf.json
 
 #### Runner <!-- omit in toc -->
 
-The `Runner` is the tool that loads the application with HTTP requests and takes as input one or more *workload* description files whose lines describe the request events, in terms of time and identifiers of the service to be called. We can see an example of a workload file below.
+The `Runner` is the tool that loads the application with HTTP requests.
+It can work in two ways: `file` and `greedy`
+
+In `file` mode, the `Runner` takes as input one or more *workload* description files whose lines describe the request events, in terms of time and identifiers of the service to be called. We can see an example of a workload file below.
 
 ```json
 [
@@ -575,15 +578,19 @@ The `Runner` is the tool that loads the application with HTTP requests and takes
 
 The `Runner` schedules the events defined in the workload files and then uses a thread pool to execute HTTP requests to the related services through the NGINX access gateway of the µBench microservice application.
 
+In `greedy` mode, the `Runner` allocates a pool of threads. Each thread makes an HTTP request to the service `s0`; when the response is received, the thread immediately send another request.     
+
 To Runner takes as input the `RunnerParameters.json` as the following one.
 
 ```json
 {
    "RunnerParameters":{
       "ms_access_gateway": "http://<access-gateway-ip>:<port>",
+      "workload_type": "file",
       "workload_files_path_list": ["/path/to/workload.json"],
       "workload_rounds": 1,
       "thread_pool_size": 4,
+      "workload_events": 100,
       "result_file": "result.txt"
    },
    "OutputPath": "SimulationWorkspace",
@@ -594,10 +601,15 @@ To Runner takes as input the `RunnerParameters.json` as the following one.
 }
 ```
 
-The HTTP requests are sent towards the services through the NGINX access gateway, whose IP address is specified in the `ms_access_gateway` parameter.
-The workload files can be specified into the `workload_files_path_list` parameter as the path of a single file or as the path of a directory where multiple workload files are saved.
-In this way, you can simulate different workload scenarios one after the other.
-The `Runner` sequentially executes one by one these files and saves a test result file whose name is in the value of `result_file` key and the output directory is the value of `OutputPath` key. Also, you can specify how many times you want to cycle through the workload directory with the `workload_rounds` parameter, as well as the size of the thread pool allocated for each test with `thread_pool_size`.
+The HTTP requests are sent towards the services of the µBench application through the NGINX access gateway, whose IP address is specified in the `ms_access_gateway` parameter.
+
+The runner mode is specified in the `workload_type` parameter and can be `file` or `greedy`.
+
+In `file` mode, the workload files can be specified into the `workload_files_path_list` parameter as the path of a single file or as the path of a directory where multiple workload files are saved. In this way, you can simulate different workload scenarios one after the other.
+The `Runner` sequentially executes one by one these files and saves a test result file whose name is in the value of `result_file` key and the output directory is the value of `OutputPath` key. 
+Also, you can specify how many times you want to cycle through the workload directory with the `workload_rounds` parameter, as well as the size of the thread pool allocated for each test with `thread_pool_size`. The parameter `workload_events` is not used for `file` mode.
+
+In `greedy` mode, the threads of the pool send a number of `workload_events` HTTP requests before terminating the test. The paramenters `workload_files_path_list` and `workload_rounds` are not used for greedy mode.
 
 After each test, the `Runner` can execute a custom python function (e.g. to fetch monitoring data from Prometheus) specified in the key `file_name`, which is defined by the user in a file specified into the `file_path` key.
 
