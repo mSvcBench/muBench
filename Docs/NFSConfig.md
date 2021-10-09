@@ -41,10 +41,10 @@ sudo apt update
 sudo apt install nfs-common
 ```
 
-Edit the */etc/fstab* file to automount the NFS server folder automatically. Here we assumed that the IP address of the NFS server is  192.168.0.46
+Edit the */etc/fstab* file to automount the NFS server folder automatically. Here we assumed that the IP address of the NFS server is 192.168.0.46
 
 ```bash
-192.168.0.46:/kubedata /kubedata nfs defaults 0 2
+192.168.0.46:/kubedata/mubSharedData /kubedata/mubSharedData nfs defaults 0 2
 ```
 
 To test the configuratin put a file in the folder of the NFS server node and see if client nodes can access it.
