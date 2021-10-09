@@ -39,6 +39,8 @@ Service-cells are connected by a TCP/IP network and they access a common storage
 
 For performance monitoring, service-cells expose a set of metrics to a Prometheus server.
 
+> Note: A service cell is a single Python process so even if the process is multi-threaded, it only loads a single CPU. 
+
 ---
 
 ## Work Model
