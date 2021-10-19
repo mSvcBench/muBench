@@ -8,4 +8,4 @@ You can define the behaviors of the application thanks to the ability of impleme
 
 To emulate real case scenarios, **µBench** deploys the modeled applications on top of distributed environments, like [Kubernetes](https://kubernetes.io).
 
-You can learn more about µBench [here](Docs/MicroserviceModel.md)
+You can learn more about µBench [here](Docs/Manual.md)
