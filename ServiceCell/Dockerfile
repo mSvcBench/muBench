@@ -13,4 +13,4 @@ EXPOSE 51313
 COPY CellController.py ExternalServiceExecutor.py InternalServiceExecutor.py mub.proto mub_pb2.py \
 mub_pb2_grpc.py start.sh ./
 
-CMD [ "/usr/local/bin/python3", "/app/CellController.py"]
+CMD [ "prometheus_multiproc_dir=/app", "/usr/local/bin/python3", "/app/CellController.py"]

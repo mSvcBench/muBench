@@ -13,3 +13,10 @@ echo "----------------------------------------------------------------"
 
 docker build -f Dockerfile.debug -t msvcbench/microservice_v2-screen:latest .
 docker push msvcbench/microservice_v2-screen:latest
+
+echo "----------------------------------------------------------------"
+echo "----------------------------------------------------------------"
+echo "----------------------------------------------------------------"
+
+docker build -f Dockerfile-mp.debug -t msvcbench/microservice_v3-screen:latest .
+docker push msvcbench/microservice_v3-screen:latest

@@ -554,7 +554,12 @@ python3 Autopilots/K8sAutopilot/K8sAutopilot.py -c Configs/K8sAutopilotConf.json
 
 ## Benchmark tools
 
-µBench provides simple benchmark tools in the `Benchmarks` directory.
+µBench provides simple benchmark tools in the `Benchmarks` directory. Besides these tools, you can 
+use other open-souce tools, e.g. *ab - Apache HTTP server benchmarking tool * as it follows, where 127.0.0.1:31113 should be replaced with the IP address and port of the NGINX API gateway:
+
+```zsh
+ab -n 100 -c 2 http://127.0.0.1:31113/s0
+```
 
 ### Traffic Generator and Runner <!-- omit in toc -->
 

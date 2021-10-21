@@ -3,7 +3,7 @@ from __future__ import print_function
 import json
 import logging
 from threading import Thread
-from flask import Flask, make_response, json, request
+from flask import Flask, Response, make_response, json, request
 import traceback
 from InternalServiceExecutor import run_internal_service
 from ExternalServiceExecutor import run_external_service, init_gRPC, init_REST
@@ -11,7 +11,8 @@ import sys
 import random
 import os
 from pprint import pprint
-from prometheus_client import start_http_server, Gauge, Counter, Histogram, Summary
+import prometheus_client
+from prometheus_client import CollectorRegistry, Summary, multiprocess
 import time
 
 import mub_pb2_grpc as pb2_grpc
@@ -32,6 +33,7 @@ def read_config_files():
 ID = os.environ["APP"]
 ZONE = os.environ["ZONE"]  # Pod Zone
 K8S_APP = os.environ["K8S_APP"]  # K8s label app
+
 work_model = read_config_files()
 my_service_mesh = work_model[ID]['external_services']
 my_work_model = work_model[ID]
@@ -42,20 +44,21 @@ else:
 
 
 ########################### PROMETHEUS METRICS
+registry = CollectorRegistry()
+multiprocess.MultiProcessCollector(registry)
 
+CONTENT_TYPE_LATEST = str('text/plain; version=0.0.4; charset=utf-8')
 RESPONSE_SIZE = Summary('mub_response_size', 'Response size',
-                        ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service']
+                        ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service'], registry=registry
                         )
-
 INTERNAL_PROCESSING = Summary('mub_internal_processing_latency_seconds', 'Latency of internal service',
-                           ['zone', 'app_name', 'method', 'endpoint']
+                           ['zone', 'app_name', 'method', 'endpoint'],registry=registry
                            )
 EXTERNAL_PROCESSING = Summary('mub_external_processing_latency_seconds', 'Latency of external services',
-                           ['zone', 'app_name', 'method', 'endpoint']
+                           ['zone', 'app_name', 'method', 'endpoint'], registry=registry
                            )
-
 REQUEST_PROCESSING = Summary('mub_request_processing_latency_seconds', 'Request latency including external and internal service',
-                           ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service']
+                           ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service'],registry=registry
                            )
 
 # Flask settings
@@ -76,7 +79,7 @@ class HttpThread(Thread):
 
         logging.basicConfig(level=logging.INFO)
 
-        self.app.run(host=flask_host, port=flask_port)
+        self.app.run(host=flask_host, port=flask_port, threaded=True)
         print("Thread '" + self.name + "closed")
 
     @app.route("/update", methods=['GET'])
@@ -125,10 +128,14 @@ class HttpThread(Thread):
         except Exception as err:
             print(traceback.format_exc())
             return json.dumps({"message": "Error"}), 500
+# Prometheus
+    @app.route('/metrics')
+    def metrics():
+        return Response(prometheus_client.generate_latest(registry), mimetype=CONTENT_TYPE_LATEST)
 
 
 class gRPCThread(Thread, pb2_grpc.MicroServiceServicer):
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
 
     def __init__(self):
         Thread.__init__(self)
@@ -197,10 +204,5 @@ if __name__ == '__main__':
     # Function
     # If mode is gRPC the http thread is necessary for the entry point (s0) that receive a REST request
     http_thread = HttpThread()
-
     http_thread.start()
-
-    # Prometheus thread
-    start_http_server(8081)
-
     http_thread.join()

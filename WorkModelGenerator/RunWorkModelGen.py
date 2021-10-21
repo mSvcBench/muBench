@@ -28,31 +28,23 @@ except Exception as err:
 
 parameters_file_path = args.parameters_file
 
-# if len(sys.argv) > 1:
-#     parameters_file_path = sys.argv[1]
-# elif len(WORKMODEL_PATH) > 0:
-#     parameters_file_path = f'{WORKMODEL_PATH}/WorkModelParameters.json'
-# else:
-#     parameters_file_path = 'WorkModelParameters.json'
-
-
 try:
     with open(parameters_file_path) as f:
         params = json.load(f)
-    workmodel_parameters = params['WorkModelParameters']
-    servicemesh_file_path = params['ServiceMeshFilePath']
+    workmodel_parameters = params["WorkModelParameters"]
+    servicemesh_file_path = workmodel_parameters["ServiceMeshFilePath"]["value"]
     with open(servicemesh_file_path) as f:
         servicemesh = json.load(f)
-    if "OutputPath" in params.keys() and len(params["OutputPath"]) > 0:
-        output_path = params["OutputPath"]
+    if "OutputPath" in workmodel_parameters.keys() and len(workmodel_parameters["OutputPath"]["value"]) > 0:
+        output_path = workmodel_parameters["OutputPath"]["value"]
         if output_path.endswith("/"):
             output_path = output_path[:-1]
         if not os.path.exists(output_path):
             os.makedirs(output_path)
     else:
         output_path = WORKMODEL_PATH
-    if "OutputFile" in params.keys() and len(params["OutputFile"]) > 0:
-        output_file = params["OutputFile"]
+    if "OutputFile" in workmodel_parameters.keys() and len(workmodel_parameters["OutputFile"]["value"]) > 0:
+        output_file = workmodel_parameters["OutputFile"]["value"]
     else:
         output_file = "workmodel.json"
 except Exception as err:

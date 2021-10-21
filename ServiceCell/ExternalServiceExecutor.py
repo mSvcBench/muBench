@@ -7,18 +7,13 @@ import mub_pb2_grpc as pb2_grpc
 import mub_pb2 as pb2
 from pprint import pprint
 
-work_model = dict()
+
 service_stub = dict()
-
-
-global request_function
-
 
 def init_REST():
     print("Init REST function")
     global request_function
     request_function = request_REST
-
 
 def init_gRPC(my_service_mesh, workmodel, server_port):
     print("Init gRPC function")
@@ -81,8 +76,9 @@ def external_service(group):
 
 
 def run_external_service(services_group, model):
-    print("** EXTERNAL SERVICES")
     global work_model
+    print("** EXTERNAL SERVICES")
+    
     service_error_dict = dict()
 
     work_model = model

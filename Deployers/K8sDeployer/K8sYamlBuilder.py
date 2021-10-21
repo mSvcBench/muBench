@@ -42,6 +42,15 @@ def create_deployment_yaml_files(model, k8s_parameters, nfs, output_path):
                 f = f.replace("{{NODE_AFFINITY}}", str(yaml.dump(NODE_AFFINITY_TEMPLATE_TO_ADD)).rstrip().replace('\n','\n   '))
             else:
                 f = f.replace("{{NODE_AFFINITY}}", "")
+            if "workers" in model[service].keys():
+                f = f.replace("{{PN}}", f'\'{model[service]["workers"]}\'')
+            else:
+                f = f.replace("{{PN}}", "\'1\'") 
+            if "threads" in model[service].keys():
+                f = f.replace("{{TN}}", f'\'{model[service]["threads"]}\'')
+            else:
+                f = f.replace("{{TN}}", "\'4\'") 
+             
         if not os.path.exists(f"{output_path}/yamls"):
             os.makedirs(f"{output_path}/yamls")
 

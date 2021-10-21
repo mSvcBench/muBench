@@ -19,9 +19,11 @@ spec:
       labels:
         zone: default
         app: {{SERVICE_NAME}}-pod
+        pn: {{PN}}
+        tn: {{TN}}
       annotations:
         prometheus.io/scrape: 'true'
-        prometheus.io/port: '8081'
+        prometheus.io/port: '8080'
     spec:
       containers:
         - name: {{SERVICE_NAME}}-pod
@@ -46,6 +48,15 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.labels['app']
+            - name: PN
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['pn']
+            - name: TN
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tn']
+
         {{SIDECAR}}
 #      terminationGracePeriodSeconds: 0
       volumes:
