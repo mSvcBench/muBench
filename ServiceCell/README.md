@@ -10,5 +10,9 @@ When this image is used the `workers` key of the `workmodel.json` is not used an
 
 The debug version runs the python code in a Linux screen for easy debugging. If the program crashes, the container will not crash, so errors can be inspected, but (beware) Kubernetes will not be aware of this, so it will not re-deploy crashed pods. 
 
+The Docker images of this service-cell are  `msvcbench/microservice_v2:latest` and `msvcbench/microservice_v2-screen:latest` 
+
 ## Multi-process service cell (v3)
 The v3 service cell image can be built using the `Dockefile-mp.debug` . This version uses Gunicorn WSGI for REST services. Each REST request is served by a pool of processes and threads according to the `workers` and `threads` keys in `workmodel.json`. Therefore, at most this service-cell uses a number of CPU cores equal to `workers`. In the case of gPRG, this service-cell uses only one core (single worker). So multi-process experiments can only be performed using the REST request-method.
+
+The Docker image of this service-cell is  `msvcbench/microservice_v3-screen:latest` 
