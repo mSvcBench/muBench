@@ -1,31 +1,84 @@
 {
    "WorkModelParameters":{
       "f0":{
-         "function": "compute_pi",
-         "recipient": "service",
-         "probability":1,
-         "mean_bandwidth":10,
-         "range_complexity":[50, 100]
+         "type": "function",
+         "value": {
+            "name": "compute_pi",
+            "recipient": "service",
+            "probability":0,
+            "parameters": {
+               "mean_bandwidth":10,
+               "range_complexity":[50, 100]
+            },
+            "workers":4,
+            "threads":16
+         }
       },
       "f1": {
-         "function": "colosseum",
-         "recipient": "service",
-         "probability": 0.0
+         "type":"function",
+         "value":{
+            "name": "colosseum",
+            "recipient": "service",
+            "probability": 0.0,
+            "parameters":{},
+            "workers":4,
+            "threads":16
+         }
       },
       "f2": {
-         "function": "compute_pi",
-         "recipient": "database",
-         "probability":1,
-         "mean_bandwidth":1,
-         "range_complexity":[1, 10]
+         "type":"function",
+         "value": {
+            "name": "loader",
+            "recipient": "database",
+            "probability":1,
+            "parameters": {
+               "cpu_stress": {"run":false,"range_complexity": [100, 100], "thread_pool_size": 1, "trials": 1},
+               "memory_stress":{"run":false, "mean_memory_size": 10000, "mean_memory_io": 1000},
+               "disk_stress":{"run":true,"tmp_file_name":  "mubtestfile.txt", "disk_write_block_count": 1000, "disk_write_block_size": 1024},
+               "mean_bandwidth": 11
+            },
+            "workers":4,
+            "threads":16
+         }
       },
-      "request_method": "rest",
-      "databases_prefix": "sdb",
+      "f3": {
+         "type":"function",
+         "value": {
+            "name": "loader",
+            "recipient": "service",
+            "probability":1,
+            "parameters": {
+               "cpu_stress": {"run":true,"range_complexity": [1000, 1000], "thread_pool_size": 1, "trials": 1},
+               "memory_stress":{"run":true, "mean_memory_size": 10000, "mean_memory_io": 1000},
+               "disk_stress":{"run":false,"tmp_file_name":  "mubtestfile.txt", "disk_write_block_count": 1000, "disk_write_block_size": 1024},
+               "mean_bandwidth": 11
+            },
+            "workers":4,
+            "threads":16
+         }
+      },
+      "request_method":{
+         "type": "metadata",
+         "value":"rest"
+      },
+      "databases_prefix": {
+         "type":"metadata",
+         "value": "sdb"
+      },
       "override": {
-         "sdb1": {"sidecar": "mongo:4.4.9"},
-         "s0": {"function_id": "f1"}
+         "type": "metadata",
+         "value": {
+            "sdb1": {"sidecar": "mongo:4.4.9"},
+            "s0": {"function_id": "f1"}
+         }
+      },
+      "ServiceMeshFilePath": {
+         "type": "metadata", 
+         "value":"SimulationWorkspace/servicemesh.json"
+      },
+      "OutputPath": {
+         "type":"metadata",
+         "value":"SimulationWorkspace"
       }
-   },
-   "ServiceMeshFilePath": "SimulationWorkspace/servicemesh.json",
-   "OutputPath": "SimulationWorkspace"
+   }
 }

@@ -33,7 +33,6 @@ def get_work_model(service_mesh, workmodel_params):
     request_method = workmodel_params["request_method"]["value"]
     databases_prefix = workmodel_params["databases_prefix"]["value"]
 
-
     internal_services = dict()
     internal_services_db = dict()
 
@@ -44,8 +43,13 @@ def get_work_model(service_mesh, workmodel_params):
         tmp_dict=dict() # string to be inserted as internal service in workmodel.json if this function is chosen 
         tmp_dict.update({"internal_service": {w["value"]["name"]: w["value"]["parameters"]}})
         tmp_dict.update({"request_method": request_method})
-        tmp_dict.update({"workers": w["value"]["workers"]})
-        tmp_dict.update({"threads": w["value"]["threads"]})  
+        if "workers" in w["value"]:
+            tmp_dict.update({"workers": w["value"]["workers"]})
+        if "threads" in w["value"]:
+            tmp_dict.update({"threads": w["value"]["threads"]})
+        if "replicas" in w["value"]:
+            tmp_dict.update({"replicas": w["value"]["replicas"]})
+        
         if "recipient" in w["value"] and w["value"]["recipient"] == "database":
             internal_services_db[k]=dict()
             internal_services_db[k].update({"string" : tmp_dict})
@@ -54,7 +58,9 @@ def get_work_model(service_mesh, workmodel_params):
             internal_services[k]=dict()
             internal_services[k].update({"string" : tmp_dict})
             internal_services[k].update({"probability": w["value"]["probability"]})
+    
     if len(internal_services_db) == 0:
+        # in case internal services for databases wer not specified, those for plain service are used
         internal_services_db = internal_services
     try:
         for vertex in service_mesh.keys():
@@ -72,8 +78,6 @@ def get_work_model(service_mesh, workmodel_params):
                     work_model[f"{vertex}"].update({"sidecar": override[vertex]["sidecar"]})
                 if "function_id" in override[vertex].keys():
                     work_model[f"{vertex}"].update(internal_services[override[vertex]['function_id']]['string'])
-                    continue
-      
 
     except Exception as err:
         print("ERROR: in get_work_model,", err)

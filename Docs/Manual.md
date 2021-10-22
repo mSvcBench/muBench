@@ -75,6 +75,8 @@ The `workmodel.json` file describing a µBench application is made by a key per 
       }
     },
     "request_method": "rest",
+    "workers": 4,
+    "threads": 16,
     "url": "s0.default.svc.cluster.local",
     "path": "/api/v1",
     "image": "msvcbench/microservice_v2:latest",
@@ -92,6 +94,8 @@ The `workmodel.json` file describing a µBench application is made by a key per 
       }
     },
     "request_method": "rest",
+    "workers": 4,
+    "threads": 16,
     "url": "sdb1.default.svc.cluster.local",
     "path": "/api/v1",
     "image": "msvcbench/microservice_v2:latest",
@@ -112,6 +116,8 @@ The `workmodel.json` file describing a µBench application is made by a key per 
       }
     },
     "request_method": "rest",
+    "workers": 4,
+    "threads": 16,
     "url": "s1.default.svc.cluster.local",
     "path": "/api/v1",
     "image": "msvcbench/microservice_v2:latest",
@@ -136,6 +142,8 @@ The `workmodel.json` file describing a µBench application is made by a key per 
       }
     },
     "request_method": "rest",
+    "workers": 4,
+    "threads": 16,
     "url": "s1.default.svc.cluster.local",
     "path": "/api/v1",
     "image": "msvcbench/microservice_v2:latest",
@@ -148,7 +156,7 @@ In this example, the µBench application is made by four services: *s0*, *s1*, *
 
 The external-services called by s0 are organized in two *external-service-groups* described by JSON objects contained by an array. The first group contains only the external-service *s1*. The second group contains only the external-service *sdb1*. To mimic random paths on the service mesh, for each group, a dedicated processing thread of the service-cell randomly selects `seq_len` external-services from it and invokes (e.g., HTTP call) them *sequentially*. These per-group threads are executed in parallel, one per group. In this way, a service-cell can emulate sequential and parallel calls of external-services.
 
-The IP address of a service-cell is associated with a `url` and its service can be (internally) requested on a specific `path` of that URL. For instance, the service *s0* is called by other services by using http://s0.default.svc.cluster.local/api/v1. Additional information includes the Docker `image` to use, the `request_method` it uses to call other services (can be `gRPC` or `rest` and, currently, must be equal for all), additional variables (e.g., `namespace`) that underlying execution platform can use. 
+The IP address of a service-cell is associated with a `url` and its service can be (internally) requested on a specific `path` of that URL. For instance, the service *s0* is called by other services by using http://s0.default.svc.cluster.local/api/v1. Additional information includes the Docker `image` to use for the service-cell, the number of parallel processes (`workers`) and `threads` per process used by the service cell to serve client requests, the `request_method` it uses to call other services (can be `gRPC` or `rest` and, currently, must be equal for all), additional variables (e.g., `namespace`) that underlying execution platform can use. 
 
 ---
 
@@ -186,6 +194,8 @@ So the input parameters of `compute_pi` are:
 
 - `"range_complexity": [X, Y]`  
 - `"average_bandwidth": value`
+
+Some custom functions are in the `CustomFunction` folder that contains also related [Readme](CustomFunctions/README.md) documentation. 
 
 ### Real Internal-Service functions <!-- omit in toc -->
 
@@ -478,44 +488,96 @@ The WorkModelGenerator takes as input a configuration file (`WorkModelParameters
 {
    "WorkModelParameters":{
       "f0":{
-         "function": "compute_pi",
-         "recipient": "service",
-         "probability":1,
-         "mean_bandwidth":10,
-         "range_complexity":[50, 100]
+         "type": "function",
+         "value": {
+            "name": "compute_pi",
+            "recipient": "service",
+            "probability":0,
+            "parameters": {
+               "mean_bandwidth":10,
+               "range_complexity":[50, 100]
+            },
+            "workers":4,
+            "threads":16
+         }
       },
       "f1": {
-         "function": "colosseum",
-         "recipient": "service",
-         "probability": 0.0
+         "type":"function",
+         "value":{
+            "name": "colosseum",
+            "recipient": "service",
+            "probability": 0.0,
+            "parameters":{},
+            "workers":4,
+            "threads":16
+         }
       },
       "f2": {
-         "function": "compute_pi",
-         "recipient": "database",
-         "probability":1,
-         "mean_bandwidth":1,
-         "range_complexity":[1, 10]
+         "type":"function",
+         "value": {
+            "name": "loader",
+            "recipient": "database",
+            "probability":1,
+            "parameters": {
+               "cpu_stress": {"run":false,"range_complexity": [100, 100], "thread_pool_size": 1, "trials": 1},
+               "memory_stress":{"run":false, "mean_memory_size": 10000, "mean_memory_io": 1000},
+               "disk_stress":{"run":true,"tmp_file_name":  "mubtestfile.txt", "disk_write_block_count": 1000, "disk_write_block_size": 1024},
+               "mean_bandwidth": 11
+            },
+            "workers":4,
+            "threads":16
+         }
       },
-      "request_method": "rest",
-      "databases_prefix": "sdb",
+      "f3": {
+         "type":"function",
+         "value": {
+            "name": "loader",
+            "recipient": "service",
+            "probability":1,
+            "parameters": {
+               "cpu_stress": {"run":true,"range_complexity": [1000, 1000], "thread_pool_size": 1, "trials": 1},
+               "memory_stress":{"run":true, "mean_memory_size": 10000, "mean_memory_io": 1000},
+               "disk_stress":{"run":false,"tmp_file_name":  "mubtestfile.txt", "disk_write_block_count": 1000, "disk_write_block_size": 1024},
+               "mean_bandwidth": 11
+            },
+            "workers":4,
+            "threads":16
+         }
+      },
+      "request_method":{
+         "type": "metadata",
+         "value":"rest"
+      },
+      "databases_prefix": {
+         "type":"metadata",
+         "value": "sdb"
+      },
       "override": {
-         "sdb1": {"sidecar": "mongo:4.4.9"},
-         "s0": {"function_id": "f1"}
+         "type": "metadata",
+         "value": {
+            "sdb1": {"sidecar": "mongo:4.4.9"},
+            "s0": {"function_id": "f1"}
+         }
+      },
+      "ServiceMeshFilePath": {
+         "type": "metadata", 
+         "value":"SimulationWorkspace/servicemesh.json"
+      },
+      "OutputPath": {
+         "type":"metadata",
+         "value":"SimulationWorkspace"
       }
-   },
-   "ServiceMeshFilePath": "SimulationWorkspace/servicemesh.json",
-   "OutputPath": "SimulationWorkspace",
-   "OutputFileName": "workmodel.json"
+   }
 }
 ```
 
-This file includes a set of *function-instances* that can be assigned to service-cells with a given probability to implement their internal-service. Many function-instances can possibly run the same function (e.g. compute_pi) but with different parameters. Each function-instance is represented as JSON object with a unique ID key (`f0`, `f1`, `f2`) and whose values are: the `recipient` of the function-instance (`database` or plain `service`);  the function to be executed (available in Python files of the NFS folder `/kubedata/mubSharedData/`); the `probability` to be associated to a service-cell; the optional key `replicas` (not shown) for choosing the number of replicas of service-cells that have chosen the specific function-instance; and other parameters that are the parameters used by the function of the function-instance, e.g., the `compute_pi` function uses `mean_bandwidth` and `range_complexity`.
+This file includes a set of function that can be assigned to service-cells with a given probability to implement their internal-service. Many functions (`f0`, `f1`, `f2`,`f3`) can use the same python *base-function* (e.g. `loader` is used by `f2` and `f3` ) but with different parameters. Each function is represented as JSON object with a unique ID key (`f0`, `f1`, `f2`, `f3`) and whose values are: the `parameters` taken as input by the function that are function dependent, , e.g., the `compute_pi` function uses `mean_bandwidth` and `range_complexity`; the `recipient` of the function (`database` or plain `service`);  the `name` of the base-function to be executed (available in Python files of the NFS folder `/kubedata/mubSharedData/`); the `probability` to be associated to a service-cell; the optional keys `workers` and `threads` that are the number of processes and threads per process used by service-cells that run the function to serve client requests; the optional key `replicas` (not shown) for choosing the number of replicas of service-cells that run the function.
 
-The description of external-services is imported through a `servicemesh.json` file located in `ServiceMeshFilePath` that can be manually made or automatically generated by the ServiceMeshGenerator. 
+The description of external-services is imported through a `servicemesh.json` file located in `ServiceMeshFilePath` metadata that can be manually made or automatically generated by the ServiceMeshGenerator. 
 
-The method used to carry out external-service calls is specified in `request_method` ("rest" or "gRPC"). Prefix to identify databases is in `databases_prefix`.  
+The method used to carry out external-service calls is specified in `request_method` metadata ("rest" or "gRPC"). Prefix to identify databases is in `databases_prefix` metadata.
 
-The `override` key can be used to enforce the use of a specific function for a service avoiding the random selection and to assign sidecar containers to a service-cell. In the above example, the service-cell that implements the database identified as `sdb1` has a mongo sidecar container. Moreover, the service-cell that implements the service `s0` uses the function-instance with ID `f1`.  
+The `override` metadata can be used to enforce the use of a specific function for a service avoiding the random selection and to assign sidecar containers to a service-cell. In the above example, the service-cell that implements the database identified as `sdb1` has a mongo sidecar container. Moreover, the service-cell that implements the service `s0` uses the function with ID `f1`.  
 
 The final `workmodel.json` file produced by the tool will be saved in the `OutputPath`. The filename `workmodel.json` can be changed with the key `OutputFileName`
 
