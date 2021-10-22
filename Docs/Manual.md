@@ -79,7 +79,7 @@ The `workmodel.json` file describing a µBench application is made by a key per 
     "threads": 16,
     "url": "s0.default.svc.cluster.local",
     "path": "/api/v1",
-    "image": "msvcbench/microservice_v2:latest",
+    "image": "msvcbench/microservice_v3-screen:latest",
     "namespace": "default"
   },
   "sdb1": {
@@ -98,7 +98,7 @@ The `workmodel.json` file describing a µBench application is made by a key per 
     "threads": 16,
     "url": "sdb1.default.svc.cluster.local",
     "path": "/api/v1",
-    "image": "msvcbench/microservice_v2:latest",
+    "image": "msvcbench/microservice_v3-screen:latest",
     "namespace": "default"
   },
   "s1": {
@@ -120,7 +120,7 @@ The `workmodel.json` file describing a µBench application is made by a key per 
     "threads": 16,
     "url": "s1.default.svc.cluster.local",
     "path": "/api/v1",
-    "image": "msvcbench/microservice_v2:latest",
+    "image": "msvcbench/microservice_v3-screen:latest",
     "namespace": "default"
   },
   "s2": {
@@ -146,7 +146,7 @@ The `workmodel.json` file describing a µBench application is made by a key per 
     "threads": 16,
     "url": "s1.default.svc.cluster.local",
     "path": "/api/v1",
-    "image": "msvcbench/microservice_v2:latest",
+    "image": "msvcbench/microservice_v3-screen:latest",
     "namespace": "default"
   }
 }
@@ -243,7 +243,7 @@ The user can change the name of the output YAML files by specifying the `prefix_
    "K8sParameters": {
       "prefix_yaml_file":"MicroServiceDeployment",
       "namespace": "default",
-      "image": "msvcbench/microservice_v2:latest",
+      "image": "msvcbench/microservice_v3-screen:latest",
       "cluster_domain": "cluster",
       "path": "/api/v1"
    },
