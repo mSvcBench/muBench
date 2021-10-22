@@ -49,8 +49,25 @@ def create_deployment_yaml_files(model, k8s_parameters, nfs, output_path):
             if "threads" in model[service].keys():
                 f = f.replace("{{TN}}", f'\'{model[service]["threads"]}\'')
             else:
-                f = f.replace("{{TN}}", "\'4\'") 
-             
+                f = f.replace("{{TN}}", "\'4\'")
+
+            if  len(set(model[service].keys()).intersection({"cpu-limits","memory-limits","cpu-requests","memory-requests"})):
+                s=""
+                if "cpu-requests" in model[service].keys() or "memory-requests" in model[service].keys():
+                    s = s + "\n            requests:"
+                    if "cpu-requests" in model[service].keys():
+                        s = s + "\n              cpu: " + model[service]["cpu-requests"]
+                    if "memory-requests" in model[service].keys():
+                        s = s + "\n              memory: " + model[service]["memory-requests"]
+                if "cpu-limits" in model[service].keys() or "memory-limits" in model[service].keys():
+                    s = s + "\n            limits:"
+                    if "cpu-limits" in model[service].keys():
+                        s = s + "\n              cpu: " + model[service]["cpu-limits"]
+                    if "memory-limits" in model[service].keys():
+                        s = s + "\n              memory: " + model[service]["memory-limits"]
+                f = f.replace("{{RESOURCES}}", s)
+            else:
+                f= f.replace("{{RESOURCES}}", "\{\}")
         if not os.path.exists(f"{output_path}/yamls"):
             os.makedirs(f"{output_path}/yamls")
 

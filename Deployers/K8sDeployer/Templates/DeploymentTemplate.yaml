@@ -19,8 +19,6 @@ spec:
       labels:
         zone: default
         app: {{SERVICE_NAME}}-pod
-        pn: {{PN}}
-        tn: {{TN}}
       annotations:
         prometheus.io/scrape: 'true'
         prometheus.io/port: '8080'
@@ -33,8 +31,6 @@ spec:
           volumeMounts:
             - name: podinfo
               mountPath: /etc/podinfo
-#            - name: config-volume
-#              mountPath: /etc/MSconfig
             - name: microservice-volume
               mountPath: /app/MSConfig
           env:
@@ -49,16 +45,13 @@ spec:
                 fieldRef:
                   fieldPath: metadata.labels['app']
             - name: PN
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.labels['pn']
+              value: {{PN}}
             - name: TN
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.labels['tn']
+              value: {{TN}}
+          resources: {{RESOURCES}}    
 
         {{SIDECAR}}
-#      terminationGracePeriodSeconds: 0
+
       volumes:
         - name: podinfo
           downwardAPI:
@@ -69,14 +62,6 @@ spec:
               - path: "annotations"
                 fieldRef:
                   fieldPath: metadata.annotations
-#        - name: config-volume
-#          configMap:
-#            name: microservices-configmap
-#            items:
-#            - key: service-mesh
-#              path: servicemesh
-#            - key: work-model
-#              path: workmodel
         - name: microservice-volume
           persistentVolumeClaim:
             claimName: nfs-pvc-ms
