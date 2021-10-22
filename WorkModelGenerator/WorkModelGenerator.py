@@ -49,7 +49,14 @@ def get_work_model(service_mesh, workmodel_params):
             tmp_dict.update({"threads": w["value"]["threads"]})
         if "replicas" in w["value"]:
             tmp_dict.update({"replicas": w["value"]["replicas"]})
-        
+        if "cpu-limits" in w["value"]:
+            tmp_dict.update({"cpu-limits": w["value"]["cpu-limits"]})
+        if "cpu-requests" in w["value"]:
+            tmp_dict.update({"cpu-requests": w["value"]["cpu-requests"]})
+        if "memory-limits" in w["value"]:
+            tmp_dict.update({"memory-limits": w["value"]["memory-limits"]})
+        if "memory-requests" in w["value"]:
+            tmp_dict.update({"memory-requests": w["value"]["memory-requests"]})
         if "recipient" in w["value"] and w["value"]["recipient"] == "database":
             internal_services_db[k]=dict()
             internal_services_db[k].update({"string" : tmp_dict})
