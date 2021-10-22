@@ -39,7 +39,7 @@ Service-cells are connected by a TCP/IP network and they access a common storage
 
 For performance monitoring, service-cells expose a set of metrics to a Prometheus server.
 
-We have single-process and multi-process different implementation of the service-cell, see [here](ServiceCell/README.md) . 
+We have single-process and multi-process different implementation of the service-cell, see [here](../ServiceCell/README.md) . 
 
 ---
 
