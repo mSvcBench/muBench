@@ -67,7 +67,7 @@ def create_deployment_yaml_files(model, k8s_parameters, nfs, output_path):
                         s = s + "\n              memory: " + model[service]["memory-limits"]
                 f = f.replace("{{RESOURCES}}", s)
             else:
-                f= f.replace("{{RESOURCES}}", "\{\}")
+                f= f.replace("{{RESOURCES}}", "{}")
         if not os.path.exists(f"{output_path}/yamls"):
             os.makedirs(f"{output_path}/yamls")
 
