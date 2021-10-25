@@ -11,7 +11,9 @@
                "range_complexity":[50, 100]
             },
             "workers":4,
-            "threads":16
+            "threads":16,
+            "cpu-requests": "1000m",
+            "cpu-limits": "1000m"
          }
       },
       "f1": {
@@ -22,7 +24,9 @@
             "probability": 0.0,
             "parameters":{},
             "workers":4,
-            "threads":16
+            "threads":16,
+            "cpu-requests": "1000m",
+            "cpu-limits": "1000m"
          }
       },
       "f2": {
@@ -38,7 +42,9 @@
                "mean_bandwidth": 11
             },
             "workers":4,
-            "threads":16
+            "threads":16,
+            "cpu-requests": "1000m",
+            "cpu-limits": "1000m"
          }
       },
       "f3": {
@@ -54,7 +60,9 @@
                "mean_bandwidth": 11
             },
             "workers":4,
-            "threads":16
+            "threads":16,
+            "cpu-requests": "1000m",
+            "cpu-limits": "1000m"
          }
       },
       "request_method":{

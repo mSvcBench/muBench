@@ -77,6 +77,8 @@ The `workmodel.json` file describing a µBench application is made by a key per 
     "request_method": "rest",
     "workers": 4,
     "threads": 16,
+    "cpu-requests": "1000m",
+    "cpu-limits": "1000m",
     "url": "s0.default.svc.cluster.local",
     "path": "/api/v1",
     "image": "msvcbench/microservice_v3-screen:latest",
@@ -96,6 +98,8 @@ The `workmodel.json` file describing a µBench application is made by a key per 
     "request_method": "rest",
     "workers": 4,
     "threads": 16,
+    "cpu-requests": "1000m",
+    "cpu-limits": "1000m",
     "url": "sdb1.default.svc.cluster.local",
     "path": "/api/v1",
     "image": "msvcbench/microservice_v3-screen:latest",
@@ -118,6 +122,8 @@ The `workmodel.json` file describing a µBench application is made by a key per 
     "request_method": "rest",
     "workers": 4,
     "threads": 16,
+    "cpu-requests": "1000m",
+    "cpu-limits": "1000m",
     "url": "s1.default.svc.cluster.local",
     "path": "/api/v1",
     "image": "msvcbench/microservice_v3-screen:latest",
@@ -144,6 +150,8 @@ The `workmodel.json` file describing a µBench application is made by a key per 
     "request_method": "rest",
     "workers": 4,
     "threads": 16,
+    "cpu-requests": "1000m",
+    "cpu-limits": "1000m",
     "url": "s1.default.svc.cluster.local",
     "path": "/api/v1",
     "image": "msvcbench/microservice_v3-screen:latest",
@@ -156,7 +164,7 @@ In this example, the µBench application is made by four services: *s0*, *s1*, *
 
 The external-services called by s0 are organized in two *external-service-groups* described by JSON objects contained by an array. The first group contains only the external-service *s1*. The second group contains only the external-service *sdb1*. To mimic random paths on the service mesh, for each group, a dedicated processing thread of the service-cell randomly selects `seq_len` external-services from it and invokes (e.g., HTTP call) them *sequentially*. These per-group threads are executed in parallel, one per group. In this way, a service-cell can emulate sequential and parallel calls of external-services.
 
-The IP address of a service-cell is associated with a `url` and its service can be (internally) requested on a specific `path` of that URL. For instance, the service *s0* is called by other services by using http://s0.default.svc.cluster.local/api/v1. Additional information includes the Docker `image` to use for the service-cell, the number of parallel processes (`workers`) and `threads` per process used by the service cell to serve client requests, the `request_method` it uses to call other services (can be `gRPC` or `rest` and, currently, must be equal for all), additional variables (e.g., `namespace`) that underlying execution platform can use. 
+The IP address of a service-cell is associated with a `url` and its service can be (internally) requested on a specific `path` of that URL. For instance, the service *s0* is called by other services by using http://s0.default.svc.cluster.local/api/v1. Additional information includes the Docker `image` to use for the service-cell, the number of parallel processes (`workers`) and `threads` per process used by the service-cell to serve client requests, the `request_method` it uses to call other services (can be `gRPC` or `rest` and, currently, must be equal for all), additional variables (e.g., ) that underlying execution platform can use. In the case of Kubernetes, these variables are: the `namespace` in which to deploy the application; optional specification of cpu and memory resources needed by service-cell containers, namely `cpu-requests`, `cpu-limits`, `memory-requests`, `memory-limits` (see k8s [documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)).
 
 ---
 
@@ -498,7 +506,9 @@ The WorkModelGenerator takes as input a configuration file (`WorkModelParameters
                "range_complexity":[50, 100]
             },
             "workers":4,
-            "threads":16
+            "threads":16,
+            "cpu-requests": "1000m",
+            "cpu-limits": "1000m"
          }
       },
       "f1": {
@@ -509,7 +519,9 @@ The WorkModelGenerator takes as input a configuration file (`WorkModelParameters
             "probability": 0.0,
             "parameters":{},
             "workers":4,
-            "threads":16
+            "threads":16,
+            "cpu-requests": "1000m",
+            "cpu-limits": "1000m"
          }
       },
       "f2": {
@@ -525,7 +537,9 @@ The WorkModelGenerator takes as input a configuration file (`WorkModelParameters
                "mean_bandwidth": 11
             },
             "workers":4,
-            "threads":16
+            "threads":16,
+            "cpu-requests": "1000m",
+            "cpu-limits": "1000m"
          }
       },
       "f3": {
@@ -541,7 +555,9 @@ The WorkModelGenerator takes as input a configuration file (`WorkModelParameters
                "mean_bandwidth": 11
             },
             "workers":4,
-            "threads":16
+            "threads":16,
+            "cpu-requests": "1000m",
+            "cpu-limits": "1000m"
          }
       },
       "request_method":{
@@ -571,7 +587,7 @@ The WorkModelGenerator takes as input a configuration file (`WorkModelParameters
 }
 ```
 
-This file includes a set of function that can be assigned to service-cells with a given probability to implement their internal-service. Many functions (`f0`, `f1`, `f2`,`f3`) can use the same python *base-function* (e.g. `loader` is used by `f2` and `f3` ) but with different parameters. Each function is represented as JSON object with a unique ID key (`f0`, `f1`, `f2`, `f3`) and whose values are: the `parameters` taken as input by the function that are function dependent, , e.g., the `compute_pi` function uses `mean_bandwidth` and `range_complexity`; the `recipient` of the function (`database` or plain `service`);  the `name` of the base-function to be executed (available in Python files of the NFS folder `/kubedata/mubSharedData/`); the `probability` to be associated to a service-cell; the optional keys `workers` and `threads` that are the number of processes and threads per process used by service-cells that run the function to serve client requests; the optional key `replicas` (not shown) for choosing the number of replicas of service-cells that run the function.
+This file includes a set of function that can be assigned to service-cells with a given probability to implement their internal-service. Many functions (`f0`, `f1`, `f2`,`f3`) can use the same python *base-function* (e.g. `loader` is used by `f2` and `f3` ) but with different parameters. Each function is represented as JSON object with a unique ID key (`f0`, `f1`, `f2`, `f3`) and whose values are: the `parameters` taken as input by the function, e.g., the `compute_pi` function uses `mean_bandwidth` and `range_complexity`; the `recipient` of the function (`database` or plain `service`);  the `name` of the base-function to be executed (available in Python files of the NFS folder `/kubedata/mubSharedData/`); the `probability` to be associated to a service-cell; the optional keys `workers` and `threads` that are the number of processes and threads per process used by service-cells that run the function to serve client requests; the optional key `replicas` (not shown) for choosing the number of replicas of service-cells that run the function; the optional keys  `cpu-requests`,`cpu-limits`,`memory-requests`,`memory-limits` to control the cpu/memory resuurces associated to the service-cells running the function (see k8s [documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/))
 
 The description of external-services is imported through a `servicemesh.json` file located in `ServiceMeshFilePath` metadata that can be manually made or automatically generated by the ServiceMeshGenerator. 
 
