@@ -37,8 +37,9 @@
             "probability":1,
             "parameters": {
                "cpu_stress": {"run":false,"range_complexity": [100, 100], "thread_pool_size": 1, "trials": 1},
-               "memory_stress":{"run":false, "mean_memory_size": 10000, "mean_memory_io": 1000},
+               "memory_stress":{"run":false, "memory_size": 10000, "memory_io": 1000},
                "disk_stress":{"run":true,"tmp_file_name":  "mubtestfile.txt", "disk_write_block_count": 1000, "disk_write_block_size": 1024},
+               "sleep_stress":{"run":false, "sleep_time":  0.01},
                "mean_bandwidth": 11
             },
             "workers":4,
@@ -55,8 +56,9 @@
             "probability":1,
             "parameters": {
                "cpu_stress": {"run":true,"range_complexity": [1000, 1000], "thread_pool_size": 1, "trials": 1},
-               "memory_stress":{"run":true, "mean_memory_size": 10000, "mean_memory_io": 1000},
+               "memory_stress":{"run":false, "memory_size": 10000, "memory_io": 1000},
                "disk_stress":{"run":false,"tmp_file_name":  "mubtestfile.txt", "disk_write_block_count": 1000, "disk_write_block_size": 1024},
+               "sleep_stress":{"run":false, "sleep_time":  0.01},
                "mean_bandwidth": 11
             },
             "workers":4,

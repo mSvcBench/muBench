@@ -136,8 +136,8 @@ if not os.path.exists(f"{builder_module_path}/yamls"):
     folder_not_exist = True
 folder = f"{builder_module_path}/yamls"
 
-if parameters_file_path != f"{output_path}/{os.path.basename(parameters_file_path)}":
-    shutil.copyfile(parameters_file_path, f"{output_path}/{os.path.basename(parameters_file_path)}")
+#if parameters_file_path != f"{output_path}/{os.path.basename(parameters_file_path)}":
+#    shutil.copyfile(parameters_file_path, f"{output_path}/{os.path.basename(parameters_file_path)}")
 
 if folder_not_exist or len(os.listdir(folder)) == 0:
 
@@ -152,7 +152,7 @@ if folder_not_exist or len(os.listdir(folder)) == 0:
         # Deploy YAML files
         K8sYamlDeployer.deploy_volume(f"{folder}/PersistentVolumeMicroService.yaml")
         K8sYamlDeployer.deploy_nginx_gateway(folder)
-        K8sYamlDeployer.deploy_items(folder)
+        K8sYamlDeployer.deploy_items(folder, st=k8s_parameters['sleep'])
     else:
         print("...\nOk you do not want to DEPLOY stuff! Bye!")
 else:

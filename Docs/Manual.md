@@ -243,7 +243,7 @@ In particular, the K8sDeployer starts up the following Kubernetes resources:
 - The NGINX gateway as a `Deployment`, reachable from the outside of the cluster thanks to its related `NodePort` service; the configuration of the NGINX gateway through a `ConfigMap`;
 - Each service-cell is a `Deployment` with an associated `NodePort` service.
 
-The K8sDeployer takes as input a json file as the following one which contains information about the IP address and path of NFS server on the K8s Master node used by the service-cells' Volume; the path of the `workmodel.json` file (`WorkModelPath`) and custom functions (`InternalServiceFilePath`) to be stored in the volume, and Kubernetes parameters. The Kubernetes parameters are the Docker `image` of the service-cell, the `namespace` of the deployment, as well as the K8s `cluster_domain` and the `path` used to triggers the service. Some information, such as `image` and `path`, can be already contained in the `workmodel.json` file and, if different, will be overwritten.
+The K8sDeployer takes as input a json file as the following one which contains information about the IP address and path of NFS server on the K8s Master node used by the service-cells' Volume; the path of the `workmodel.json` file (`WorkModelPath`) and custom functions (`InternalServiceFilePath`) to be stored in the volume, and Kubernetes parameters. The Kubernetes parameters are the Docker `image` of the service-cell, the `namespace` of the deployment, as well as the K8s `cluster_domain` and the `path` used to triggers the service. Between the deployment of a service-cell and the next one there is an void period equal to `sleep` seconds to avoid API server overload. Some information, such as `image` and `path`, can be already contained in the `workmodel.json` file and, if different, will be overwritten. 
 The user can change the name of the output YAML files by specifying the `prefix_yaml_file` and these files will be inserted in the `OutputPath` directory.
 
 ```json
@@ -253,7 +253,8 @@ The user can change the name of the output YAML files by specifying the `prefix_
       "namespace": "default",
       "image": "msvcbench/microservice_v3-screen:latest",
       "cluster_domain": "cluster",
-      "path": "/api/v1"
+      "path": "/api/v1",
+      "sleep": 2
    },
    "NFSConfigurations": {
       "address": "192.168.0.46",
@@ -532,7 +533,7 @@ The WorkModelGenerator takes as input a configuration file (`WorkModelParameters
             "probability":1,
             "parameters": {
                "cpu_stress": {"run":false,"range_complexity": [100, 100], "thread_pool_size": 1, "trials": 1},
-               "memory_stress":{"run":false, "mean_memory_size": 10000, "mean_memory_io": 1000},
+               "memory_stress":{"run":false, "memory_size": 10000, "memory_io": 1000},
                "disk_stress":{"run":true,"tmp_file_name":  "mubtestfile.txt", "disk_write_block_count": 1000, "disk_write_block_size": 1024},
                "mean_bandwidth": 11
             },
@@ -550,8 +551,9 @@ The WorkModelGenerator takes as input a configuration file (`WorkModelParameters
             "probability":1,
             "parameters": {
                "cpu_stress": {"run":true,"range_complexity": [1000, 1000], "thread_pool_size": 1, "trials": 1},
-               "memory_stress":{"run":true, "mean_memory_size": 10000, "mean_memory_io": 1000},
+               "memory_stress":{"run":false, "memory_size": 10000, "memory_io": 1000},
                "disk_stress":{"run":false,"tmp_file_name":  "mubtestfile.txt", "disk_write_block_count": 1000, "disk_write_block_size": 1024},
+               "sleep_stress":{"run":false, "sleep_time":  0.01}
                "mean_bandwidth": 11
             },
             "workers":4,

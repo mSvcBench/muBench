@@ -1,7 +1,3 @@
-# This function computes X decimal points of pi,
-# where X is a random integer in range_complexity[0] and range_complexity[1].
-# The evaluation is repeated parallelly trials times with thread_pool_size number of threads
-
 import random
 import time
 import os
@@ -52,8 +48,8 @@ def bandwidth_loader(params):
 
 def memory_loader(params):
     print("--------> Memory stress start")
-    memory_size = params["mean_memory_size"]
-    memory_io = params["mean_memory_io"]
+    memory_size = params["memory_size"]
+    memory_io = params["memory_io"]
     
     # allocate memory_size kB of memory
     dummy_buffer = []
@@ -96,13 +92,21 @@ def disk_loader(params):
         os.remove(filename)
         return
 
+def sleep_loader(params):
+    print("--------> Sleep start")
+    time.sleep(float(params["sleep_time"]))
+    print("--------> Sleep stop")
+    return
+
 def loader(params):
 
     default_params = {
-        "cpu_stress": {"run":True,"range_complexity": [100, 100], "thread_pool_size": 1, "trials": 1},
-        "memory_stress":{"run":True, "mean_memory_size": 10000, "mean_memory_io": 1000},
-        "disk_stress":{"run":True,"tmp_file_name":  "mubtestfile.txt", "disk_write_block_count": 1000, "disk_write_block_size": 1024},
+        "cpu_stress": {"run":False,"range_complexity": [100, 100], "thread_pool_size": 1, "trials": 1},
+        "memory_stress":{"run":False, "memory_size": 10000, "memory_io": 1000},
+        "disk_stress":{"run":False,"tmp_file_name":  "mubtestfile.txt", "disk_write_block_count": 1000, "disk_write_block_size": 1024},
+        "sleep_stress":{"run":True,"sleep_time": 0.01},
         "mean_bandwidth": 11}
+    
     params = jsonmerge.merge(default_params,params)
     if params['cpu_stress']['run']: 
         cpu_loader(params['cpu_stress'])
@@ -110,6 +114,8 @@ def loader(params):
         memory_loader(params['memory_stress'])
     if params['disk_stress']['run']:
         disk_loader(params['disk_stress'])
+    if params['sleep_stress']['run']:
+        sleep_loader(params['sleep_stress'])
     return bandwidth_loader(params)
 
 if __name__ == '__main__':

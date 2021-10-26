@@ -4,7 +4,8 @@
       "namespace": "default",
       "image": "msvcbench/microservice_v3-screen:latest",
       "cluster_domain": "cluster",
-      "path": "/api/v1"
+      "path": "/api/v1",
+      "sleep": 2
    },
    "NFSConfigurations": {
       "address": "192.168.0.46",

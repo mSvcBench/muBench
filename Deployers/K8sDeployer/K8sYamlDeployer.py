@@ -6,7 +6,7 @@ import os
 import time
 
 
-def deploy_items(folder):
+def deploy_items(folder,st):
     print("######################")
     print(f"We are going to DEPLOY the yaml files in the following folder: {folder}")
     print("######################")
@@ -32,7 +32,7 @@ def deploy_items(folder):
                     if partial_yaml["kind"] == "Deployment":
                         k8s_apps_api.create_namespaced_deployment(namespace=partial_yaml["metadata"]["namespace"], body=partial_yaml)
                         print(f"Deployment '{partial_yaml['metadata']['name']}' created.")
-                        time.sleep(5) # used to avoid API server overload
+                        time.sleep(st) # used to avoid API server overload
                     elif partial_yaml["kind"] == "Service":
                         k8s_core_api.create_namespaced_service(namespace=partial_yaml["metadata"]["namespace"], body=partial_yaml)
                         print(f"Service '{partial_yaml['metadata']['name']}' created.")
