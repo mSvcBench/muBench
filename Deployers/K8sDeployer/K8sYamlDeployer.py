@@ -16,6 +16,7 @@ def deploy_items(folder,st):
     k8s_core_api = client.CoreV1Api()
     items = list()
     for r, d, f in os.walk(folder):
+        f.sort(reverse=True)    # userd to deploy first pods demanding more resources
         for file in f:
             if '.yaml' in file and not "DeploymentNginxGw.yaml" in file:
                 items.append(os.path.join(r, file))

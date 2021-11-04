@@ -111,7 +111,7 @@ def do_requests(event, stats,local_latency_stats):
         req_latency_ms = r.elapsed.total_seconds()*1000
         stats.append(f"{now_ms} \t {req_latency_ms} \t {r.status_code}")
         local_latency_stats.append(req_latency_ms)
-        if now_ms > last_print_time_ms + 10_000:
+        if now_ms > last_print_time_ms + 1_000:
             print(f"Processed request {requests_processed}, latency {req_latency_ms} \n")
             last_print_time_ms = now_ms
  
@@ -125,12 +125,12 @@ def job_assignment(v_pool, v_futures, event, stats, local_latency_stats):
     try:
         worker = v_pool.submit(do_requests, event, stats, local_latency_stats)
         # Wait for the thread state change
-        time.sleep(0.0001)
-        #  If thread status is PENDING i can not respect the timing requirements
-        if worker._state == "PENDING" and event['time']>0:
+        # time.sleep(0.001)
+        if (len(v_pool._threads)) >= threads: 
+        # maximum capacity of thread pool reached, request is queued 
             timing_error_number += 1
+            v_futures.append(worker)
             raise TimingError(event['time'])
-        v_futures.append(worker)
     except TimingError as err:
         print("Error: %s" % err)
 

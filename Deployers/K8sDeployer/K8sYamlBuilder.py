@@ -22,7 +22,9 @@ def customization_work_model(model, k8s_parameters):
 
 def create_deployment_yaml_files(model, k8s_parameters, nfs, output_path):
     namespace = k8s_parameters['namespace']
+    counter=0
     for service in model:
+        counter=counter+1
         with open(f"{K8s_YAML_BUILDER_PATH}/Templates/DeploymentTemplate.yaml", "r") as file:
             f = file.read()
             f = f.replace("{{SERVICE_NAME}}", service)
@@ -50,13 +52,18 @@ def create_deployment_yaml_files(model, k8s_parameters, nfs, output_path):
                 f = f.replace("{{TN}}", f'\'{model[service]["threads"]}\'')
             else:
                 f = f.replace("{{TN}}", "\'4\'")
-
+            
+            rank_string='' # ranck string is used to order the yaml file as a funciont of the cpu-requests 
             if  len(set(model[service].keys()).intersection({"cpu-limits","memory-limits","cpu-requests","memory-requests"})):
                 s=""
                 if "cpu-requests" in model[service].keys() or "memory-requests" in model[service].keys():
                     s = s + "\n            requests:"
                     if "cpu-requests" in model[service].keys():
                         s = s + "\n              cpu: " + model[service]["cpu-requests"]
+                        if 'm' in model[service]["cpu-requests"]:
+                            rank_string=str(int(model[service]["cpu-requests"].replace('m',''))).zfill(5)
+                        else:
+                            rank_string=str(int(float(model[service]["cpu-requests"])*1000)).zfill(5)
                     if "memory-requests" in model[service].keys():
                         s = s + "\n              memory: " + model[service]["memory-requests"]
                 if "cpu-limits" in model[service].keys() or "memory-limits" in model[service].keys():
@@ -70,8 +77,9 @@ def create_deployment_yaml_files(model, k8s_parameters, nfs, output_path):
                 f= f.replace("{{RESOURCES}}", "{}")
         if not os.path.exists(f"{output_path}/yamls"):
             os.makedirs(f"{output_path}/yamls")
-
-        with open(f"{output_path}/yamls/{k8s_parameters['prefix_yaml_file']}-{service}.yaml", "w") as file:
+        
+        # rank used to sort the deployment so as more demanding PODs are deployed first
+        with open(f"{output_path}/yamls/{str(rank_string).zfill(3)}-{k8s_parameters['prefix_yaml_file']}-{service}.yaml", "w") as file:
             file.write(f)
 
     with open(f"{K8s_YAML_BUILDER_PATH}/Templates/ConfigMapNginxGwTemplate.yaml", "r") as file:
