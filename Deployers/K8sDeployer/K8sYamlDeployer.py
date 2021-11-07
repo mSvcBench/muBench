@@ -32,8 +32,14 @@ def deploy_items(folder,st):
                 try:
                     if partial_yaml["kind"] == "Deployment":
                         k8s_apps_api.create_namespaced_deployment(namespace=partial_yaml["metadata"]["namespace"], body=partial_yaml)
-                        print(f"Deployment '{partial_yaml['metadata']['name']}' created.")
+                        dn=partial_yaml['metadata']['name']
+                        api_response = k8s_apps_api.read_namespaced_deployment_status(name=partial_yaml['metadata']['name'], namespace=partial_yaml["metadata"]["namespace"], pretty=True)
+                        while (api_response.status.ready_replicas != api_response.status.replicas):
+                            print(f"\n *** Waiting deployment {dn} ready ...*** \n")
+                            time.sleep(5)
+                            api_response = k8s_apps_api.read_namespaced_deployment_status(name=partial_yaml['metadata']['name'], namespace=partial_yaml["metadata"]["namespace"], pretty=True)
                         time.sleep(st) # used to avoid API server overload
+                        print(f"Deployment {dn} created.")
                     elif partial_yaml["kind"] == "Service":
                         k8s_core_api.create_namespaced_service(namespace=partial_yaml["metadata"]["namespace"], body=partial_yaml)
                         print(f"Service '{partial_yaml['metadata']['name']}' created.")
