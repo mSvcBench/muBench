@@ -124,13 +124,12 @@ def job_assignment(v_pool, v_futures, event, stats, local_latency_stats):
     global timing_error_number
     try:
         worker = v_pool.submit(do_requests, event, stats, local_latency_stats)
-        # Wait for the thread state change
-        # time.sleep(0.001)
+        v_futures.append(worker)
         if (len(v_pool._threads)) >= threads: 
-        # maximum capacity of thread pool reached, request is queued 
+            # maximum capacity of thread pool reached, request is queued 
             timing_error_number += 1
-            v_futures.append(worker)
-            raise TimingError(event['time'])
+            if runner_type!="greedy":
+                raise TimingError(event['time'])
     except TimingError as err:
         print("Error: %s" % err)
 
@@ -194,11 +193,15 @@ def greedy_runner():
     pool = ThreadPoolExecutor(threads)
     futures = list()
     event={'service':'s0','time':0}
+    slow_start_end = 16 # number of initial delayed request
+    slow_start_delay = 0.01
     for i in range(workload_events):
         # in seconds
         # s.enter(event["time"], 1, job_assignment, argument=(pool, futures, event))
         # in milliseconds
-        s.enter(0, 1, job_assignment, argument=(pool, futures, event, stats, local_latency_stats))
+        if i < slow_start_end :
+            event_time =  i * slow_start_delay
+        s.enter(event_time, 1, job_assignment, argument=(pool, futures, event, stats, local_latency_stats))
 
     start_time = time.time()
     print("Start Time:", datetime.now().strftime("%H:%M:%S.%f - %g/%m/%Y"))
