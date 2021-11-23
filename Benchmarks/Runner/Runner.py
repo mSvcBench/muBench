@@ -2,6 +2,7 @@ from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 import sched
 import time
+import threading
 from TimingError import TimingError
 import requests
 import json
@@ -14,10 +15,225 @@ from pprint import pprint
 import argparse
 import argcomplete
 
+
+
+class Counter(object):
+    def __init__(self, start = 0):
+        self.lock = threading.Lock()
+        self.value = start
+    def increase(self):
+        self.lock.acquire()
+        try:
+            self.value = self.value + 1
+        finally:
+            self.lock.release()
+    def decrease(self):
+        self.lock.acquire()
+        try:
+            self.value = self.value - 1
+        finally:
+            self.lock.release()
+
+
+def do_requests(event, stats, local_latency_stats):
+    global processed_requests, last_print_time_ms, error_requests, pending_requests
+    # pprint(workload[event]["services"])
+    # for services in event["services"]:
+        # print(services)
+    processed_requests.increase()    
+    try:
+        now_ms = time.time_ns() // 1_000_000
+        if runner_type=="greedy":
+            pending_requests.increase()
+        
+        r = requests.get(f"{ms_access_gateway}/{event['service']}")
+        pending_requests.decrease()
+        
+        if r.status_code != 200:
+            print("Response Status Code", r.status_code)
+            error_requests.increase()
+
+        req_latency_ms = int(r.elapsed.total_seconds()*1000)
+        stats.append(f"{now_ms} \t {req_latency_ms} \t {r.status_code} \t {processed_requests.value} \t {pending_requests.value}")
+        local_latency_stats.append(req_latency_ms)
+        
+        if now_ms > last_print_time_ms + 1_000:
+            print(f"Processed request {processed_requests.value}, latency {req_latency_ms}, pending requests {pending_requests.value} \n")
+            last_print_time_ms = now_ms
+        return event['time'], req_latency_ms
+    except Exception as err:
+        print("Error: %s" % err)
+
+
+def job_assignment(v_pool, v_futures, event, stats, local_latency_stats):
+    global timing_error_requests, pending_requests
+    try:
+        worker = v_pool.submit(do_requests, event, stats, local_latency_stats)
+        v_futures.append(worker)
+        if runner_type!="greedy":
+            pending_requests.increase()
+        if pending_requests.value > threads: 
+            # maximum capacity of thread pool reached, request is queued (not an issue for greedy runner)
+            if runner_type!="greedy":
+                timing_error_requests += 1
+                raise TimingError(event['time'])
+    except TimingError as err:
+        print("Error: %s" % err)
+
+def file_runner(workload=None):
+    global start_time, stats, local_latency_stats
+
+    stats = list()
+    print("###############################################")
+    print("############   Run Forrest Run!!   ############")
+    print("###############################################")
+    if len(sys.argv) > 1 and workload is None:
+        workload_file = sys.argv[1]
+    else:
+        workload_file = workload
+
+    with open(workload_file) as f:
+        workload = json.load(f)
+    s = sched.scheduler(time.time, time.sleep)
+    pool = ThreadPoolExecutor(threads)
+    futures = list()
+
+    for event in workload:
+        # in seconds
+        # s.enter(event["time"], 1, job_assignment, argument=(pool, futures, event))
+        # in milliseconds
+        s.enter((event["time"]/1000+2), 1, job_assignment, argument=(pool, futures, event, stats, local_latency_stats))
+
+    start_time = time.time()
+    print("Start Time:", datetime.now().strftime("%H:%M:%S.%f - %g/%m/%Y"))
+    s.run()
+
+    wait(futures)
+    run_duration_sec = time.time() - start_time
+    avg_latency = 1.0*sum(local_latency_stats)/len(local_latency_stats)
+
+    print("###############################################")
+    print("###########   Stop Forrest Stop!!   ###########")
+    print("###############################################")
+    print("Run Duration (sec): %.6f" % run_duration_sec, "Total Requests: %d - Error Request: %d - Timing Error Requests: %d - Average Latency (ms): %.6f - Request rate (req/sec) %.6f" % (len(workload), error_requests.value, timing_error_requests, avg_latency, 1.0*len(workload)/run_duration_sec))
+
+    if run_after_workload is not None:
+        args = {"run_duration_sec": run_duration_sec,
+                "last_print_time_ms": last_print_time_ms,
+                "requests_processed": processed_requests.value,
+                "timing_error_number": timing_error_requests,
+                "total_request": len(workload),
+                "error_request": error_requests.value,
+                "runner_results_file": f"{output_path}/{result_file}_{workload_var.split('/')[-1].split('.')[0]}.txt"
+                }
+        run_after_workload(args)
+
+def greedy_runner():
+    global start_time, stats, local_latency_stats, runner_parameters
+
+    if 'ingress_service' in runner_parameters.keys():
+        srv=runner_parameters['ingress_service']
+    else:
+        srv = 's0'
+
+    stats = list()
+    print("###############################################")
+    print("############   Run Forrest Run!!   ############")
+    print("###############################################")
+    
+    s = sched.scheduler(time.time, time.sleep)
+    pool = ThreadPoolExecutor(threads)
+    futures = list()
+    event={'service':srv,'time':0}
+    slow_start_end = 32 # number requests with initial delays
+    slow_start_delay = 0.1
+    # put every request in the thread pool scheduled at time 0 (in case with initial slow start spread to reduce initial concurrency)
+    for i in range(workload_events):
+        if i < slow_start_end :
+            event_time =  i * slow_start_delay
+        s.enter(event_time, 1, job_assignment, argument=(pool, futures, event, stats, local_latency_stats))
+
+    start_time = time.time()
+    print("Start Time:", datetime.now().strftime("%H:%M:%S.%f - %g/%m/%Y"))
+    s.run()
+
+    wait(futures)
+    run_duration_sec = time.time() - start_time
+    avg_latency = 1.0*sum(local_latency_stats)/len(local_latency_stats)
+
+    print("###############################################")
+    print("###########   Stop Forrest Stop!!   ###########")
+    print("###############################################")
+    
+    print("Run Duration (sec): %.6f" % run_duration_sec, "Total Requests: %d - Error Request: %d - Timing Error Requests: %d - Average Latency (ms): %.6f - Request rate (req/sec) %.6f" % (workload_events, error_requests.value, timing_error_requests, avg_latency, 1.0*workload_events/run_duration_sec))
+
+    if run_after_workload is not None:
+        args = {"run_duration_sec": run_duration_sec,
+                "last_print_time_ms": last_print_time_ms,
+                "requests_processed": processed_requests,
+                "timing_error_number": timing_error_requests,
+                "total_request": workload_events,
+                "error_request": error_requests,
+                "runner_results_file": f"{output_path}/{result_file}.txt"
+                }
+        run_after_workload(args)
+
+def periodic_runner():
+    global start_time, stats, local_latency_stats, runner_parameters
+
+    if 'rate' in runner_parameters.keys():
+        rate=runner_parameters['rate']
+    else:
+        rate = 1
+    
+    if 'ingress_service' in runner_parameters.keys():
+        srv=runner_parameters['ingress_service']
+    else:
+        srv = 's0'
+    
+    stats = list()
+    print("###############################################")
+    print("############   Run Forrest Run!!   ############")
+    print("###############################################")
+    
+    s = sched.scheduler(time.time, time.sleep)
+    pool = ThreadPoolExecutor(threads)
+    futures = list()
+    event={'service':srv,'time':0}
+    for i in range(workload_events):
+        event_time =  i * 1.0/rate
+        s.enter(event_time, 1, job_assignment, argument=(pool, futures, event, stats, local_latency_stats))
+
+    start_time = time.time()
+    print("Start Time:", datetime.now().strftime("%H:%M:%S.%f - %g/%m/%Y"))
+    s.run()
+
+    wait(futures)
+    run_duration_sec = time.time() - start_time
+    avg_latency = 1.0*sum(local_latency_stats)/len(local_latency_stats)
+
+    print("###############################################")
+    print("###########   Stop Forrest Stop!!   ###########")
+    print("###############################################")
+    
+    print("Run Duration (sec): %.6f" % run_duration_sec, "Total Requests: %d - Error Request: %d - Timing Error Requests: %d - Average Latency (ms): %.6f - Request rate (req/sec) %.6f" % (workload_events, error_requests.value, timing_error_requests, avg_latency, workload_events/run_duration_sec))
+
+    if run_after_workload is not None:
+        args = {"run_duration_sec": run_duration_sec,
+                "last_print_time_ms": last_print_time_ms,
+                "requests_processed": processed_requests,
+                "timing_error_number": timing_error_requests,
+                "total_request": workload_events,
+                "error_request": error_requests,
+                "runner_results_file": f"{output_path}/{result_file}.txt"
+                }
+        run_after_workload(args)
+ 
+
+### Main
+
 RUNNER_PATH = os.path.dirname(os.path.abspath(__file__))
-
 parser = argparse.ArgumentParser()
-
 parser.add_argument('-c', '--config-file', action='store', dest='parameters_file',
                     help='The Runner Parameters file', default=f'{RUNNER_PATH}/RunnerParameters.json')
 
@@ -35,20 +251,14 @@ except Exception as err:
 
 parameters_file_path = args.parameters_file
 
-# if len(sys.argv) > 1:
-#     parameters_file_path = sys.argv[1]
-# elif len(RUNNER_PATH) > 0:
-#     parameters_file_path = f'{RUNNER_PATH}/RunnerParameters.json'
-# else:
-#     parameters_file_path = 'RunnerParameters.json'
-
 last_print_time_ms = 0
-requests_processed = 0
-
 run_after_workload = None
+timing_error_requests = 0
+processed_requests = Counter()
+error_requests = Counter()
+pending_requests = Counter()
 
-timing_error_number = 0
-error_request = 0
+
 
 try:
     with open(parameters_file_path) as f:
@@ -94,142 +304,13 @@ stats = list()
 local_latency_stats = list()
 start_time = 0.0
 
-
-def do_requests(event, stats,local_latency_stats):
-    global requests_processed, last_print_time_ms, error_request
-    # pprint(workload[event]["services"])
-    # for services in event["services"]:
-        # print(services)
-    requests_processed = requests_processed + 1    
-    try:
-        now_ms = time.time_ns() // 1_000_000
-        r = requests.get(f"{ms_access_gateway}/{event['service']}")
-        if r.status_code != 200:
-            print("Response Status Code", r.status_code)
-            error_request += 1
-
-        req_latency_ms = r.elapsed.total_seconds()*1000
-        stats.append(f"{now_ms} \t {req_latency_ms} \t {r.status_code}")
-        local_latency_stats.append(req_latency_ms)
-        if now_ms > last_print_time_ms + 1_000:
-            print(f"Processed request {requests_processed}, latency {req_latency_ms} \n")
-            last_print_time_ms = now_ms
- 
-        return event['time'], req_latency_ms
-    except Exception as err:
-        print("Error: %s" % err)
-
-
-def job_assignment(v_pool, v_futures, event, stats, local_latency_stats):
-    global timing_error_number
-    try:
-        worker = v_pool.submit(do_requests, event, stats, local_latency_stats)
-        v_futures.append(worker)
-        if (len(v_pool._threads)) >= threads: 
-            # maximum capacity of thread pool reached, request is queued 
-            timing_error_number += 1
-            if runner_type!="greedy":
-                raise TimingError(event['time'])
-    except TimingError as err:
-        print("Error: %s" % err)
-
-def runner(workload=None):
-    global start_time, stats, local_latency_stats
-
-    stats = list()
-    print("###############################################")
-    print("############   Run Forrest Run!!   ############")
-    print("###############################################")
-    if len(sys.argv) > 1 and workload is None:
-        workload_file = sys.argv[1]
-    else:
-        workload_file = workload
-
-    with open(workload_file) as f:
-        workload = json.load(f)
-    s = sched.scheduler(time.time, time.sleep)
-    pool = ThreadPoolExecutor(threads)
-    futures = list()
-
-    for event in workload:
-        # in seconds
-        # s.enter(event["time"], 1, job_assignment, argument=(pool, futures, event))
-        # in milliseconds
-        s.enter((event["time"]/1000+2), 1, job_assignment, argument=(pool, futures, event, stats, local_latency_stats))
-
-    start_time = time.time()
-    print("Start Time:", datetime.now().strftime("%H:%M:%S.%f - %g/%m/%Y"))
-    s.run()
-
-    wait(futures)
-    run_duration_sec = time.time() - start_time
-    avg_latency = 1.0*sum(local_latency_stats)/len(local_latency_stats)
-
-    print("###############################################")
-    print("###########   Stop Forrest Stop!!   ###########")
-    print("###############################################")
-    print("Run Duration (sec): %.6f" % run_duration_sec, "Total Requests: %d - Error Request: %d - Timing Error Requests: %d - Average Latency (ms): %.6f" % (len(workload), error_request, timing_error_number, avg_latency))
-
-    if run_after_workload is not None:
-        args = {"run_duration_sec": run_duration_sec,
-                "last_print_time_ms": last_print_time_ms,
-                "requests_processed": requests_processed,
-                "timing_error_number": timing_error_number,
-                "total_request": len(workload),
-                "error_request": error_request,
-                "runner_results_file": f"{output_path}/{result_file}_{workload_var.split('/')[-1].split('.')[0]}.txt"
-                }
-        run_after_workload(args)
-
-def greedy_runner():
-    global start_time, stats, local_latency_stats
-
-    stats = list()
-    print("###############################################")
-    print("############   Run Forrest Run!!   ############")
-    print("###############################################")
-    
-    s = sched.scheduler(time.time, time.sleep)
-    pool = ThreadPoolExecutor(threads)
-    futures = list()
-    event={'service':'s0','time':0}
-    slow_start_end = 16 # number of initial delayed request
-    slow_start_delay = 0.01
-    for i in range(workload_events):
-        # in seconds
-        # s.enter(event["time"], 1, job_assignment, argument=(pool, futures, event))
-        # in milliseconds
-        if i < slow_start_end :
-            event_time =  i * slow_start_delay
-        s.enter(event_time, 1, job_assignment, argument=(pool, futures, event, stats, local_latency_stats))
-
-    start_time = time.time()
-    print("Start Time:", datetime.now().strftime("%H:%M:%S.%f - %g/%m/%Y"))
-    s.run()
-
-    wait(futures)
-    run_duration_sec = time.time() - start_time
-    avg_latency = 1.0*sum(local_latency_stats)/len(local_latency_stats)
-
-    print("###############################################")
-    print("###########   Stop Forrest Stop!!   ###########")
-    print("###############################################")
-    
-    print("Run Duration (sec): %.6f" % run_duration_sec, "Total Requests: %d - Error Request: %d - Timing Error Requests: %d - Average Latency (ms): %.6f" % (workload_events, error_request, timing_error_number, avg_latency))
-
-    if run_after_workload is not None:
-        args = {"run_duration_sec": run_duration_sec,
-                "last_print_time_ms": last_print_time_ms,
-                "requests_processed": requests_processed,
-                "timing_error_number": timing_error_number,
-                "total_request": workload_events,
-                "error_request": error_request,
-                "runner_results_file": f"{output_path}/{result_file}.txt"
-                }
-        run_after_workload(args)
- 
 if runner_type=="greedy":
     greedy_runner()
+    with open(f"{output_path}/{result_file}.txt", "w") as f:
+        f.writelines("\n".join(stats))
+
+elif runner_type=="periodic": 
+    periodic_runner()
     with open(f"{output_path}/{result_file}.txt", "w") as f:
         f.writelines("\n".join(stats))
 else:
@@ -237,10 +318,10 @@ else:
     for cnt, workload_var in enumerate(workloads):
         for x in range(round):
             print("Round: %d -- workload: %s" % (x+1, workload_var))
-            requests_processed = 0
-            timing_error_number = 0
-            error_request = 0
-            runner(workload_var)
+            processed_requests = 0
+            timing_error_requests = 0
+            error_requests = 0
+            file_runner(workload_var)
             print("***************************************")
         if cnt != len(workloads) - 1:
             print("Sleep for 100 sec to allow completion of previus requests")

@@ -647,8 +647,39 @@ ab -n 100 -c 2 http://127.0.0.1:31113/s0
 
 #### Runner <!-- omit in toc -->
 
-The `Runner` is the tool that loads the application with HTTP requests.
-It can work in two ways: `file` and `greedy`
+The `Runner` is the tool that loads the application with HTTP requests sent to the NGINX access gateway. It can use different `workload_type`, namely: `file`, `greedy`, and `periodic` (see later)
+To Runner takes as input the `RunnerParameters.json` as the following one.
+
+```json
+{
+   "RunnerParameters":{
+      "ms_access_gateway": "http://<access-gateway-ip>:<port>",
+      "workload_type": "file",
+      "workload_files_path_list": ["/path/to/workload.json"],
+      "workload_rounds": 1,
+      "thread_pool_size": 4,
+      "workload_events": 100,
+      "rate": 5,
+      "ingress_service": "s0",
+      "result_file": "result.txt"
+   },
+   "OutputPath": "SimulationWorkspace",
+   "AfterWorkloadFunction": {
+    "file_path": "Function",
+    "function_name": "get_prometheus_stats"
+   }
+}
+```
+
+The `Runner` can be executed by using:
+
+```zsh
+python3 Benchmarks/Runner/Runner.py -c Configs/RunnerParameters.json
+```
+
+> We recommend executing the `Runner` outside the nodes of the cluster where the microservices application is running, with the purpose of not holding resources from the running services and bias the test results.
+
+*File mode*
 
 In `file` mode, the `Runner` takes as input one or more *workload* description files whose lines describe the request events, in terms of time and identifiers of the service to be called. We can see an example of a workload file below.
 
@@ -663,66 +694,42 @@ In `file` mode, the `Runner` takes as input one or more *workload* description f
 ]
 ```
 
-The `Runner` schedules the events defined in the workload files and then uses a thread pool to execute HTTP requests to the related services through the NGINX access gateway of the µBench microservice application.
+The `Runner` schedules the events defined in the workload files and then uses a thread pool to execute HTTP requests to the related services through the NGINX access gateway, whose IP address is specified in the `ms_access_gateway` parameter.
 
-In `greedy` mode, the `Runner` allocates a pool of threads. Each thread makes an HTTP request to the service `s0`; when the response is received, the thread immediately send another request.     
+The workload files are specified into the `workload_files_path_list` parameter as the path of a single file or as the path of a directory where multiple workload files are saved. In this way, you can simulate different workload scenarios one after the other.
+The `Runner` sequentially executes one by one these files and saves a test result file whose name is the value of `result_file` key and the output directory is the value of `OutputPath` key. Also, you can specify how many times you want to cycle through the workload directory with the `workload_rounds` parameter, as well as the size of the thread pool allocated for each test with `thread_pool_size`. The parameters `workload_events`, `rate` and `service` are not used for `file` mode.
 
-To Runner takes as input the `RunnerParameters.json` as the following one.
+*Greedy mode*
 
-```json
-{
-   "RunnerParameters":{
-      "ms_access_gateway": "http://<access-gateway-ip>:<port>",
-      "workload_type": "file",
-      "workload_files_path_list": ["/path/to/workload.json"],
-      "workload_rounds": 1,
-      "thread_pool_size": 4,
-      "workload_events": 100,
-      "result_file": "result.txt"
-   },
-   "OutputPath": "SimulationWorkspace",
-   "AfterWorkloadFunction": {
-   "file_path": "Function",
-   "function_name": "get_prometheus_stats"
-   }
-}
-```
+In `greedy` mode, the `Runner` allocates a pool of threads. Each thread makes an HTTP request to a service defined in the key `ingress_service` (e.g. s0); when the response is received, the thread immediately send another request. 
+Overall, the number of sent request is the value of `workload_events`. The paramenters `workload_files_path_list`, `workload_rounds` and `rate` are not used for greedy mode. 
 
-The HTTP requests are sent towards the services of the µBench application through the NGINX access gateway, whose IP address is specified in the `ms_access_gateway` parameter.
+*Periodic mode*
+In `periodic` mode, the `Runner` periodically sends HTTP requests at a constant `rate` to a service defined in the key `ingress_service` (e.g. s0). To manage concurrent requests, the Runner uses a thread pool. The paramenters `workload_files_path_list` and `workload_rounds` are not used for periodic mode.
 
-The runner mode is specified in the `workload_type` parameter and can be `file` or `greedy`.
-
-In `file` mode, the workload files can be specified into the `workload_files_path_list` parameter as the path of a single file or as the path of a directory where multiple workload files are saved. In this way, you can simulate different workload scenarios one after the other.
-The `Runner` sequentially executes one by one these files and saves a test result file whose name is in the value of `result_file` key and the output directory is the value of `OutputPath` key. 
-Also, you can specify how many times you want to cycle through the workload directory with the `workload_rounds` parameter, as well as the size of the thread pool allocated for each test with `thread_pool_size`. The parameter `workload_events` is not used for `file` mode.
-
-In `greedy` mode, the threads of the pool send a number of `workload_events` HTTP requests before terminating the test. The paramenters `workload_files_path_list` and `workload_rounds` are not used for greedy mode.
+*AfterWorkloadFunction*
 
 After each test, the `Runner` can execute a custom python function (e.g. to fetch monitoring data from Prometheus) specified in the key `file_name`, which is defined by the user in a file specified into the `file_path` key.
 
-The `result_file` produced by the `Runner` contains three columns: the first one indicates the time of the execution of the request as a unix timestamp; the second column indicates the elapsed time, in *ms*, of the request; the third column reports the received HTTP status (e.g. 200 OK).
+*Result File*
+
+The `result_file` produced by the `Runner` contains five columns. Each row is written at the end of an HTTP request. The first column indicates the time of the execution of the request as a unix timestamp; the second column indicates the elapsed time, in *ms*, of the request; the third column reports the received HTTP status (e.g. 200 OK), the fourth and fifth columns are the number of processed and pending (on-going) requests at that time, respectively. 
 
 ```bash
-1622712602765    0.163079   200
-1622712603940    0.158704   200      
-1622712604272    0.147043   200
-1622712605857    0.14741    200
-1622712606245    0.155425   200
-1622712606612    0.161511   200
-1622712606972    0.15307    200
-1622712607343    0.157438   200
-1622712607520    0.147363   200
-1622712607593    0.192539   200
+1637682769350 	 171 	 200 	 6 	 5
+1637682769449 	 155 	 200 	 8 	 6
+1637682769499 	 164 	 200 	 9 	 6
+1637682769648 	 134 	 200 	 11 	 7
+1637682769749 	 155 	 200 	 14 	 9
+1637682769949 	 191 	 200 	 18 	 12
+1637682770001 	 158 	 200 	 19 	 12
+1637682769299 	 928 	 200 	 20 	 12
+1637682770050 	 181 	 200 	 20 	 11
+1637682769253 	 966 	 200 	 20 	 10
+1637682770100 	 175 	 200 	 21 	 10
+1637682769399 	 900 	 200 	 22 	 10
 ...
 ```
-
-The `Runner` can be executed by using:
-
-```zsh
-python3 Benchmarks/Runner/Runner.py -c Configs/RunnerParameters.json
-```
-
-> We recommend executing the `Runner` outside the nodes of the cluster where the microservices application is running, with the purpose of not holding resources from the running services and bias the test results.
 
 #### TrafficGenerator <!-- omit in toc -->
 
