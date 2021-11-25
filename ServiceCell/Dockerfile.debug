@@ -8,7 +8,7 @@ WORKDIR /app
 
 RUN pip install -r requirements.txt
 
-RUN apt -y install vim iproute2 vim curl
+RUN apt -y install iproute2 vim curl
 
 EXPOSE 8080
 EXPOSE 51313
