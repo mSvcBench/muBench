@@ -64,7 +64,8 @@
             "workers":4,
             "threads":16,
             "cpu-requests": "1000m",
-            "cpu-limits": "1000m"
+            "cpu-limits": "1000m",
+            "replicas": 2
          }
       },
       "request_method":{
