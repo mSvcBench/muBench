@@ -25,11 +25,7 @@
             "request": "launch",
             "program": "ServiceMeshGenerator/RunServiceMeshGen.py",
             "console": "integratedTerminal",
-<<<<<<< HEAD
             "args": ["-c", "myConfigs/ServiceMeshParameters.json"]
-=======
-            "args": ["-c", "Configs/RunnerParameters.json"]
->>>>>>> main
         },
         {
             "name": "WorkModelGenerator",
@@ -37,26 +33,15 @@
             "request": "launch",
             "program": "WorkModelGenerator/RunWorkModelGen.py",
             "console": "integratedTerminal",
-            "args": ["-c", "Configs/WorkModelParameters.json"]
+            "args": ["-c", "myConfigs/WorkModelParameters.json"]
         },
         {
-<<<<<<< HEAD
-=======
-            "name": "ServiceMeshGen",
-            "type": "python",
-            "request": "launch",
-            "program": "ServiceMeshGenerator/RunServiceMeshGen.py",
-            "console": "integratedTerminal",
-            "args": ["-c", "Configs/ServiceMeshParameters.json"]
-        },
-        {
->>>>>>> main
             "name": "K8sDeployer",
             "type": "python",
             "request": "launch",
             "program": "Deployers/K8sDeployer/RunK8sDeployer.py",
             "console": "integratedTerminal",
-            "args": ["-c", "Configs/K8sParameters.json"]
+            "args": ["-c", "myConfigs/K8sParameters.json"]
         },
         {
             "name": "TrafficGenerator",
@@ -64,7 +49,6 @@
             "request": "launch",
             "program": "Benchmarks/TrafficGenerator/RunTrafficGen.py",
             "console": "integratedTerminal",
-<<<<<<< HEAD
             "args": ["-c", "myConfigs/TrafficParameters.json"]
         },
         {
@@ -74,9 +58,6 @@
             "program": "Benchmarks/Runner/Runner.py",
             "console": "integratedTerminal",
             "args": ["-c", "myConfigs/RunnerParameters.json"]
-=======
-            "args": ["-c", "Configs/TrafficParameters.json"]
->>>>>>> main
         }
     ]
 }
