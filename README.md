@@ -5,7 +5,7 @@ The tool creates *dummy* microservice applications that can be customized by the
 
 The user can model the topology of the application's service mesh, define the behaviors of the internal microservices using a portfolio of stress functions (e.g. for CPU, memory, I/O, network) or implementing new ones, choose HTTP or gRPC as the microservice protocol, etc.
 
-After the microservice application is created, µBench deploys it to execution platforms, such as [Kubernetes](https://kubernetes.io).Developers of these platforms can test their innovations by observing their effect on µBench-created applications, which export per-microservice metrics, such as delay, load, etc., through a Prometheus server. 
+After the microservice application is created, µBench deploys it on platforms for containerized applications, such as [Kubernetes](https://kubernetes.io). Developers of these platforms can test their innovations by observing their effect on µBench-created applications, which export per-microservice metrics, such as delay, load, etc., through a Prometheus server. 
 
 You can learn more about µBench [here](Docs/Manual.md)
 
