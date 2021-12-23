@@ -1,4 +1,4 @@
-# **µBench** - A factory of microservices applications used to benchmark cloud solutions
+# **µBench** - A factory of microservices applications to benchmark cloud solutions
 
 
 ![service-cell-rest-grpc](Docs/microservices-rest-grpc.png)
