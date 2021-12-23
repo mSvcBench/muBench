@@ -45,7 +45,7 @@ We have single-process and multi-process different implementation of the service
 
 ## Work Model
 
-The description of a µBench application, i.e. the set of internal and external services run by service-cells, is contained in a global file named `workmodel.json`, which all service-cells access via a NFS [shared folder](/Docs/NFSConfig.md) (e.g., `/kubedata/mubSharedData/`), internally mounted by the container runtime as storage volume. This configuration mechanism, which exploits the sharing of global files, allows a service-cell to initialize and specialize autonomously, without the aid of a configuration server, a feature that makes it possible to exploit the replication and fault management mechanisms offered by container orchestration platforms such as Kubernetes. We point out a slight analogy of our architecture with that of human cells, which are equal to each other, contain the entire DNA (our configuration files), and are also able to characterize themselves and perform specific tasks.
+The description of a µBench application, i.e. the set of internal and external services run by service-cells, is contained in a global file named `workmodel.json`, which all service-cells access via a NFS [shared folder](NFSConfig.md) (e.g., `/kubedata/mubSharedData/`), internally mounted by the container runtime as storage volume. This configuration mechanism, which exploits the sharing of global files, allows a service-cell to initialize and specialize autonomously, without the aid of a configuration server, a feature that makes it possible to exploit the replication and fault management mechanisms offered by container orchestration platforms such as Kubernetes. We point out a slight analogy of our architecture with that of human cells, which are equal to each other, contain the entire DNA (our configuration files), and are also able to characterize themselves and perform specific tasks.
 The `workmodel.json` file describing a µBench application is made by a key per service as shown below.
 
 ```json
@@ -170,7 +170,7 @@ The IP address of a service-cell is associated with a `url` and its service can 
 
 ## Internal-Service functions
 
-An internal-service is a function that users can define as a Python function to be inserted in the [shared folder](/Docs/NFSConfig.md) `/kubedata/mubSharedData/InternalServiceFunctions`. The Docker image of the service-cell provides a default function named `compute_pi` that computes a configurable number of decimals of pigreco to keep the CPU busy. 
+An internal-service is a function that users can define as a Python function to be inserted in the [shared folder](NFSConfig.md) `/kubedata/mubSharedData/InternalServiceFunctions`. The Docker image of the service-cell provides a default function named `compute_pi` that computes a configurable number of decimals of pigreco to keep the CPU busy. 
 To stress other aspects (e.g. memory, storage, etc.), the user can develop his *custom functions* and save them into files of the subfolder `InternalServiceFunctions` inside the NFS shared directory. In this way, µBench supports the continuous integration of new benchmark functions without the need of changing the remaining code.
 
 ### How to write your own custom function <!-- omit in toc -->
@@ -239,7 +239,7 @@ The K8sDeployer uses the `workmodel.json` file and other config files to build Y
 
 In particular, the K8sDeployer starts up the following Kubernetes resources:
 
-- A `PersistentVolume` with its `PersistentVolumeClaim` to make the [NFS shared directory](/Docs/NFSConfig.md) visible as a volume for each pod, as it contains the configuration files;
+- A `PersistentVolume` with its `PersistentVolumeClaim` to make the [NFS shared directory](NFSConfig.md) visible as a volume for each pod, as it contains the configuration files;
 - The NGINX gateway as a `Deployment`, reachable from the outside of the cluster thanks to its related `NodePort` service; the configuration of the NGINX gateway through a `ConfigMap`;
 - Each service-cell is a `Deployment` with an associated `NodePort` service.
 
@@ -821,7 +821,7 @@ In this section, we describe how to deploy a µBench example application and mak
 
 ### Step 1 - Platform Configuration <!-- omit in toc -->
 
-- Obtain access to a Kubernetes platform with [NFS](Docs/NFSConfig.md) and Prometheus (#monitoring-with-prometheus) installed.
+- Obtain access to a Kubernetes platform with [NFS](NFSConfig.md) and Prometheus (#monitoring-with-prometheus) installed.
 - Install Python3 on the master node
 - Clone the git repository of µBench on Kubernetes master node and move in the  MicroServiceSimulator dir
   
