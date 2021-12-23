@@ -33,7 +33,7 @@ Service-cells report their observed performance to a global [Prometheus](/Monito
 ## Service-Cell
 
 ![service-cell-abstraction](service-cell-abstraction.png)
-Each service is implemented by a software unit that we call *service-cell*. A service-cell is a [Docker container](/MicroServiceCellAbstraction/README.md) which contains a Python code executing the internal and external services that the user has chosen for the specific service-cell. 
+Each service is implemented by a software unit that we call *service-cell*. A service-cell is a [Docker container](/ServiceCell/README.md) which contains a Python code executing the internal and external services that the user has chosen for the specific service-cell.
 
 Service-cells are connected by a TCP/IP network and they access a common storage space (e.g., a Kubernetes Volume) where they find some files describing the work that each of them has to do. These files are `workmodel.json`, and a set of python files imported by the service-cell that include the definition of all *custom functions* possibly used as internal-service.
 
