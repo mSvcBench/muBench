@@ -3,7 +3,7 @@
 
 ![service-cell-rest-grpc](Docs/microservices-rest-grpc.png)
 
-**µBench** is a benchmarking tool for cloud/edge computing platforms that run microservice applications.
+**µBench** is a tool for benchmarking cloud/edge computing platforms that run microservice applications.
 The tool creates *dummy* microservice applications that can be customized by the user and run on [Kubernetes](https://kubernetes.io) (and more).
 
 µBench targets researchers and cloud platform developers who lack real microservice applications to benchmark their findings (e.g., new resource control mechanisms, AI-driven orchestration, etc.). Indeed, µBench can create these applications for them. At the same time, µBench can also be used for educational purposes to show advantages and problems of microservice applications to students.
