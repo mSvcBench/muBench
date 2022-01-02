@@ -34,11 +34,12 @@ def remove_files(folder_v):
 
         folder_items = os.listdir(folder_v)
         for item in folder_items:
-            os.remove(f"{folder_v}/{item}")
-
-        print("######################")
-        print(f"Following files removed: {folder_items}")
-        print("######################")
+            file_path = f"{folder_v}/{item}"
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+                print("######################")
+                print(f"Following files removed: {folder_items}")
+                print("######################")
     except Exception as er:
         print("######################")
         print(f"Error removing following files: {er}")
@@ -47,11 +48,14 @@ def remove_files(folder_v):
 
 def copy_config_file_to_nfs(nfs_folder_path, workmodel, internal_service_functions):
     try:
-        # Remove NFS mub folder contents
+        # Remove files from NFS folder
         if os.path.exists(nfs_folder_path):
-            shutil.rmtree(nfs_folder_path,ignore_errors=True)
-            os.makedirs(nfs_folder_path)
-            os.makedirs(f"{nfs_folder_path}/InternalServiceFunctions")
+            remove_files(nfs_folder_path)
+            remove_files(f"{nfs_folder_path}/InternalServiceFunctions")
+        
+            #shutil.rmtree(nfs_folder_path,ignore_errors=True)
+            #os.makedirs(nfs_folder_path)
+            #os.makedirs(f"{nfs_folder_path}/InternalServiceFunctions")
         
         if output_path is None:
             with open(f"{nfs_folder_path}/workmodel.json", "w") as f:

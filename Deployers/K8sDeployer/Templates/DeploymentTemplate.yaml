@@ -19,6 +19,7 @@ spec:
       labels:
         zone: default
         app: {{SERVICE_NAME}}-pod
+        prometheus.io/scrape: 'true'
       annotations:
         prometheus.io/scrape: 'true'
         prometheus.io/port: '8080'
@@ -27,7 +28,8 @@ spec:
         - name: {{SERVICE_NAME}}-pod
           image: {{IMAGE}}
           ports:
-            - containerPort: 8080
+            - name: mub-cell-port
+              containerPort: 8080
           volumeMounts:
             - name: podinfo
               mountPath: /etc/podinfo
