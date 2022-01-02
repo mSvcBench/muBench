@@ -1,3 +1,9 @@
 # kubernetes-grafana
 
-Read about the grafana implementation on Kubernetes here https://devopscube.com/setup-grafana-kubernetes/
+You can install grafana by moving in the upper folder and running
+
+```zsh
+kubectl apply -f kubernetes-grafana
+```
+
+Grafana server is exosed as NodePort service on port `30001`
