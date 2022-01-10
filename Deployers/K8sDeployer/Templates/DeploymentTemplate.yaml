@@ -1,7 +1,7 @@
 apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
 kind: Deployment
 metadata:
-  name: {{SERVICE_NAME}}-dep
+  name: {{SERVICE_NAME}}
   namespace: {{NAMESPACE}}
   labels:
     zone: default
@@ -11,14 +11,14 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: {{SERVICE_NAME}}-pod
+      app: {{SERVICE_NAME}}
   replicas: {{REPLICAS}}
   {{NODE_AFFINITY}}
   template:
     metadata:
       labels:
         zone: default
-        app: {{SERVICE_NAME}}-pod
+        app: {{SERVICE_NAME}}
         prometheus.io/scrape: 'true'
       annotations:
         prometheus.io/scrape: 'true'
@@ -74,7 +74,7 @@ metadata:
   name: {{SERVICE_NAME}}
   namespace: {{NAMESPACE}}
   labels:
-    app: {{SERVICE_NAME}}-pod
+    app: {{SERVICE_NAME}}
 spec:
   type: NodePort
   ports:
@@ -86,4 +86,4 @@ spec:
     targetPort: 51313
     name: tcp-input-grpc
   selector:
-    app: {{SERVICE_NAME}}-pod
+    app: {{SERVICE_NAME}}
