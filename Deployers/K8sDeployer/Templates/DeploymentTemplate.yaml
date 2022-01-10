@@ -25,7 +25,7 @@ spec:
         prometheus.io/port: '8080'
     spec:
       containers:
-        - name: {{SERVICE_NAME}}-pod
+        - name: {{SERVICE_NAME}}
           image: {{IMAGE}}
           ports:
             - name: mub-cell-port
