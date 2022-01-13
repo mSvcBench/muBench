@@ -6,7 +6,7 @@ Flask-Cors==3.0.10
 Flask-JWT-Extended==3.25.0
 idna==2.10
 itsdangerous==1.1.0
-Jinja2==2.11.2
+jinja2==2.11.3
 MarkupSafe==1.1.1
 prometheus-client==0.9.0
 PyJWT==1.7.1
