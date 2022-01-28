@@ -883,10 +883,10 @@ kubectl get pods svc
 
 ### Step 5: Test service response <!-- omit in toc -->
 
-Test the correct execution of the application with
+Test the correct execution of the application with (access-gateway-ip is the public IP address of a node of the cluster, e.g. the master node)
 
 ```zsh
-curl http://<k8s-master-node-IP>:31113/s0
+curl http://<access-gateway-ip>:31113/s0
 ```
 
 <p align="center">
