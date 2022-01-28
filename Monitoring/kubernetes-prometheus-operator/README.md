@@ -28,5 +28,4 @@ Grafana `admin` password can be obtained with
 
 ```zsh
 kubectl get secret prometheus-grafana -o jsonpath="{.data.admin-password}" -n monitoring | base64 --decode ; echo
-```
-
+``` 

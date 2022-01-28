@@ -767,18 +767,14 @@ With the following steps, you will deploy on your Kubernetes environment: [Prome
 
 ## Monitoring with Prometheus
 
-µBench service-cells export some metrics to a Prometheus server running in the cluster.
+µBench service-cells exports some metrics to a Prometheus server running in the cluster.
 
-### Cluster Configuration <!-- omit in toc -->
 
-First, create a new namespace called `monitoring` where we will deploy all the monitoring resources. Prometheus will be available at: `http://<access-gateway-ip>:30000` after the successful deployment of the following commands:
+### Prometheus installation <!-- omit in toc -->
 
-```bash
-kubectl create namespace monitoring
-kubectl apply -f Monitoring/kubernetes-prometheus
-```
+We considered two ways to install Prometheus: the first one directly uses k8s yaml files and is descibed [here](../Monitoring/kubernetes-prometheus/README.md); the second (recommended) solution uses the prometheus-operator installed via Helm and install Grafana too, related documentation is [here](../Monitoring/kubernetes-prometheus-operator/README.md)      
 
-#### Prometheus Adapter <!-- omit in toc -->
+#### Prometheus Adapter (optional) <!-- omit in toc -->
 
 Prometheus Adapter is suitable for use with the [Kubernetes Horizontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/).
 It can also replace the metrics server on clusters that already run Prometheus and collect the appropriate metrics.
@@ -797,16 +793,16 @@ $ helm status prometheus-adapter --namespace monitoring
 #### Grafana  <!-- omit in toc -->
 
 Prometheus metrics can be shown by using [Grafana](https://grafana.com/) tool.
-To install Grafana in the Kubernetes cluster you can use the following command and Grafana services will be available at: `http://<access-gateway-ip>:30001`
+To install Grafana in the Kubernetes cluster you can use the following command and Grafana services will be available at: `http://<access-gateway-ip>:30001`. If you istalled the prometheus-operator Grafana is already running, so this step is not required. 
 
 ```bash
 kubectl create namespace monitoring
 kubectl apply -f Monitoring/kubernetes-grafana
 ```
 
-### Service Cell metrics <!-- omit in toc -->
+### Service metrics <!-- omit in toc -->
 
-A service-cell exports the following Prometheus Summary metrics:
+Each µBench service-cell exports the following Prometheus Summary metrics:
 
 - *mub_response_size* : size of the request response in bytes;
 - *mub_request_latency_seconds* : request latency including the execution of internal and extrenal services;
@@ -821,9 +817,10 @@ In this section, we describe how to deploy a µBench example application and mak
 
 ### Step 1 - Platform Configuration <!-- omit in toc -->
 
-- Obtain access to a Kubernetes platform with [NFS](NFSConfig.md) and Prometheus (#monitoring-with-prometheus) installed.
-- Install Python3 on the master node
-- Clone the git repository of µBench on Kubernetes master node and move in the  MicroServiceSimulator dir
+- Create a Kubernetes cluster with [NFS](NFSConfig.md) and [Prometheus] (#monitoring-with-prometheus) installed.
+- Get access via SSH to master-node, or use a client terminal from witch it is possible i) to control the cluster via `kubectl` and ii) write into the NFS folder used by µBench
+- Install Python3
+- Clone the git repository of µBench and move into `MicroServiceSimulator` directory
   
   ```zsh
   git clone https://github.com/mSvcBench/MicroServiceSimulator.git
@@ -842,7 +839,7 @@ pip3 install -r requirements.txt
 
 ### Step 2 -  Service mesh generation <!-- omit in toc -->
 
-Generate the [service mesh](#service-mesh-generator) and obtain two files `servicemesh.json` and `servicemesh.png` in the `SimulationWorkspace` dir. The .png is a picture of the generated mesh. 
+Generate the [service mesh](#service-mesh-generator) to obtain two files `servicemesh.json` and `servicemesh.png` in the `SimulationWorkspace` directory. The .png is a picture of the generated mesh. 
 
 ```zsh
 python3 ServiceMeshGenerator/RunServiceMeshGen.py -c Configs/ServiceMeshParameters.json
@@ -850,7 +847,7 @@ python3 ServiceMeshGenerator/RunServiceMeshGen.py -c Configs/ServiceMeshParamete
 
 ### Step 3: Work model generation <!-- omit in toc -->
 
-Generate the [work model](#work-model) and obtain the `workmodel.json` file in the `SimulationWorkspace` dir.
+Generate the [work model](#work-model) to obtain the `workmodel.json` file in the `SimulationWorkspace` directory.
 
 ```zsh
 python3 WorkModelGenerator/RunWorkModelGen.py -c Configs/WorkModelParameters.json
@@ -858,7 +855,7 @@ python3 WorkModelGenerator/RunWorkModelGen.py -c Configs/WorkModelParameters.jso
 
 ### Step 4: Deploy on Kubernetes <!-- omit in toc -->
 
-Deploy the service-cells on Kubernetes and manually monitor that all pods are Running 
+Deploy the generated µBench microservice application on Kubernetes cluster and manually monitor that all pods are Running 
 
 ```zsh
 python3 Deployers/K8sDeployer/RunK8sDeployer.py -c Configs/K8sParameters.json
@@ -886,10 +883,10 @@ kubectl get pods svc
 
 ### Step 5: Test service response <!-- omit in toc -->
 
-Test the correct execution of the application with (127.0.0.1 can be replaced with the public IP address of master node)
+Test the correct execution of the application with
 
 ```zsh
-curl http://127.0.0.1:31113/s0
+curl http://<k8s-master-node-IP>:31113/s0
 ```
 
 <p align="center">

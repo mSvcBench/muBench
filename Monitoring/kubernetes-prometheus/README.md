@@ -1,9 +1,9 @@
-# kubernetes prometheus
+# Prometheus manual installation 
 
-You can install only prometheus by moving in the upper folder and running
+Run the following commands:
 
-```zsh
-kubectl apply -f kubernetes-prometheus
+```bash
+kubectl create namespace monitoring
+kubectl apply -f Monitoring/kubernetes-prometheus
 ```
-
-Prometheus server is exosed as NodePort service on port `30000`
+Prometheus server will be available at: `http://<access-gateway-ip>:30000` after the successful deployment of the following commands:
