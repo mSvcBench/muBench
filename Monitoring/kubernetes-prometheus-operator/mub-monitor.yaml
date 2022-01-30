@@ -10,5 +10,5 @@ spec:
     matchLabels:
       prometheus.io/scrape: 'true'
   podMetricsEndpoints:
-  - port: "mub-cell-port"
+  - port: "http-mubpodport"
 

@@ -3,6 +3,9 @@ kind: Deployment
 metadata:
   name: ms-gateway-nginx
   namespace: {{NAMESPACE}}
+  labels:  
+    app: ms-gateway-nginx
+    version: "1.0"
 spec:
   replicas: 1
   selector:
@@ -12,12 +15,14 @@ spec:
     metadata:
       labels:
         app: ms-gateway-nginx
+        version: "1.0"
     spec:
       containers:
       - name: ms-gateway-nginx
         image: nginx
         ports:
-        - containerPort: 80
+        - name: http-nginx
+          containerPort: 80
         volumeMounts:
         - mountPath: /etc/nginx/nginx.conf
           readOnly: true
@@ -49,7 +54,7 @@ spec:
       protocol: TCP
       targetPort: 80
       nodePort: 31113
-      name: tcp-gw
+      name: http-nginx
   selector:
     app: ms-gateway-nginx
 

@@ -1,13 +1,15 @@
-# kubernetes prometheus operator
+# Prometheus operator
 
 You can install [Prometheus operator] (https://github.com/prometheus-operator/prometheus-operator) via helm: 
 
 ```zsh
 kubectl create namespace monitoring
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
 helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring
 ```
 
-Deploy the PodMonitor with
+Deploy the Prometheus PodMonitor with
 ```zsh
 kubectl apply -f ./mub-monitor.yaml
 ```
@@ -29,3 +31,22 @@ Grafana `admin` password can be obtained with
 ```zsh
 kubectl get secret prometheus-grafana -o jsonpath="{.data.admin-password}" -n monitoring | base64 --decode ; echo
 ``` 
+
+# Istio
+[Istio] (https://istio.io/) service mesh can be included in the cluster for a deeper monitoring.
+
+To install Istio we used:
+
+```zsh
+ curl -L https://istio.io/downloadIstio | sh -
+ curl -L https://istio.io/downloadIstio | sh -
+ cd istio-1.12.2/
+export PATH=$PWD/bin:$PATH
+istioctl install --set profile=demo -y
+kubectl label namespace default istio-injection=enabled
+``` 
+
+Then it is necessary to add Prometheus PodMonitor and ServiceMonitor:
+```zsh
+k apply -f istio-prometheus-operator.yaml
+```

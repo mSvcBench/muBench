@@ -636,10 +636,10 @@ python3 Autopilots/K8sAutopilot/K8sAutopilot.py -c Configs/K8sAutopilotConf.json
 ## Benchmark tools
 
 µBench provides simple benchmark tools in the `Benchmarks` directory. Besides these tools, you can 
-use other open-souce tools, e.g. *ab - Apache HTTP server benchmarking tool * as it follows, where 127.0.0.1:31113 should be replaced with the IP address and port of the NGINX API gateway:
+use other open-souce tools, e.g. *ab - Apache HTTP server benchmarking tool * as it follows, where <access-gateway-ip>:31113 is the IP address (e.g. that of k8s master node) and port through which it is possible to contact the NGINX API gateway:
 
 ```zsh
-ab -n 100 -c 2 http://127.0.0.1:31113/s0
+ab -n 100 -c 2 http://<access-gateway-ip>:31113/s0
 ```
 
 ### Traffic Generator and Runner <!-- omit in toc -->
@@ -648,8 +648,8 @@ ab -n 100 -c 2 http://127.0.0.1:31113/s0
 
 #### Runner <!-- omit in toc -->
 
-The `Runner` is the tool that loads the application with HTTP requests sent to the NGINX access gateway. It can use different `workload_type`, namely: `file`, `greedy`, and `periodic` (see later)
-To Runner takes as input the `RunnerParameters.json` as the following one.
+The `Runner` is the tool that loads the application with HTTP requests sent to the NGINX access gateway. It can use different `workload_type`, namely: `file`, `greedy`, and `periodic` (see later).
+The Runner takes as input a `RunnerParameters.json` file as the following one.
 
 ```json
 {
@@ -678,11 +678,11 @@ The `Runner` can be executed by using:
 python3 Benchmarks/Runner/Runner.py -c Configs/RunnerParameters.json
 ```
 
-> We recommend executing the `Runner` outside the nodes of the cluster where the microservices application is running, with the purpose of not holding resources from the running services and bias the test results.
+> We recommend executing the `Runner` outside the nodes of the cluster where the microservices application is running, with the purpose of not holding resources from the running services.
 
 *File mode*
 
-In `file` mode, the `Runner` takes as input one or more *workload* description files whose lines describe the request events, in terms of time and identifiers of the service to be called. We can see an example of a workload file below.
+In `file` mode, the `Runner` takes as input one or more *workload* description files whose lines describe the request events, in terms of time and identifiers of the service to be called. This makes the test reproducible. We can see an example of a workload file below.
 
 ```json
 [
@@ -702,8 +702,8 @@ The `Runner` sequentially executes one by one these files and saves a test resul
 
 *Greedy mode*
 
-In `greedy` mode, the `Runner` allocates a pool of threads. Each thread makes an HTTP request to a service defined in the key `ingress_service` (e.g. s0); when the response is received, the thread immediately send another request. 
-Overall, the number of sent request is the value of `workload_events`. The paramenters `workload_files_path_list`, `workload_rounds` and `rate` are not used for greedy mode. 
+In `greedy` mode, the `Runner` allocates a pool of threads. Each thread makes an HTTP request to a service defined in the key `ingress_service` (e.g. s0); when the response is received, the thread immediately sends another request. 
+Overall, the number of sent requests is the value of `workload_events`. The paramenters `workload_files_path_list`, `workload_rounds` and `rate` are not used for greedy mode. 
 
 *Periodic mode*
 In `periodic` mode, the `Runner` periodically sends HTTP requests at a constant `rate` to a service defined in the key `ingress_service` (e.g. s0). To manage concurrent requests, the Runner uses a thread pool. The paramenters `workload_files_path_list` and `workload_rounds` are not used for periodic mode.
@@ -716,7 +716,7 @@ After each test, the `Runner` can execute a custom python function (e.g. to fetc
 
 The `result_file` produced by the `Runner` contains five columns. Each row is written at the end of an HTTP request. The first column indicates the time of the execution of the request as a unix timestamp; the second column indicates the elapsed time, in *ms*, of the request; the third column reports the received HTTP status (e.g. 200 OK), the fourth and fifth columns are the number of processed and pending (on-going) requests at that time, respectively. 
 
-```bash
+```zsh
 1637682769350 	 171 	 200 	 6 	 5
 1637682769449 	 155 	 200 	 8 	 6
 1637682769499 	 164 	 200 	 9 	 6
@@ -819,7 +819,7 @@ In this section, we describe how to deploy a µBench example application and mak
 
 - Create a Kubernetes cluster with [NFS](NFSConfig.md) and [Prometheus] (#monitoring-with-prometheus) installed.
 - Get access via SSH to master-node, or use a client terminal from witch it is possible i) to control the cluster via `kubectl` and ii) write into the NFS folder used by µBench
-- Install Python3
+- Install Python3 (v3.7 or above)
 - Clone the git repository of µBench and move into `MicroServiceSimulator` directory
   
   ```zsh
@@ -836,6 +836,8 @@ source .venv/bin/activate
 
 pip3 install -r requirements.txt
 ```
+
+Note: if you had error in installing required modules may be that some of them have not properly compiled in your device. It may help to install C/C++ building tools, with e.g. `sudo apt-get install build-essential`, `sudo apt-get install cmake` (or `sudo snap install cmake --classic` for lates version) on Ubuntu; there could be some missing `ffi` dev library that can be installed with `sudo apt-get install libffi-dev`; may be a lack of python3 wheel that can be installed with `pip3 install wheel` in the .venv.     
 
 ### Step 2 -  Service mesh generation <!-- omit in toc -->
 

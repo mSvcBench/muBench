@@ -6,6 +6,7 @@ metadata:
   labels:
     zone: default
     app: {{SERVICE_NAME}}
+    version: "1.0"
   annotations:
     something: something
 spec:
@@ -19,6 +20,7 @@ spec:
       labels:
         zone: default
         app: {{SERVICE_NAME}}
+        version: "1.0"
         prometheus.io/scrape: 'true'
       annotations:
         prometheus.io/scrape: 'true'
@@ -28,7 +30,7 @@ spec:
         - name: {{SERVICE_NAME}}
           image: {{IMAGE}}
           ports:
-            - name: mub-cell-port
+            - name: http-mubpodport
               containerPort: 8080
           volumeMounts:
             - name: podinfo
@@ -81,9 +83,9 @@ spec:
   - port: 80
     targetPort: 8080
     nodePort:
-    name: tcp-input-rest
+    name: http-mubserviceport
   - port: 51313
     targetPort: 51313
-    name: tcp-input-grpc
+    name: grpc-mubserviceport
   selector:
     app: {{SERVICE_NAME}}
