@@ -9,7 +9,7 @@ helm repo update
 helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring
 ```
 
-Deploy the Prometheus PodMonitor with
+Deploy the Prometheus µBench PodMonitor with
 ```zsh
 kubectl apply -f ./mub-monitor.yaml
 ```
@@ -50,3 +50,5 @@ Then it is necessary to add Prometheus PodMonitor and ServiceMonitor:
 ```zsh
 k apply -f istio-prometheus-operator.yaml
 ```
+
+Istio may use [Metrics merging] (https://istio.io/latest/docs/ops/integrations/prometheus/), therefore the µBench metrics can be shown two times, even though with different 'job' labels. To avoid this, in presence of Istio, can be convenient not to run the aforementioned µBench PodMonitor. 
