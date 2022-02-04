@@ -34,7 +34,7 @@ sudo systemctl restart nfs-kernel-server
 
 ## Configure NFS Clients
 
-Client nodes must have nfs-common package and a `/kubedata/mubSharedData` directory used to mount the NFS folder   
+Client nodes must have nfs-common package and a `/kubedata` directory used to mount the NFS folder   
 
 ```bash
 sudo mkdir /kubedata
