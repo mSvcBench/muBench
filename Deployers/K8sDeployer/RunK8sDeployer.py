@@ -50,8 +50,9 @@ def copy_config_file_to_nfs(nfs_folder_path, workmodel, internal_service_functio
         # Remove NFS mub folder contents
         if os.path.exists(nfs_folder_path):
             shutil.rmtree(nfs_folder_path,ignore_errors=True)
-            os.makedirs(nfs_folder_path)
-            os.makedirs(f"{nfs_folder_path}/InternalServiceFunctions")
+        
+        os.makedirs(nfs_folder_path)
+        os.makedirs(f"{nfs_folder_path}/InternalServiceFunctions")
         
         if output_path is None:
             with open(f"{nfs_folder_path}/workmodel.json", "w") as f:
