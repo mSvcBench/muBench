@@ -79,6 +79,8 @@ The `workmodel.json` file describing a µBench application is made by a key per 
     "threads": 16,
     "cpu-requests": "1000m",
     "cpu-limits": "1000m",
+    "pod_antiaffinity": false,
+    "replicas": 1,
     "url": "s0.default.svc.cluster.local",
     "path": "/api/v1",
     "image": "msvcbench/microservice_v3-screen:latest",
@@ -98,6 +100,8 @@ The `workmodel.json` file describing a µBench application is made by a key per 
     "request_method": "rest",
     "workers": 4,
     "threads": 16,
+    "pod_antiaffinity": false,
+    "replicas": 1,
     "cpu-requests": "1000m",
     "cpu-limits": "1000m",
     "url": "sdb1.default.svc.cluster.local",
@@ -124,6 +128,8 @@ The `workmodel.json` file describing a µBench application is made by a key per 
     "threads": 16,
     "cpu-requests": "1000m",
     "cpu-limits": "1000m",
+    "pod_antiaffinity": false,
+    "replicas": 1,
     "url": "s1.default.svc.cluster.local",
     "path": "/api/v1",
     "image": "msvcbench/microservice_v3-screen:latest",
@@ -152,6 +158,8 @@ The `workmodel.json` file describing a µBench application is made by a key per 
     "threads": 16,
     "cpu-requests": "1000m",
     "cpu-limits": "1000m",
+    "pod_antiaffinity": false,
+    "replicas": 1,
     "url": "s1.default.svc.cluster.local",
     "path": "/api/v1",
     "image": "msvcbench/microservice_v3-screen:latest",
@@ -164,7 +172,7 @@ In this example, the µBench application is made by four services: *s0*, *s1*, *
 
 The external-services called by s0 are organized in two *external-service-groups* described by JSON objects contained by an array. The first group contains only the external-service *s1*. The second group contains only the external-service *sdb1*. To mimic random paths on the service mesh, for each group, a dedicated processing thread of the service-cell randomly selects `seq_len` external-services from it and invokes (e.g., HTTP call) them *sequentially*. These per-group threads are executed in parallel, one per group. In this way, a service-cell can emulate sequential and parallel calls of external-services.
 
-The IP address of a service-cell is associated with a `url` and its service can be (internally) requested on a specific `path` of that URL. For instance, the service *s0* is called by other services by using http://s0.default.svc.cluster.local/api/v1. Additional information includes the Docker `image` to use for the service-cell, the number of parallel processes (`workers`) and `threads` per process used by the service-cell to serve client requests, the `request_method` it uses to call other services (can be `gRPC` or `rest` and, currently, must be equal for all), additional variables (e.g., ) that underlying execution platform can use. In the case of Kubernetes, these variables are: the `namespace` in which to deploy the application; optional specification of cpu and memory resources needed by service-cell containers, namely `cpu-requests`, `cpu-limits`, `memory-requests`, `memory-limits` (see k8s [documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)).
+The IP address of a service-cell is associated with a `url` and its service can be (internally) requested on a specific `path` of that URL. For instance, the service *s0* is called by other services by using http://s0.default.svc.cluster.local/api/v1. Additional information includes the Docker `image` to use for the service-cell, the number of parallel processes (`workers`) and `threads` per process used by the service-cell to serve client requests, the `request_method` it uses to call other services (can be `gRPC` or `rest` and, currently, must be equal for all), additional variables (e.g., ) that underlying execution platform can use. In the case of Kubernetes, these variables are: the `namespace` in which to deploy the application; optional specification of cpu and memory resources needed by service-cell containers, namely `cpu-requests`, `cpu-limits`, `memory-requests`, `memory-limits` (see k8s [documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)), the number of `replicas` of the related POD, the `pod_antiaffinity` (true,false) property to enforce pods spreading on diferent nodes.
 
 ---
 

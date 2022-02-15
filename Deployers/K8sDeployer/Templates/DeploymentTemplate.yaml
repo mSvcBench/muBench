@@ -53,8 +53,10 @@ spec:
             - name: TN
               value: {{TN}}
           resources: {{RESOURCES}}    
-
+        
         {{SIDECAR}}
+
+      {{POD_ANTIAFFINITY}}
 
       volumes:
         - name: podinfo

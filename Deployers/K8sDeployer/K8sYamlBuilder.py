@@ -8,7 +8,7 @@ K8s_YAML_BUILDER_PATH = os.path.dirname(os.path.abspath(__file__))
 
 SIDECAR_TEMPLATE = "- name: %s-sidecar\n          image: %s"
 NODE_AFFINITY_TEMPLATE = {'affinity': {'nodeAffinity': {'requiredDuringSchedulingIgnoredDuringExecution': {'nodeSelectorTerms': [{'matchExpressions': [{'key': 'kubernetes.io/hostname','operator': 'In','values': ['']}]}]}}}}
-
+POD_ANTIAFFINITI_TEMPLATE = {'affinity':{'podAntiAffinity':{'requiredDuringSchedulingIgnoredDuringExecution':[{'labelSelector':{'matchExpressions':[{'key':'app','operator':'In','values':['']}]},'topologyKey':'kubernetes.io/hostname'}]}}}
 # Add params to work_model json
 # http://s1.default.svc.cluster.local
 def customization_work_model(model, k8s_parameters):
@@ -33,7 +33,7 @@ def create_deployment_yaml_files(model, k8s_parameters, nfs, output_path):
             if "sidecar" in model[service].keys():
                 f = f.replace("{{SIDECAR}}", SIDECAR_TEMPLATE % (service, model[service]["sidecar"]))
             else:
-                f = f.replace("{{SIDECAR}}", "")
+                f = f.replace("{{SIDECAR}}", "".rstrip())
             if "replicas" in model[service].keys():
                 f = f.replace("{{REPLICAS}}", str(model[service]["replicas"]))
             else:
@@ -44,6 +44,13 @@ def create_deployment_yaml_files(model, k8s_parameters, nfs, output_path):
                 f = f.replace("{{NODE_AFFINITY}}", str(yaml.dump(NODE_AFFINITY_TEMPLATE_TO_ADD)).rstrip().replace('\n','\n   '))
             else:
                 f = f.replace("{{NODE_AFFINITY}}", "")
+            if "pod_antiaffinity" in model[service].keys() and model[service]['pod_antiaffinity']==True:
+                POD_ANTIAFFINITY_TO_ADD = POD_ANTIAFFINITI_TEMPLATE
+                POD_ANTIAFFINITY_TO_ADD['affinity']['podAntiAffinity']['requiredDuringSchedulingIgnoredDuringExecution'][0]['labelSelector']['matchExpressions'][0]['values'][0] = service
+                POD_ANTIAFFINITY_TO_ADD = str(yaml.dump(POD_ANTIAFFINITY_TO_ADD)).replace('\n','\n        ').rstrip()
+                f = f.replace("{{POD_ANTIAFFINITY}}", POD_ANTIAFFINITY_TO_ADD)
+            else:
+                f = f.replace("{{POD_ANTIAFFINITY}}", "".rstrip())
             if "workers" in model[service].keys():
                 f = f.replace("{{PN}}", f'\'{model[service]["workers"]}\'')
             else:
