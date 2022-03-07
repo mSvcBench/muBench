@@ -819,7 +819,7 @@ Each µBench service-cell exports the following Prometheus Summary metrics:
 
 ---
 
-## Getting Started
+## Installation and Getting Started
 
 In this section, we describe how to deploy a µBench example application and make a simple performance test. We use the configuration files contained in the `Config` directory.
 
@@ -855,6 +855,8 @@ Generate the [service mesh](#service-mesh-generator) to obtain two files `servic
 python3 ServiceMeshGenerator/RunServiceMeshGen.py -c Configs/ServiceMeshParameters.json
 ```
 
+Note: if you have problems with cairo library this may help on Ubuntu: "sudo apt-get install libpangocairo-1.0-0"
+  
 ### Step 3: Work model generation <!-- omit in toc -->
 
 Generate the [work model](#work-model) to obtain the `workmodel.json` file in the `SimulationWorkspace` directory.
