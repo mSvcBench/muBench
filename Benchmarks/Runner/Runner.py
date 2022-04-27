@@ -200,8 +200,9 @@ def periodic_runner():
     pool = ThreadPoolExecutor(threads)
     futures = list()
     event={'service':srv,'time':0}
+    offset=10 # initial delay to allow the insertion of events in the event list
     for i in range(workload_events):
-        event_time =  i * 1.0/rate
+        event_time =  offset + i * 1.0/rate
         s.enter(event_time, 1, job_assignment, argument=(pool, futures, event, stats, local_latency_stats))
 
     start_time = time.time()
