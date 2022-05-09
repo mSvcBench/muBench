@@ -288,7 +288,7 @@ Take care of controlling the eventual completion of the deployement/undeployment
 
 ## Toolchain
 
-To simulate large microservice applications, µBench provides a toolchain made by two software, *ServiceMechGenerator* and *WorkLoadGenerator*, that support the creation of complex `workmodel.json` files by using random distributions whose parameters can be configured by the user.
+To simulate large microservice applications, µBench provides a toolchain made by two software, *ServiceMeshGenerator* and *WorkLoadGenerator*, that support the creation of complex `workmodel.json` files by using random distributions whose parameters can be configured by the user.
 The following figure shows how they can be sequentially used with the K8sDeployer to have a µBench running on a Kubernetes cluster.
 
 ![toolchain](toolchain.png)
