@@ -49,6 +49,13 @@ def external_service(group):
         seq_len = group["seq_len"]
     # Randomly select seq_len elements from services in the group
     selected_services = random.sample(group["services"], k=seq_len)
+    
+    # read probabilities of services of the group, if exist
+    if "probabilities" in  group.keys():
+        probabilities = group["probabilities"]
+    else:
+        probabilities = dict()
+    
     service_error_dict = dict()
     service_error_flag = False
 
@@ -59,12 +66,18 @@ def external_service(group):
         try:
             # "url": "http://s0.default.svc.cluster.local",
             # "path": "/api/v1",
-            r = request_function(service)
-            print("Service: %s -> Status_code: %s -- len(text): %d" % (service, r.status_code, len(r.text)))
-            if type(r.status_code) == bool and not r.status_code:
-                raise Exception(f"Error in request external service: {service} -- (gRPC) status_code: {r.status_code}")
-            elif type(r.status_code) == int and r.status_code != 200:
-                raise Exception(f"Error in request external service: {service} -- (REST) status_code: {r.status_code}")
+            if service in probabilities.keys():
+                p = probabilities[service]
+            else:
+                p = 1
+            if random.random() < p :
+                # service called with probability p
+                r = request_function(service)
+                print("Service: %s -> Status_code: %s -- len(text): %d" % (service, r.status_code, len(r.text)))
+                if type(r.status_code) == bool and not r.status_code:
+                    raise Exception(f"Error in request external service: {service} -- (gRPC) status_code: {r.status_code}")
+                elif type(r.status_code) == int and r.status_code != 200:
+                    raise Exception(f"Error in request external service: {service} -- (REST) status_code: {r.status_code}")
 
         except Exception as err:
             service_error_dict[service] = err

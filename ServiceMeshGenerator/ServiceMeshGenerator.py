@@ -24,6 +24,17 @@ def edges_reversal(graph):
         graph.delete_edges([(edge[0], edge[1])])
         graph.add_edges([(edge[1], edge[0])])
 
+def get_probability(graph_params):
+    try:
+        if "service_probability" in graph_params.keys():
+            if graph_params["service_probability"]["model"]=="const":
+                return float(graph_params["service_probability"]["params"]["value"])
+            if graph_params["service_probability"]["model"]=="random":
+                return round(random.random(),3)
+
+    except Exception as err:        
+        print(f"Error in service_probability: {err}")
+        return 1
 
 def get_service_mesh(graph_params, output_path=None, output_file_png=None):
     if output_path is None:
@@ -46,9 +57,10 @@ def get_service_mesh(graph_params, output_path=None, output_file_png=None):
         # print("vertex: %d -> childs: " %vertex, g.get_adjlist()[vertex])
         for service_id in g.get_adjlist()[vertex]:
             if len(service_list) == current_service_group:
-                service_list.append({"seq_len": graph_params["seq_len"], "services": list()})
+                service_list.append({"seq_len": graph_params["seq_len"], "services": list(), "probabilities": dict()})
 
             service_list[current_service_group]["services"].append(f"s{service_id}")
+            service_list[current_service_group]["probabilities"][f"s{service_id}"] = get_probability(graph_params)
             current_service_group = (current_service_group + 1) % graph_params["external_service_groups"]
                 
         service_mesh[f"s{vertex}"] = {'external_services': service_list}
