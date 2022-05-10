@@ -19,13 +19,13 @@
 
 ![service-cell-rest-grpc](microservices-rest-grpc.png)
 
-µBench models a microservice application as a complex system made up of services with a different ID, e.g. *s0, s1, s2, sdb1, ... etc*. The task of each service consists in: 
+µBench generates dummy microservice applications consisting of a set of (micro) services that call each other to satisfy a client request. Each service has a different ID (e.g., *s0, s1, s2, sdb1*) and performs the following tasks
 
 - executing an *internal-service*, i.e. a function, that stresses specific *computing* resources (CPU, disk, memory, etc.) and produces some dummy bytes to stress *network* resources
 - calling a set of *external-services*, i.e.  the services of other service-cells, and wait for their results
 - sending back the number of dummy bytes produced by the internal-service to the callers
 
-Services communicate with each other using either HTTP REST request/response mechanisms or gRPC. Users can access the µBench microservice application through an API gateway, an NGINX server, that exposes an HTTP endpoint per service, e.g. *NGINX_ip:port/s0*, *NGINX_ip:port/s1*, etc. These endpoints can be used by software for performance evaluation that loads the system with service requests, such as our [Runner](Manual.md#benchmark-tools).
+Services communicate with each other using either HTTP REST request/response mechanisms or gRPC. Users can access the µBench microservice application through an API gateway, an NGINX server, that exposes an HTTP endpoint per service, e.g. *NGINX_ip:port/s0*, *NGINX_ip:port/s1*, etc. These endpoints can be used by software for performance evaluation that loads the system with service requests, such as our [Runner](Manual.md#benchmark-tools), [ApacheBench](https://httpd.apache.org/docs/2.4/programs/ab.html), [JMeter] .
 Service-cells report their observed performance to a global [Prometheus](/Monitoring/kubernetes-prometheus/README.md#Prometheus) monitoring system. The underlying platform (e.g. Kubernetes) running the µBench microservice application can report its metrics to Prometheus too.
 
 ---
@@ -79,6 +79,8 @@ The `workmodel.json` file describing a µBench application is made by a key per 
     "threads": 16,
     "cpu-requests": "1000m",
     "cpu-limits": "1000m",
+    "pod_antiaffinity": false,
+    "replicas": 1,
     "url": "s0.default.svc.cluster.local",
     "path": "/api/v1",
     "image": "msvcbench/microservice_v3-screen:latest",
@@ -98,6 +100,8 @@ The `workmodel.json` file describing a µBench application is made by a key per 
     "request_method": "rest",
     "workers": 4,
     "threads": 16,
+    "pod_antiaffinity": false,
+    "replicas": 1,
     "cpu-requests": "1000m",
     "cpu-limits": "1000m",
     "url": "sdb1.default.svc.cluster.local",
@@ -124,6 +128,8 @@ The `workmodel.json` file describing a µBench application is made by a key per 
     "threads": 16,
     "cpu-requests": "1000m",
     "cpu-limits": "1000m",
+    "pod_antiaffinity": false,
+    "replicas": 1,
     "url": "s1.default.svc.cluster.local",
     "path": "/api/v1",
     "image": "msvcbench/microservice_v3-screen:latest",
@@ -152,6 +158,8 @@ The `workmodel.json` file describing a µBench application is made by a key per 
     "threads": 16,
     "cpu-requests": "1000m",
     "cpu-limits": "1000m",
+    "pod_antiaffinity": false,
+    "replicas": 1,
     "url": "s1.default.svc.cluster.local",
     "path": "/api/v1",
     "image": "msvcbench/microservice_v3-screen:latest",
@@ -164,7 +172,7 @@ In this example, the µBench application is made by four services: *s0*, *s1*, *
 
 The external-services called by s0 are organized in two *external-service-groups* described by JSON objects contained by an array. The first group contains only the external-service *s1*. The second group contains only the external-service *sdb1*. To mimic random paths on the service mesh, for each group, a dedicated processing thread of the service-cell randomly selects `seq_len` external-services from it and invokes (e.g., HTTP call) them *sequentially*. These per-group threads are executed in parallel, one per group. In this way, a service-cell can emulate sequential and parallel calls of external-services.
 
-The IP address of a service-cell is associated with a `url` and its service can be (internally) requested on a specific `path` of that URL. For instance, the service *s0* is called by other services by using http://s0.default.svc.cluster.local/api/v1. Additional information includes the Docker `image` to use for the service-cell, the number of parallel processes (`workers`) and `threads` per process used by the service-cell to serve client requests, the `request_method` it uses to call other services (can be `gRPC` or `rest` and, currently, must be equal for all), additional variables (e.g., ) that underlying execution platform can use. In the case of Kubernetes, these variables are: the `namespace` in which to deploy the application; optional specification of cpu and memory resources needed by service-cell containers, namely `cpu-requests`, `cpu-limits`, `memory-requests`, `memory-limits` (see k8s [documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)).
+The IP address of a service-cell is associated with a `url` and its service can be (internally) requested on a specific `path` of that URL. For instance, the service *s0* is called by other services by using http://s0.default.svc.cluster.local/api/v1. Additional information includes the Docker `image` to use for the service-cell, the number of parallel processes (`workers`) and `threads` per process used by the service-cell to serve client requests, the `request_method` it uses to call other services (can be `gRPC` or `rest` and, currently, must be equal for all), additional variables (e.g., ) that underlying execution platform can use. In the case of Kubernetes, these variables are: the `namespace` in which to deploy the application; optional specification of cpu and memory resources needed by service-cell containers, namely `cpu-requests`, `cpu-limits`, `memory-requests`, `memory-limits` (see k8s [documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)), the number of `replicas` of the related POD, the `pod_antiaffinity` (true,false) property to enforce pods spreading on diferent nodes.
 
 ---
 
@@ -266,7 +274,7 @@ The user can change the name of the output YAML files by specifying the `prefix_
 }
 ```
 
-Run`RunK8sDeployer.py` from the K8s Master node as follows
+Run `RunK8sDeployer.py` from the K8s Master node as follows
 
 ```zsh
 python3 Deployers/K8sDeployer/RunK8sDeployer.py -c Configs/K8sParameters.json
@@ -280,7 +288,7 @@ Take care of controlling the eventual completion of the deployement/undeployment
 
 ## Toolchain
 
-To simulate large microservice applications, µBench provides a toolchain made by two software, *ServiceMechGenerator* and *WorkLoadGenerator*, that support the creation of complex `workmodel.json` files by using random distributions whose parameters can be configured by the user.
+To simulate large microservice applications, µBench provides a toolchain made by two software, *ServiceMeshGenerator* and *WorkLoadGenerator*, that support the creation of complex `workmodel.json` files by using random distributions whose parameters can be configured by the user.
 The following figure shows how they can be sequentially used with the K8sDeployer to have a µBench running on a Kubernetes cluster.
 
 ![toolchain](toolchain.png)
@@ -636,10 +644,10 @@ python3 Autopilots/K8sAutopilot/K8sAutopilot.py -c Configs/K8sAutopilotConf.json
 ## Benchmark tools
 
 µBench provides simple benchmark tools in the `Benchmarks` directory. Besides these tools, you can 
-use other open-souce tools, e.g. *ab - Apache HTTP server benchmarking tool * as it follows, where 127.0.0.1:31113 should be replaced with the IP address and port of the NGINX API gateway:
+use other open-souce tools, e.g. *ab - Apache HTTP server benchmarking tool * as it follows, where <access-gateway-ip>:31113 is the IP address (e.g. that of k8s master node) and port through which it is possible to contact the NGINX API gateway:
 
 ```zsh
-ab -n 100 -c 2 http://127.0.0.1:31113/s0
+ab -n 100 -c 2 http://<access-gateway-ip>:31113/s0
 ```
 
 ### Traffic Generator and Runner <!-- omit in toc -->
@@ -648,8 +656,8 @@ ab -n 100 -c 2 http://127.0.0.1:31113/s0
 
 #### Runner <!-- omit in toc -->
 
-The `Runner` is the tool that loads the application with HTTP requests sent to the NGINX access gateway. It can use different `workload_type`, namely: `file`, `greedy`, and `periodic` (see later)
-To Runner takes as input the `RunnerParameters.json` as the following one.
+The `Runner` is the tool that loads the application with HTTP requests sent to the NGINX access gateway. It can use different `workload_type`, namely: `file`, `greedy`, and `periodic` (see later).
+The Runner takes as input a `RunnerParameters.json` file as the following one.
 
 ```json
 {
@@ -678,11 +686,11 @@ The `Runner` can be executed by using:
 python3 Benchmarks/Runner/Runner.py -c Configs/RunnerParameters.json
 ```
 
-> We recommend executing the `Runner` outside the nodes of the cluster where the microservices application is running, with the purpose of not holding resources from the running services and bias the test results.
+> We recommend executing the `Runner` outside the nodes of the cluster where the microservices application is running, with the purpose of not holding resources from the running services.
 
 *File mode*
 
-In `file` mode, the `Runner` takes as input one or more *workload* description files whose lines describe the request events, in terms of time and identifiers of the service to be called. We can see an example of a workload file below.
+In `file` mode, the `Runner` takes as input one or more *workload* description files whose lines describe the request events, in terms of time and identifiers of the service to be called. This makes the test reproducible. We can see an example of a workload file below.
 
 ```json
 [
@@ -702,8 +710,8 @@ The `Runner` sequentially executes one by one these files and saves a test resul
 
 *Greedy mode*
 
-In `greedy` mode, the `Runner` allocates a pool of threads. Each thread makes an HTTP request to a service defined in the key `ingress_service` (e.g. s0); when the response is received, the thread immediately send another request. 
-Overall, the number of sent request is the value of `workload_events`. The paramenters `workload_files_path_list`, `workload_rounds` and `rate` are not used for greedy mode. 
+In `greedy` mode, the `Runner` allocates a pool of threads. Each thread makes an HTTP request to a service defined in the key `ingress_service` (e.g. s0); when the response is received, the thread immediately sends another request. 
+Overall, the number of sent requests is the value of `workload_events`. The paramenters `workload_files_path_list`, `workload_rounds` and `rate` are not used for greedy mode. 
 
 *Periodic mode*
 In `periodic` mode, the `Runner` periodically sends HTTP requests at a constant `rate` to a service defined in the key `ingress_service` (e.g. s0). To manage concurrent requests, the Runner uses a thread pool. The paramenters `workload_files_path_list` and `workload_rounds` are not used for periodic mode.
@@ -716,7 +724,7 @@ After each test, the `Runner` can execute a custom python function (e.g. to fetc
 
 The `result_file` produced by the `Runner` contains five columns. Each row is written at the end of an HTTP request. The first column indicates the time of the execution of the request as a unix timestamp; the second column indicates the elapsed time, in *ms*, of the request; the third column reports the received HTTP status (e.g. 200 OK), the fourth and fifth columns are the number of processed and pending (on-going) requests at that time, respectively. 
 
-```bash
+```zsh
 1637682769350 	 171 	 200 	 6 	 5
 1637682769449 	 155 	 200 	 8 	 6
 1637682769499 	 164 	 200 	 9 	 6
@@ -767,18 +775,14 @@ With the following steps, you will deploy on your Kubernetes environment: [Prome
 
 ## Monitoring with Prometheus
 
-µBench service-cells export some metrics to a Prometheus server running in the cluster.
+µBench service-cells exports some metrics to a Prometheus server running in the cluster.
 
-### Cluster Configuration <!-- omit in toc -->
 
-First, create a new namespace called `monitoring` where we will deploy all the monitoring resources. Prometheus will be available at: `http://<access-gateway-ip>:30000` after the successful deployment of the following commands:
+### Prometheus installation <!-- omit in toc -->
 
-```bash
-kubectl create namespace monitoring
-kubectl apply -f Monitoring/kubernetes-prometheus
-```
+We considered two ways to install Prometheus: the first one directly uses k8s yaml files and is descibed [here](../Monitoring/kubernetes-prometheus/README.md); the second (recommended) solution uses the prometheus-operator installed via Helm and install Grafana too, related documentation is [here](../Monitoring/kubernetes-prometheus-operator/README.md)      
 
-#### Prometheus Adapter <!-- omit in toc -->
+#### Prometheus Adapter (optional) <!-- omit in toc -->
 
 Prometheus Adapter is suitable for use with the [Kubernetes Horizontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/).
 It can also replace the metrics server on clusters that already run Prometheus and collect the appropriate metrics.
@@ -797,16 +801,16 @@ $ helm status prometheus-adapter --namespace monitoring
 #### Grafana  <!-- omit in toc -->
 
 Prometheus metrics can be shown by using [Grafana](https://grafana.com/) tool.
-To install Grafana in the Kubernetes cluster you can use the following command and Grafana services will be available at: `http://<access-gateway-ip>:30001`
+To install Grafana in the Kubernetes cluster you can use the following command and Grafana services will be available at: `http://<access-gateway-ip>:30001`. If you istalled the prometheus-operator Grafana is already running, so this step is not required. 
 
 ```bash
 kubectl create namespace monitoring
 kubectl apply -f Monitoring/kubernetes-grafana
 ```
 
-### Service Cell metrics <!-- omit in toc -->
+### Service metrics <!-- omit in toc -->
 
-A service-cell exports the following Prometheus Summary metrics:
+Each µBench service-cell exports the following Prometheus Summary metrics:
 
 - *mub_response_size* : size of the request response in bytes;
 - *mub_request_latency_seconds* : request latency including the execution of internal and extrenal services;
@@ -815,15 +819,16 @@ A service-cell exports the following Prometheus Summary metrics:
 
 ---
 
-## Getting Started
+## Installation and Getting Started
 
 In this section, we describe how to deploy a µBench example application and make a simple performance test. We use the configuration files contained in the `Config` directory.
 
 ### Step 1 - Platform Configuration <!-- omit in toc -->
 
-- Obtain access to a Kubernetes platform with [NFS](NFSConfig.md) and Prometheus (#monitoring-with-prometheus) installed.
-- Install Python3 on the master node
-- Clone the git repository of µBench on Kubernetes master node and move in the  MicroServiceSimulator dir
+- Create a Kubernetes cluster with [NFS](NFSConfig.md) and [Prometheus] (#monitoring-with-prometheus) installed.
+- Get access via SSH to master-node, or use a client terminal from witch it is possible i) to control the cluster via `kubectl` and ii) write into the NFS folder used by µBench
+- Install Python3 (v3.7 or above)
+- Clone the git repository of µBench and move into `MicroServiceSimulator` directory
   
   ```zsh
   git clone https://github.com/mSvcBench/MicroServiceSimulator.git
@@ -840,17 +845,21 @@ source .venv/bin/activate
 pip3 install -r requirements.txt
 ```
 
+Note: if you had error in installing required modules may be that some of them have not properly compiled in your device. It may help to install C/C++ building tools, with e.g. `sudo apt-get install build-essential`, `sudo apt-get install cmake` (or `sudo snap install cmake --classic` for lates version) on Ubuntu; there could be some missing `ffi` dev library that can be installed with `sudo apt-get install libffi-dev`; may be a lack of python3 wheel that can be installed with `pip3 install wheel` in the .venv.     
+
 ### Step 2 -  Service mesh generation <!-- omit in toc -->
 
-Generate the [service mesh](#service-mesh-generator) and obtain two files `servicemesh.json` and `servicemesh.png` in the `SimulationWorkspace` dir. The .png is a picture of the generated mesh. 
+Generate the [service mesh](#service-mesh-generator) to obtain two files `servicemesh.json` and `servicemesh.png` in the `SimulationWorkspace` directory. The .png is a picture of the generated mesh. 
 
 ```zsh
 python3 ServiceMeshGenerator/RunServiceMeshGen.py -c Configs/ServiceMeshParameters.json
 ```
 
+Note: if you have problems with cairo library this may help on Ubuntu: "sudo apt-get install libpangocairo-1.0-0"
+  
 ### Step 3: Work model generation <!-- omit in toc -->
 
-Generate the [work model](#work-model) and obtain the `workmodel.json` file in the `SimulationWorkspace` dir.
+Generate the [work model](#work-model) to obtain the `workmodel.json` file in the `SimulationWorkspace` directory.
 
 ```zsh
 python3 WorkModelGenerator/RunWorkModelGen.py -c Configs/WorkModelParameters.json
@@ -858,7 +867,7 @@ python3 WorkModelGenerator/RunWorkModelGen.py -c Configs/WorkModelParameters.jso
 
 ### Step 4: Deploy on Kubernetes <!-- omit in toc -->
 
-Deploy the service-cells on Kubernetes and manually monitor that all pods are Running 
+Deploy the generated µBench microservice application on Kubernetes cluster and manually monitor that all pods are Running 
 
 ```zsh
 python3 Deployers/K8sDeployer/RunK8sDeployer.py -c Configs/K8sParameters.json
@@ -886,10 +895,10 @@ kubectl get pods svc
 
 ### Step 5: Test service response <!-- omit in toc -->
 
-Test the correct execution of the application with (127.0.0.1 can be replaced with the public IP address of master node)
+Test the correct execution of the application with (access-gateway-ip is the public IP address of a node of the cluster, e.g. the master node)
 
 ```zsh
-curl http://127.0.0.1:31113/s0
+curl http://<access-gateway-ip>:31113/s0
 ```
 
 <p align="center">

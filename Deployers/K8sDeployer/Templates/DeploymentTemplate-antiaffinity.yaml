@@ -26,6 +26,16 @@ spec:
         prometheus.io/scrape: 'true'
         prometheus.io/port: '8080'
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - {{SERVICE_NAME}}
+            topologyKey: kubernetes.io/hostname
       containers:
         - name: {{SERVICE_NAME}}
           image: {{IMAGE}}
@@ -53,10 +63,8 @@ spec:
             - name: TN
               value: {{TN}}
           resources: {{RESOURCES}}    
-        
-        {{SIDECAR}}
 
-      {{POD_ANTIAFFINITY}}
+        {{SIDECAR}}
 
       volumes:
         - name: podinfo

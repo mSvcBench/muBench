@@ -171,7 +171,7 @@ class gRPCThread(Thread, pb2_grpc.MicroServiceServicer):
             print("*************** EXTERNAL SERVICES STARTED ***************")
             start_external_request_processing = time.time()
             if len(my_service_mesh) > 0:
-                service_error_dict = run_external_service(my_service_mesh, work_model)
+                service_error_dict = run_external_service(my_service_mesh, globalDict['work_model'])
                 if len(service_error_dict):
                     pprint(service_error_dict)
                     logging.error("Error in request external services")

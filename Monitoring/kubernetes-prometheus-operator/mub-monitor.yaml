@@ -1,0 +1,14 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: mub-monitor
+  labels:
+    team: mub
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      prometheus.io/scrape: 'true'
+  podMetricsEndpoints:
+  - port: "http-mubpodport"
+
