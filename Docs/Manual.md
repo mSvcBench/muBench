@@ -861,7 +861,7 @@ source .venv/bin/activate
 pip3 install -r requirements.txt
 ```
 
-Note: if you had error in installing required modules may be that some of them have not properly compiled in your device. It may help to install C/C++ building tools, with e.g. `sudo apt-get install build-essential`, `sudo apt-get install cmake` (or `sudo snap install cmake --classic` for lates version) on Ubuntu; there could be some missing `ffi` dev library that can be installed with `sudo apt-get install libffi-dev`; may be a lack of python3 wheel that can be installed with `pip3 install wheel` in the .venv.     
+Note: if you had error in installing required modules may be that some of them have not properly compiled in your device. It may help to install C/C++ building tools, with e.g. `sudo apt-get install build-essential`, `sudo apt-get install cmake` (or `sudo snap install cmake --classic` for lates version) on Ubuntu; there could be some missing `ffi` dev and `cairo` libraries that can be installed with `sudo apt-get install libffi-dev libcairo2`; may be a lack of python3 wheel that can be installed with `pip3 install wheel` in the .venv.     
 
 ### Step 2 -  Service mesh generation <!-- omit in toc -->
 

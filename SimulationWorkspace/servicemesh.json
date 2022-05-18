@@ -1,0 +1,28 @@
+{
+  "s0": {
+    "external_services": [
+      {
+        "seq_len": 100,
+        "services": [
+          "s1"
+        ],
+        "probabilities": {
+          "s1": 1.0
+        }
+      }
+    ]
+  },
+  "s1": {
+    "external_services": [
+      {
+        "seq_len": 1,
+        "services": [
+          "sdb1"
+        ]
+      }
+    ]
+  },
+  "sdb1": {
+    "external_services": []
+  }
+}

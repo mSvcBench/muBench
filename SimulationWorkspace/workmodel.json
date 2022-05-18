@@ -1,0 +1,107 @@
+{
+  "s0": {
+    "external_services": [
+      {
+        "seq_len": 100,
+        "services": [
+          "s1"
+        ],
+        "probabilities": {
+          "s1": 1.0
+        }
+      }
+    ],
+    "internal_service": {
+      "colosseum": {}
+    },
+    "request_method": "rest",
+    "workers": 4,
+    "threads": 16,
+    "replicas": 2,
+    "cpu-limits": "1000m",
+    "cpu-requests": "1000m"
+  },
+  "s1": {
+    "external_services": [
+      {
+        "seq_len": 1,
+        "services": [
+          "sdb1"
+        ]
+      }
+    ],
+    "internal_service": {
+      "loader": {
+        "cpu_stress": {
+          "run": true,
+          "range_complexity": [
+            1000,
+            1000
+          ],
+          "thread_pool_size": 1,
+          "trials": 1
+        },
+        "memory_stress": {
+          "run": false,
+          "memory_size": 10000,
+          "memory_io": 1000
+        },
+        "disk_stress": {
+          "run": false,
+          "tmp_file_name": "mubtestfile.txt",
+          "disk_write_block_count": 1000,
+          "disk_write_block_size": 1024
+        },
+        "sleep_stress": {
+          "run": false,
+          "sleep_time": 0.01
+        },
+        "mean_bandwidth": 11
+      }
+    },
+    "request_method": "rest",
+    "workers": 4,
+    "threads": 16,
+    "replicas": 2,
+    "cpu-limits": "1000m",
+    "cpu-requests": "1000m"
+  },
+  "sdb1": {
+    "external_services": [],
+    "internal_service": {
+      "loader": {
+        "cpu_stress": {
+          "run": false,
+          "range_complexity": [
+            100,
+            100
+          ],
+          "thread_pool_size": 1,
+          "trials": 1
+        },
+        "memory_stress": {
+          "run": false,
+          "memory_size": 10000,
+          "memory_io": 1000
+        },
+        "disk_stress": {
+          "run": true,
+          "tmp_file_name": "mubtestfile.txt",
+          "disk_write_block_count": 1000,
+          "disk_write_block_size": 1024
+        },
+        "sleep_stress": {
+          "run": false,
+          "sleep_time": 0.01
+        },
+        "mean_bandwidth": 11
+      }
+    },
+    "request_method": "rest",
+    "workers": 4,
+    "threads": 16,
+    "cpu-limits": "1000m",
+    "cpu-requests": "1000m",
+    "sidecar": "mongo:4.4.9"
+  }
+}
