@@ -25,29 +25,29 @@ def cpu_loader_job(params):
             else:
                 q, r, t, k, m, x = q*k, (2*q+r)*x, t*x, k+1, (q*(7*k+2)+r*x)//(t*x), x+2
         #print("Service complexity: %d - Number of cycles for pi computation: %d" % (cpu_load, cpu_load + 1))
-        print(f"Value: 3.{''.join(pi_greco[1:])}\n")
+        # print(f"Value: 3.{''.join(pi_greco[1:])}\n")
 
 def cpu_loader(params):
-    print("--------> CPU stress start")
+    # print("--------> CPU stress start")
     pool_size = int(params["thread_pool_size"])
     pool = ThreadPoolExecutor(pool_size)
     futures = list()
     for thread in range(pool_size):
         futures.append(pool.submit(cpu_loader_job, params))
     wait(futures)
-    print("--------> CPU stress test stop")
+    # print("--------> CPU stress test stop")
     return
 
 def bandwidth_loader(params):
-    print("--------> Network stress start")
+    # print("--------> Network stress start")
     bandwidth_load = random.expovariate(1 / params["mean_bandwidth"])
     num_chars = 1000 * bandwidth_load  # Response in kB
     response_body = 'A' * int(num_chars)
-    print("--------> Network stress stop")
+    # print("--------> Network stress stop")
     return response_body
 
 def memory_loader(params):
-    print("--------> Memory stress start")
+    # print("--------> Memory stress start")
     memory_size = params["memory_size"]
     memory_io = params["memory_io"]
     
@@ -58,12 +58,12 @@ def memory_loader(params):
     for i in range(0, int(memory_io)):
         v = dummy_buffer[i % int(memory_size)]  # read operation
         dummy_buffer[i % int(memory_size)] = ['A' * 1000] # write operation
-    print("--------> Memory stress stop")
+    # print("--------> Memory stress stop")
     return dummy_buffer
 
 def disk_loader(params):
-        print("--------> Disk stress start")
-        print("--------> Write stress start")
+        # print("--------> Disk stress start")
+        # print("--------> Write stress start")
         filename_base = params["tmp_file_name"]
         rnd_str = ''.join(random.choice(string.ascii_lowercase) for i in range(10))
         filename = f"{rnd_str}-{filename_base}"
@@ -75,9 +75,9 @@ def disk_loader(params):
             os.write(f, buff)
         os.fsync(f)  # force write to disk
         os.close(f)
-        print("--------> Write stress stop")
+        # print("--------> Write stress stop")
 
-        print("--------> Read stress start")
+        # print("--------> Read stress start")
         f = os.open(filename, os.O_RDONLY, 0o777)  # low-level I/O
         # generate random read positions
         offsets = list(range(0, blocks_count * block_size, block_size))
@@ -88,14 +88,14 @@ def disk_loader(params):
             buff = os.read(f, block_size)  # read from position
             if not buff: break  # if EOF reached
         os.close(f)
-        print("--------> Read stress stop")
+        # print("--------> Read stress stop")
         os.remove(filename)
         return
 
 def sleep_loader(params):
-    print("--------> Sleep start")
+    # print("--------> Sleep start")
     time.sleep(float(params["sleep_time"]))
-    print("--------> Sleep stop")
+    # print("--------> Sleep stop")
     return
 
 def loader(params):

@@ -56,13 +56,17 @@ The `workmodel.json` file describing a µBench application is made by a key per 
         "seq_len": 100,
         "services": [
           "s1"
-        ]
+        ],
+        "probabilities": {
+          "s1": 1
+        }
+      }
       },
       {
         "seq_len": 1,
         "services": [
           "sdb1"
-        ]
+        ],
       }
     ],
     "internal_service": {
@@ -115,7 +119,10 @@ The `workmodel.json` file describing a µBench application is made by a key per 
         "seq_len": 100,
         "services": [
           "s2"
-        ]
+        ],        
+        "probabilities": {
+          "s2": 1
+        }
       }
     ],
     "internal_service": {
@@ -170,7 +177,7 @@ The `workmodel.json` file describing a µBench application is made by a key per 
 
 In this example, the µBench application is made by four services: *s0*, *s1*, *s2*, and *sdb1* (that mimics a database). The internal-service of s0 is the function  *compute_pi* with parameters `range_complexity` (uniform random interval of number of pigreco digits to generate; the higher this number the higher the CPU stress) and `mean_bandwidth` (average value of an expneg distribution used to generate the number of bytes to return to the caller).
 
-The external-services called by s0 are organized in two *external-service-groups* described by JSON objects contained by an array. The first group contains only the external-service *s1*. The second group contains only the external-service *sdb1*. To mimic random paths on the service mesh, for each group, a dedicated processing thread of the service-cell randomly selects `seq_len` external-services from it and invokes (e.g., HTTP call) them *sequentially*. These per-group threads are executed in parallel, one per group. In this way, a service-cell can emulate sequential and parallel calls of external-services.
+The external-services called by s0 are organized in two *external-service-groups* described by JSON objects contained by an array. The first group contains only the external-service *s1*. The second group contains only the external-service *sdb1*. To mimic random paths on the service mesh, for each group, a dedicated processing thread of the service-cell randomly selects `seq_len` external-services from it and invokes (e.g., HTTP call) them *sequentially*; in the case where the `probability` array contains an external-service selected by the `seq_len` selection, that service is actually called based on its probability. The per-group threads are executed in parallel, one per group. In this way, a µBench emulates sequential and parallel calls of external-services.
 
 The IP address of a service-cell is associated with a `url` and its service can be (internally) requested on a specific `path` of that URL. For instance, the service *s0* is called by other services by using http://s0.default.svc.cluster.local/api/v1. Additional information includes the Docker `image` to use for the service-cell, the number of parallel processes (`workers`) and `threads` per process used by the service-cell to serve client requests, the `request_method` it uses to call other services (can be `gRPC` or `rest` and, currently, must be equal for all), additional variables (e.g., ) that underlying execution platform can use. In the case of Kubernetes, these variables are: the `namespace` in which to deploy the application; optional specification of cpu and memory resources needed by service-cell containers, namely `cpu-requests`, `cpu-limits`, `memory-requests`, `memory-limits` (see k8s [documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)), the number of `replicas` of the related POD, the `pod_antiaffinity` (true,false) property to enforce pods spreading on diferent nodes.
 
@@ -295,7 +302,8 @@ The following figure shows how they can be sequentially used with the K8sDeploye
 
 ### Service Mesh Generator
 
-The ServiceMeshGenerator generates a random *service mesh* of a µBench microservice application. A service mesh is usually defined as the set of external-services called by each service. It is represented as a graph, whose nodes are the services and a link exists between service A and B if service *A* call service *B*, i.e., *B* is an external-service of *A*. The ServiceMeshGenerator creates a `servicemesh.json` file that includes this topological informations and also other information concerning the strategy used to call the possible external-services, in order to mimic a random traveling of the service-mesh.
+The ServiceMeshGenerator generates a random *service mesh* of a µBench microservice application. A service mesh is usually defined as the set of external-services called by each service. It is represented as a graph, whose nodes are the services and a link exists between service A and B if service *A* call service *B*, i.e., *B* is an external-service of *A*. A link can have a weigth that is the probability of actually performing the call *A*->*B*.
+The ServiceMeshGenerator creates a `servicemesh.json` file that includes this topological informations and also other information concerning the strategy used to call the possible external-services, in order to mimic a random traveling of the service-mesh.
 
 #### Service Mesh Topology <!-- omit in toc -->
 
@@ -325,6 +333,7 @@ The ServicMeshGenrator takes as input a json configuration file (`ServiceMeshPar
       "external_service_groups": 1,
       "power": 0.05,
       "seq_len": 100,
+      "service_probability": {"model":"const", "params":{"value":1}},
       "zero_appeal": 3.25,
       "dbs": {
          "nodb": 0.2,
@@ -337,9 +346,9 @@ The ServicMeshGenrator takes as input a json configuration file (`ServiceMeshPar
 }
 ```
 
-There are two services (`vertices = 2`), each service has a single `external_service_groups=1`, and for each group `seq_len=100` external-services are sequentially called (when `seq_len` > `vertices` all external-service of a service group are sequentially called).
+There are two services (`vertices = 2`), each service has a single `external_service_groups=1`, and for each group  `seq_len=100` external-services are sequentially called (when `seq_len` > `vertices` all external-service of a service group are sequentially called). Regarding the weights of the link of the mesh, i.e. the calling probabilities, the Service Mesh Generator allows using a random ("model":"random") distribution in the range 0,1 for extracting the value of such probabilities or using a constant value for all, as in the example. In any, case these probabilities can be fine-tuned a posteriori by editing the produced \texttt{servicemesh.json} file. 
 
-The configuration allows also the presence of two database, `sdb1` and `sdb2`. sdb1 is used by a service with probability 0.79, `sdb2` with probability 0.01, in the remainig cases the service doent use any database.
+The configuration in the example provides also the presence of two database, `sdb1` and `sdb2`. sdb1 is used by a service with probability 0.79, `sdb2` with probability 0.01, in the remainig cases the service do not use any database.
 
 The figure below reports a possible service mesh generated with these parameters where `sdb2` has been never chosen by services and therefore not included in the microservice application.
 
@@ -359,7 +368,10 @@ This is an example of the `servicemesh.json` file generated by the ServiceMeshGe
         "seq_len": 100,
         "services": [
           "s1"
-        ]
+        ],
+        "probabilities": {
+          "s1": 1
+        }
       },
       {
         "seq_len": 1,
@@ -402,6 +414,7 @@ We illustrate four examples of different service mesh topologies:
    "ServiceMeshParameters":{
       "external_service_groups":1,
       "seq_len":1,
+      "service_probability": {"model":"const", "params":{"value":1}},
       "vertices":10,
       "power":0.05,
       "zero_appeal":0.01,
@@ -427,6 +440,7 @@ We illustrate four examples of different service mesh topologies:
    "ServiceMeshParameters":{
       "external_service_groups":1,
       "seq_len":1,
+      "service_probability": {"model":"const", "params":{"value":1}},
       "vertices":10,
       "power":0.9,
       "zero_appeal":0.01,
@@ -452,6 +466,7 @@ We illustrate four examples of different service mesh topologies:
    "ServiceMeshParameters":{
       "external_service_groups":1,
       "seq_len":1,
+      "service_probability": {"model":"const", "params":{"value":1}},
       "vertices":10,
       "power":0.05,
       "zero_appeal":3.25,
@@ -477,6 +492,7 @@ We illustrate four examples of different service mesh topologies:
    "ServiceMeshParameters":{
       "external_service_groups":1,
       "seq_len":1,
+      "service_probability": {"model":"const", "params":{"value":1}},
       "vertices":10,
       "power":0.9,
       "zero_appeal":3.25,
@@ -598,7 +614,7 @@ The WorkModelGenerator takes as input a configuration file (`WorkModelParameters
 }
 ```
 
-This file includes a set of function that can be assigned to service-cells with a given probability to implement their internal-service. Many functions (`f0`, `f1`, `f2`,`f3`) can use the same python *base-function* (e.g. `loader` is used by `f2` and `f3` ) but with different parameters. Each function is represented as JSON object with a unique ID key (`f0`, `f1`, `f2`, `f3`) and whose values are: the `parameters` taken as input by the function, e.g., the `compute_pi` function uses `mean_bandwidth` and `range_complexity`; the `recipient` of the function (`database` or plain `service`);  the `name` of the base-function to be executed (available in Python files of the NFS folder `/kubedata/mubSharedData/`); the `probability` to be associated to a service-cell; the optional keys `workers` and `threads` that are the number of processes and threads per process used by service-cells that run the function to serve client requests; the optional key `replicas` for choosing the number of replicas of service-cells that run the function; the optional keys  `cpu-requests`,`cpu-limits`,`memory-requests`,`memory-limits` to control the cpu/memory resuurces associated to the service-cells running the function (see k8s [documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/))
+This file includes a set of *function-flavor* that can be assigned to service-cells with a given probability to implement their internal-service. Many *function-flavors* (`f0`, `f1`, `f2`,`f3`) can use the same python base-function (e.g. `loader` is used by `f2` and `f3` ) but with different parameters. Each function-flavor is represented as JSON object with a unique ID key (`f0`, `f1`, `f2`, `f3`) and whose values are: the `parameters` taken as input by the function, e.g., the `compute_pi` function uses `mean_bandwidth` and `range_complexity`; the `recipient` of the function-flavor (`database` or plain `service`);  the `name` of the base-function to be executed (available in Python files of the NFS folder `/kubedata/mubSharedData/`); the `probability` to be associated to a service-cell; the optional keys `workers` and `threads` that are the number of processes and threads per process used by service-cells that run the function-flavor to serve client requests; the optional key `replicas` for choosing the number of replicas of service-cells that run the function-flavor; the optional keys  `cpu-requests`,`cpu-limits`,`memory-requests`,`memory-limits` to control the cpu/memory resources associated to the service-cells running the function-flavor (see k8s [documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/))
 
 The description of external-services is imported through a `servicemesh.json` file located in `ServiceMeshFilePath` metadata that can be manually made or automatically generated by the ServiceMeshGenerator. 
 
