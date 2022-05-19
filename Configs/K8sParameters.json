@@ -5,11 +5,8 @@
       "image": "msvcbench/microservice_v3-screen:latest",
       "cluster_domain": "cluster",
       "path": "/api/v1",
-      "sleep": 2
-   },
-   "NFSConfigurations": {
-      "address": "192.168.0.46",
-      "mount_path": "/kubedata/mubSharedData"
+      "sleep": 2,
+      "dns-resolver":"kube-dns.kube-system.svc.cluster.local"
    },
    "InternalServiceFilePath": "CustomFunctions",
    "OutputPath": "SimulationWorkspace",

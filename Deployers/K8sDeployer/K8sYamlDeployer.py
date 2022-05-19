@@ -10,7 +10,6 @@ def deploy_items(folder,st):
     print("######################")
     print(f"We are going to DEPLOY the yaml files in the following folder: {folder}")
     print("######################")
-
     config.load_kube_config()
     k8s_apps_api = client.AppsV1Api()
     k8s_core_api = client.CoreV1Api()
@@ -54,33 +53,34 @@ def undeploy_items(folder):
     print("######################")
     print(f"We are going to UNDEPLOY the yaml files in the following folder: {folder}")
     print("######################")
-
     config.load_kube_config()
     k8s_apps_api = client.AppsV1Api()
     k8s_core_api = client.CoreV1Api()
-
     items = list()
     for r, d, f in os.walk(folder):
         for file in f:
             if '.yaml' in file:
                 items.append(os.path.join(r, file))
-
     if os.path.isfile(folder):
         items.append(folder)
-
     for yaml_to_create in items:
         with open(yaml_to_create) as f:
-            complete_yaml = yaml.load_all(f)
+            complete_yaml = yaml.load_all(f,Loader=yaml.FullLoader)
             for partial_yaml in complete_yaml:
                 try:
                     if partial_yaml["kind"] == "Deployment":
                         dep_name = partial_yaml["metadata"]["name"]
                         resp = k8s_apps_api.delete_namespaced_deployment(name=dep_name, namespace=partial_yaml["metadata"]["namespace"], grace_period_seconds=0)
-                        print(f"Deployment '{dep_name}' deleted. Status={resp.status}")
+                        print(f"Deployment '{dep_name}' deleted.")
                     elif partial_yaml["kind"] == "Service":
                         svc_name = partial_yaml["metadata"]["name"]
                         resp = k8s_core_api.delete_namespaced_service(name=svc_name, namespace=partial_yaml["metadata"]["namespace"], grace_period_seconds=0)
-                        print(f"Service '{svc_name}' deleted. Status={resp.status}")
+                        print(f"Service '{svc_name}' deleted.")
+                        print("---")
+                    elif partial_yaml["kind"] == "ConfigMap":
+                        map_name = partial_yaml["metadata"]["name"]
+                        resp = k8s_core_api.delete_namespaced_config_map(name=map_name, namespace=partial_yaml["metadata"]["namespace"])
+                        print(f"ConfigMap '{map_name}' deleted.")
                         print("---")
                 except ApiException as err:
                     api_exception_body = json.loads(err.body)
@@ -89,72 +89,14 @@ def undeploy_items(folder):
                     print("######################")
 
 
-def deploy_volume(yamls):
-    print("######################")
-    print(f"We are going to DEPLOY the PersistentVolume and PersistentVolumeClaim from the yaml file: {yamls}")
-    print("######################")
-
-    config.load_kube_config()
-    k8s_core_api = client.CoreV1Api()
-
-    with open(yamls) as f:
-        complete_yaml = yaml.load_all(f)
-        for partial_yaml in complete_yaml:
-            try:
-                if partial_yaml["kind"] == "PersistentVolume":
-                    api_response = k8s_core_api.create_persistent_volume(body=partial_yaml)
-                    print(f"PersistentVolume '{partial_yaml['metadata']['name']}' created.")
-                    print("---")
-                elif partial_yaml["kind"] == "PersistentVolumeClaim":
-                    api_response = k8s_core_api.create_namespaced_persistent_volume_claim(namespace=partial_yaml["metadata"]["namespace"], body=partial_yaml)
-                    print(f"PersistentVolumeClaim '{partial_yaml['metadata']['name']}' created.")
-                    print("---")
-            except ApiException as err:
-                api_exception_body = json.loads(err.body)
-                print("######################")
-                print(f"Exception raised deploying a {partial_yaml['kind']}: {api_exception_body['details']} -> {api_exception_body['reason']}")
-                print("######################")
-
-
-def undeploy_volume(yamls):
-    print("######################")
-    print(f"We are going to UNDEPLOY the PersistentVolume Persi and PersistentVolumeClaim from the yaml file: {yamls}")
-    print("######################")
-
-    config.load_kube_config()
-    k8s_core_api = client.CoreV1Api()
-
-    with open(yamls) as f:
-        complete_yaml = yaml.load_all(f)
-        for partial_yaml in complete_yaml:
-            try:
-                if partial_yaml["kind"] == "PersistentVolume":
-                    pv_name = partial_yaml["metadata"]["name"]
-                    resp = k8s_core_api.delete_persistent_volume(name=pv_name)
-                    print(f"Deployment '{pv_name}' deleted. Status={resp.status}")
-                elif partial_yaml["kind"] == "PersistentVolumeClaim":
-                    pvc_name = partial_yaml["metadata"]["name"]
-                    resp = k8s_core_api.delete_namespaced_persistent_volume_claim(name=pvc_name, namespace=partial_yaml["metadata"]["namespace"])
-                    print(f"Service '{pvc_name}' deleted. Status={resp.status}")
-                    print("---")
-            except ApiException as err:
-                api_exception_body = json.loads(err.body)
-                print("######################")
-                print(
-                    f"Exception raised trying to delete {partial_yaml['kind']} '{api_exception_body['details']['name']}': {api_exception_body['reason']}")
-                print("######################")
-
-
 def deploy_nginx_gateway(folder):
     print("######################")
     print(f"We are going to DEPLOY the yaml files in the following folder: {folder}")
     print("######################")
-
     config.load_kube_config()
     k8s_apps_api = client.AppsV1Api()
     k8s_core_api = client.CoreV1Api()
     items = [f"{folder}/DeploymentNginxGw.yaml", f"{folder}/ConfigMapNginxGw.yaml"]
-
     for yaml_to_create in items:
         with open(yaml_to_create) as f:
             # print(yaml_to_create)
@@ -189,12 +131,10 @@ def undeploy_nginx_gateway(folder):
     print("######################")
     print(f"We are going to UNDEPLOY the yaml files in the following folder: {folder}")
     print("######################")
-
     config.load_kube_config()
     k8s_apps_api = client.AppsV1Api()
     k8s_core_api = client.CoreV1Api()
     items = [f"{folder}/DeploymentNginxGw.yaml", f"{folder}/ConfigMapNginxGw.yaml"]
-
     for yaml_to_create in items:
         with open(yaml_to_create) as f:
             complete_yaml = yaml.load_all(f)
@@ -203,15 +143,15 @@ def undeploy_nginx_gateway(folder):
                     if partial_yaml["kind"] == "Deployment":
                         dep_name = partial_yaml["metadata"]["name"]
                         resp = k8s_apps_api.delete_namespaced_deployment(name=dep_name, namespace=partial_yaml["metadata"]["namespace"])
-                        print(f"Deployment '{dep_name}' deleted. Status={resp.status}")
+                        print(f"Deployment '{dep_name}' deleted.")
                     elif partial_yaml["kind"] == "Service":
                         svc_name = partial_yaml["metadata"]["name"]
                         resp = k8s_core_api.delete_namespaced_service(name=svc_name, namespace=partial_yaml["metadata"]["namespace"])
-                        print(f"Service '{svc_name}' deleted. Status={resp.status}")
+                        print(f"Service '{svc_name}' deleted.")
                     elif partial_yaml["kind"] == "ConfigMap":
                         map_name = partial_yaml["metadata"]["name"]
                         resp = k8s_core_api.delete_namespaced_config_map(name=map_name, namespace=partial_yaml["metadata"]["namespace"])
-                        print(f"ConfigMap '{map_name}' deleted. Status={resp.status}")
+                        print(f"ConfigMap '{map_name}' deleted.")
                         print("---")
                 except ApiException as err:
                     api_exception_body = json.loads(err.body)
@@ -221,12 +161,73 @@ def undeploy_nginx_gateway(folder):
                     print("######################")
 
 
-# deploy_items("../K8sYamlBuilder/yamls")
-# undeploy_items("../K8sYamlBuilder/yamls")
+def create_workmodel_configmap_data(k8s_parameters,work_model):
+    data_dict=dict()
+    metadata = client.V1ObjectMeta(
+        name="mub-workmodel",
+        namespace=k8s_parameters["namespace"]
+    )
+    data_dict["workmodel.json"]=json.dumps(work_model)
+    configmap = client.V1ConfigMap(
+        api_version="v1",
+        kind="ConfigMap",
+        data=data_dict,
+        metadata=metadata
+    )
+    return configmap
 
-# deploy_volume("../../yaml/PersistentVolumeMicroService.yaml")
-# undeploy_volume("../../yaml/PersistentVolumeMicroService.yaml")
+def create_internal_service_configmap_data(params):
+    k8s_parameters = params["K8sParameters"]
+    data_dict=dict()
+    metadata = client.V1ObjectMeta(
+        name="mub-internal-services",
+        namespace=k8s_parameters["namespace"]
+    )
+    internal_service_functions = params['InternalServiceFilePath']
+    if internal_service_functions != "" or internal_service_functions is None:
+        src_files = os.listdir(internal_service_functions)
+        for file_name in src_files:
+            full_file_name = os.path.join(internal_service_functions, file_name)
+            if os.path.isfile(full_file_name):
+                with open(full_file_name, 'r') as f:
+                    file_content=f.read()
+                    data_dict[file_name]=file_content           
+    configmap = client.V1ConfigMap(
+        api_version="v1",
+        kind="ConfigMap",
+        data=data_dict,
+        metadata=metadata
+    )
+    return configmap
 
+def deploy_configmap(k8s_parameters,configmap):
+    print("######################")
+    print(f"We are going to DEPLOY the the configmap: {configmap.metadata.name}")
+    print("######################")
 
-# deploy_nginx_gateway("yamls")
-# undeploy_nginx_gateway("../../yaml/DeploymentNginxGw.yaml")
+    config.load_kube_config()
+    api_instance = client.CoreV1Api()
+    try:
+        api_response = api_instance.create_namespaced_config_map(
+            namespace=k8s_parameters["namespace"],
+            body=configmap
+        )
+        print(f"ConfigMap '{configmap.metadata.name}' created.")
+        print("---")
+    except ApiException as e:
+        print("Exception when calling CoreV1Api->create_namespaced_config_map: %s\n" % e)
+
+def undeploy_configmap(configmap_name,k8s_parameters):
+    print("######################")
+    print(f"We are going to UNDEPLOY the the configmap: {configmap_name}")
+    print("######################")
+    config.load_kube_config()
+    api_instance = client.CoreV1Api()
+    try:
+        api_response = api_instance.delete_namespaced_config_map(
+        namespace=k8s_parameters["namespace"],
+        name=configmap_name)
+        print(f"ConfigMap '{configmap_name}' deleted.")
+        print("---")
+    except ApiException as e:
+        print("Exception when calling CoreV1Api->delete_namespaced_config_map: %s\n" % e)

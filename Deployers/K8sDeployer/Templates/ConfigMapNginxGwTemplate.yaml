@@ -32,18 +32,15 @@ data:
                     proxy_read_timeout 5m;
                     proxy_connect_timeout 5m;
                     proxy_send_timeout 5m;
-                    resolver kube-dns.kube-system.svc.cluster.local;
+                    resolver {{RESOLVER}};
                     proxy_pass http:/$request_uri.{{NAMESPACE}}.svc.cluster.local{{PATH}};
                     proxy_http_version 1.1;
                 }
                 location ~* /update$ {
-                    resolver kube-dns.kube-system.svc.cluster.local;
+                    resolver {{RESOLVER}};
                     rewrite ^(/.*)/update$ /update break;
                     proxy_pass http:/$1.{{NAMESPACE}}.svc.cluster.local;
                     proxy_http_version 1.1;
-                }
-                location ~* ^/.*\.(jpg|jpeg|png)$ {
-                    root /etc/nginx/MSConfig;
                 }
         }
     }

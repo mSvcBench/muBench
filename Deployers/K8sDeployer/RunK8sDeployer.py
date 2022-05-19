@@ -31,58 +31,21 @@ def create_deployment_config():
 
 def remove_files(folder_v):
     try:
-
         folder_items = os.listdir(folder_v)
+        print("######################")
+        print(f"Removing files in: {folder_v}")
+        print("######################")
         for item in folder_items:
             file_path = f"{folder_v}/{item}"
             if os.path.isfile(file_path):
                 os.remove(file_path)
-                print("######################")
-                print(f"Following files removed: {folder_items}")
-                print("######################")
+                print(f"Removed file: {item}")
+        print("---")
     except Exception as er:
         print("######################")
         print(f"Error removing following files: {er}")
         print("######################")
 
-
-def copy_config_file_to_nfs(nfs_folder_path, workmodel, internal_service_functions):
-    try:
-        # Remove files from NFS folder
-        if os.path.exists(nfs_folder_path):
-            remove_files(nfs_folder_path)
-            remove_files(f"{nfs_folder_path}/InternalServiceFunctions")
-        
-            #shutil.rmtree(nfs_folder_path,ignore_errors=True)
-            #os.makedirs(nfs_folder_path)
-            #os.makedirs(f"{nfs_folder_path}/InternalServiceFunctions")
-        
-        if output_path is None:
-            with open(f"{nfs_folder_path}/workmodel.json", "w") as f:
-                f.write(json.dumps(workmodel, indent=2))
-        else:
-            with open(f"{output_path}/workmodel.json", "w") as f:
-                f.write(json.dumps(workmodel, indent=2))
-
-            shutil.copy(f"{output_path}/workmodel.json", f"{nfs_folder_path}/")
-
-        if internal_service_functions != "" or internal_service_functions is None:
-            if not os.path.exists(f"{nfs_folder_path}/InternalServiceFunctions"):
-                os.makedirs(f"{nfs_folder_path}/InternalServiceFunctions")
-
-            if os.path.isdir(internal_service_functions):
-                src_files = os.listdir(internal_service_functions)
-                for file_name in src_files:
-                    full_file_name = os.path.join(internal_service_functions, file_name)
-                    if os.path.isfile(full_file_name):
-                        shutil.copy(full_file_name, f"{nfs_folder_path}/InternalServiceFunctions/")
-            else:
-                shutil.copyfile(internal_service_functions, f"{nfs_folder_path}/InternalServiceFunctions/{internal_service_functions.split('/')[-1]}")
-                print("FILE")
-
-    except Exception as er:
-        print("Error in copy_config_file_to_nfs: %s" % er)
-        exit()
 
 ### Main
 
@@ -109,9 +72,8 @@ parameters_file_path = args.parameters_file
 try:
     with open(parameters_file_path) as f:
         params = json.load(f)
-
-    k8s_parameters = params["K8sParameters"]
-    nfs_conf = params['NFSConfigurations']
+    k8s_parameters = params["K8sParameters"]    
+    nfs_conf=dict()
     internal_service_functions_file_path = params['InternalServiceFilePath']
     workmodel_path = params['WorkModelPath'] 
 
@@ -129,7 +91,7 @@ except Exception as err:
     exit(1)
 
 
-###  Create YAML, insert files (workmodel.json and custom function) in k8s NFS and deploy YAML 
+###  Create YAML, insert files (workmodel.json and custom function) as configmaps, and deploy YAML 
 
 folder_not_exist = False
 if output_path is None:
@@ -140,8 +102,6 @@ if not os.path.exists(f"{builder_module_path}/yamls"):
     folder_not_exist = True
 folder = f"{builder_module_path}/yamls"
 
-#if parameters_file_path != f"{output_path}/{os.path.basename(parameters_file_path)}":
-#    shutil.copyfile(parameters_file_path, f"{output_path}/{os.path.basename(parameters_file_path)}")
 
 if folder_not_exist or len(os.listdir(folder)) == 0:
 
@@ -149,12 +109,12 @@ if folder_not_exist or len(os.listdir(folder)) == 0:
     keyboard_input = "y"
 
     if keyboard_input == "y" or keyboard_input == "yes":
-        updated_folder_items, work_model = create_deployment_config()   # Creates YAML files
-        copy_config_file_to_nfs(nfs_folder_path=nfs_conf["mount_path"], 
-            workmodel=work_model, internal_service_functions=internal_service_functions_file_path) # Insert files in NFS
-
+        # Create YAML files
+        updated_folder_items, work_model = create_deployment_config()   
+        # Create and deploy configmaps for internal service custom function and workmodel.json
+        K8sYamlDeployer.deploy_configmap(k8s_parameters,K8sYamlDeployer.create_workmodel_configmap_data(k8s_parameters,work_model))
+        K8sYamlDeployer.deploy_configmap(k8s_parameters,K8sYamlDeployer.create_internal_service_configmap_data(params))
         # Deploy YAML files
-        K8sYamlDeployer.deploy_volume(f"{folder}/PersistentVolumeMicroService.yaml")
         K8sYamlDeployer.deploy_nginx_gateway(folder)
         K8sYamlDeployer.deploy_items(folder, st=k8s_parameters['sleep'])
     else:
@@ -164,13 +124,13 @@ else:
     print("!!!! Warning !!!!")
     print("######################")
     print(f"Folder is not empty: {folder}.")
-    keyboard_input = input("Wanna UNDEPLOY old yamls first, delete the files and then start again? (n) ") or "n"
+    keyboard_input = input("Do you want to UNDEPLOY yamls of the old application first, delete the files and then start the new applicaiton ? (n) ") or "n"
     if keyboard_input == "y" or keyboard_input == "yes":
         K8sYamlDeployer.undeploy_items(folder)
-        K8sYamlDeployer.undeploy_nginx_gateway(folder)
-        K8sYamlDeployer.undeploy_volume(f"{folder}/PersistentVolumeMicroService.yaml")
+        #K8sYamlDeployer.undeploy_nginx_gateway(folder)
+        K8sYamlDeployer.undeploy_configmap("mub-internal-services",k8s_parameters)
+        K8sYamlDeployer.undeploy_configmap("mub-workmodel",k8s_parameters)
         remove_files(folder)
-
     else:
-        print("...\nOk you want to keep the OLD deployment! Bye!")
+        print("...\nOk you want to keep the OLD application! Bye!")
 

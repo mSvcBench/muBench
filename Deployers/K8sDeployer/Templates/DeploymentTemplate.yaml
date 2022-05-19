@@ -35,8 +35,10 @@ spec:
           volumeMounts:
             - name: podinfo
               mountPath: /etc/podinfo
-            - name: microservice-volume
+            - name: microservice-workmodel
               mountPath: /app/MSConfig
+            - name: microservice-internal-services
+              mountPath: /app/MSConfig/InternalServiceFunctions
           env:
             - name: APP
               value: {{SERVICE_NAME}}
@@ -68,9 +70,12 @@ spec:
               - path: "annotations"
                 fieldRef:
                   fieldPath: metadata.annotations
-        - name: microservice-volume
-          persistentVolumeClaim:
-            claimName: nfs-pvc-ms
+        - name: microservice-workmodel
+          configMap:
+            name: mub-workmodel
+        - name: microservice-internal-services
+          configMap:
+            name: mub-internal-services        
 ---
 apiVersion: v1
 kind: Service
