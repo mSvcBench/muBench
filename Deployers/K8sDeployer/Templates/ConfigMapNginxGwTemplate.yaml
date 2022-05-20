@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: ms-gateway-configmap
+  name: gw-nginx
   namespace: {{NAMESPACE}}
 data:
   nginx.conf: |

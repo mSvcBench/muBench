@@ -72,10 +72,10 @@ spec:
                   fieldPath: metadata.annotations
         - name: microservice-workmodel
           configMap:
-            name: mub-workmodel
+            name: workmodel
         - name: microservice-internal-services
           configMap:
-            name: mub-internal-services        
+            name: internal-services        
 ---
 apiVersion: v1
 kind: Service

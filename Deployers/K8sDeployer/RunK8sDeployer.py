@@ -128,8 +128,8 @@ else:
     if keyboard_input == "y" or keyboard_input == "yes":
         K8sYamlDeployer.undeploy_items(folder)
         #K8sYamlDeployer.undeploy_nginx_gateway(folder)
-        K8sYamlDeployer.undeploy_configmap("mub-internal-services",k8s_parameters)
-        K8sYamlDeployer.undeploy_configmap("mub-workmodel",k8s_parameters)
+        K8sYamlDeployer.undeploy_configmap("internal-services",k8s_parameters)
+        K8sYamlDeployer.undeploy_configmap("workmodel",k8s_parameters)
         remove_files(folder)
     else:
         print("...\nOk you want to keep the OLD application! Bye!")

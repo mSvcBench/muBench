@@ -164,7 +164,7 @@ def undeploy_nginx_gateway(folder):
 def create_workmodel_configmap_data(k8s_parameters,work_model):
     data_dict=dict()
     metadata = client.V1ObjectMeta(
-        name="mub-workmodel",
+        name="workmodel",
         namespace=k8s_parameters["namespace"]
     )
     data_dict["workmodel.json"]=json.dumps(work_model)
@@ -180,7 +180,7 @@ def create_internal_service_configmap_data(params):
     k8s_parameters = params["K8sParameters"]
     data_dict=dict()
     metadata = client.V1ObjectMeta(
-        name="mub-internal-services",
+        name="internal-services",
         namespace=k8s_parameters["namespace"]
     )
     internal_service_functions = params['InternalServiceFilePath']

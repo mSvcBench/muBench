@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ms-gateway-nginx
+  name: gw-nginx
   namespace: {{NAMESPACE}}
   labels:  
-    app: ms-gateway-nginx
+    app: gw-nginx
     version: "1.0"
 spec:
   replicas: 1
   selector:
     matchLabels:
-        app: ms-gateway-nginx
+        app: gw-nginx
   template:
     metadata:
       labels:
-        app: ms-gateway-nginx
+        app: gw-nginx
         version: "1.0"
     spec:
       containers:
-      - name: ms-gateway-nginx
+      - name: gw-nginx
         image: nginx
         ports:
         - name: http-nginx
@@ -33,14 +33,14 @@ spec:
       volumes:
       - name: config-volume
         configMap:
-          name: ms-gateway-configmap
+          name: gw-nginx
       - name: log
         emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: ms-gw-nginx-svc
+  name: gw-nginx
   namespace: {{NAMESPACE}}
 spec:
   type: NodePort
@@ -51,5 +51,5 @@ spec:
       nodePort: 31113
       name: http-nginx
   selector:
-    app: ms-gateway-nginx
+    app: gw-nginx
 
