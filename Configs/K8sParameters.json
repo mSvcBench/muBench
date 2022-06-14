@@ -10,5 +10,5 @@
    },
    "InternalServiceFilePath": "CustomFunctions",
    "OutputPath": "SimulationWorkspace",
-   "WorkModelPath": "SimulationWorkspace/workmodel.json"
+   "WorkModelPath": "examples/workmodelC-multi.json"
 }
