@@ -832,11 +832,11 @@ In this section, we describe how to deploy a µBench example application and mak
 - Create a Kubernetes cluster with [Prometheus] (#monitoring-with-prometheus) installed.
 - Get access via SSH to master-node, or use a client terminal from which it is possible to control the cluster via `kubectl` 
 - Install Python3 (v3.7 or above)
-- Clone the git repository of µBench and move into `MicroServiceSimulator` directory
+- Clone the git repository of µBench and move into `muBench` directory
 
 ```zsh
-git clone https://github.com/mSvcBench/MicroServiceSimulator.git
-cd MicroServiceSimulator
+git clone https://github.com/mSvcBench/muBench.git
+cd muBench
 ```
 
 - Create and activate a Python virtual environment, and install required modules
