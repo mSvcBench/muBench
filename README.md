@@ -20,6 +20,9 @@ This software is supported by:
 For a complete install guide, head over to the documentation [here](Docs/Manual.md#installation-and-getting-started). Instead, for a quick hands-on with **µBench** the following commands will deploy a microservice application composed of 20 services interconnected as the following [service mesh](examples/servicemeshC.png) to your Kubernetes cluster (this guide is intended for Debian-based distributions). You can find more information on the application to be deployed [here](examples/README.md).
 
 ```bash
+git clone https://github.com/mSvcBench/muBench.git
+cd muBench
+
 # Create a virtual environment
 $ python3 -m venv .venv
 $ source .venv/bin/activate
