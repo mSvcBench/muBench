@@ -17,6 +17,12 @@ def customization_work_model(model, k8s_parameters):
         model[service].update({"path": k8s_parameters['path']})
         model[service].update({"image": k8s_parameters['image']})
         model[service].update({"namespace": k8s_parameters['namespace']})
+        if "replicas" in k8s_parameters.keys():
+            # override replica value of workmodel.json
+            model[service].update({"replicas": k8s_parameters['replicas']})
+        if "cpu-requests" in k8s_parameters.keys():
+            # override cpu-requests value of workmodel.json
+            model[service].update({"cpu-requests": k8s_parameters['cpu-requests']})
     print("Work Model Updated!")
 
 
