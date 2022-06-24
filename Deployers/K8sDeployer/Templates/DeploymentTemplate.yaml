@@ -26,6 +26,7 @@ spec:
         prometheus.io/scrape: 'true'
         prometheus.io/port: '8080'
     spec:
+      terminationGracePeriodSeconds : 5
       containers:
         - name: {{SERVICE_NAME}}
           image: {{IMAGE}}
