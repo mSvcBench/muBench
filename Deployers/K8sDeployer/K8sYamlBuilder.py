@@ -23,6 +23,15 @@ def customization_work_model(model, k8s_parameters):
         if "cpu-requests" in k8s_parameters.keys():
             # override cpu-requests value of workmodel.json
             model[service].update({"cpu-requests": k8s_parameters['cpu-requests']})
+        if "cpu-limits" in k8s_parameters.keys():
+            # override cpu-limits value of workmodel.json
+            model[service].update({"cpu-limits": k8s_parameters['cpu-limits']})
+        if "memory-requests" in k8s_parameters.keys():
+            # override memory-requests value of workmodel.json
+            model[service].update({"memory-requests": k8s_parameters['memory-requests']})
+        if "memory-limits" in k8s_parameters.keys():
+            # override memory-limits value of workmodel.json
+            model[service].update({"memory-limits": k8s_parameters['memory-limits']})
     print("Work Model Updated!")
 
 
