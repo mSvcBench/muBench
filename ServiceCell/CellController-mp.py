@@ -29,9 +29,17 @@ import grpc
 # Configuration of global variables
 
 def read_config_files():
+    res = dict()
     with open('MSConfig/workmodel.json') as f:
         workmodel = json.load(f)
-    return workmodel
+        # shrink workmodel
+        for service in workmodel:
+            print(f'service: {service}')
+            if service==ID:
+                res[service]=workmodel[service]
+            else:
+                res[service]={"url":workmodel[service]["url"],"path":workmodel[service]["path"]}
+    return res
 
 ID = os.environ["APP"]
 ZONE = os.environ["ZONE"]  # Pod Zone
@@ -41,11 +49,9 @@ TN = os.environ["TN"] # Number of thread per process
 
 globalDict=Manager().dict()
 globalDict['work_model'] = read_config_files()    # must be shared among processes for hot update
-my_service_mesh = globalDict['work_model'][ID]['external_services'] # must be shared among processes for hot update
-my_work_model = globalDict['work_model'][ID] # must be shared among processes for hot update
 
-if "request_method" in my_work_model.keys():
-    request_method = my_work_model["request_method"].lower()
+if "request_method" in globalDict['work_model'][ID].keys():
+    request_method = globalDict['work_model'][ID]["request_method"].lower()
 else:
     request_method = "rest"
 
@@ -77,13 +83,23 @@ def update():
     globalDict['work_model'] = read_config_files() 
     return f'{json.dumps("Successfully Update ServiceMesh and WorkModel variables! :)")}\n', 200
 
-@app.route(f"{my_work_model['path']}", methods=['GET'])
+@app.route(f"{globalDict['work_model'][ID]['path']}", methods=['GET'])
 def start_worker():
     global globalDict
-    work_model = globalDict['work_model']
-    my_service_mesh = globalDict['work_model'][ID]['external_services'] # must be shared among processes for hot update
-    my_work_model = globalDict['work_model'][ID] # must be shared among processes for hot update
-    
+    behaviour_id = request.args.get('bid', default = 'default', type = str)
+
+    # default behaviour
+    my_work_model = globalDict['work_model'][ID]
+    my_service_mesh = my_work_model['external_services'] 
+    my_internal_service = my_work_model['internal_service']
+
+    if behaviour_id != 'default' and "alternative_behaviors" in my_work_model.keys():
+        if behaviour_id in my_work_model['alternative_behaviors'].keys():
+            if "external_services" in my_work_model['alternative_behaviors'][behaviour_id].keys():
+                my_service_mesh = my_work_model['alternative_behaviors'][behaviour_id]['external_services']  
+            if "internal_services" in my_work_model['alternative_behaviors'][behaviour_id].keys():
+                my_internal_service = my_work_model['alternative_behaviors'][behaviour_id]['internal_service']
+
     try:
         start_request_processing = time.time()
         app.logger.info('Request Received')
@@ -91,7 +107,7 @@ def start_worker():
         # Execute the internal service
         print("*************** INTERNAL SERVICE STARTED ***************")
         start_local_processing = time.time()
-        body = run_internal_service(my_work_model["internal_service"])
+        body = run_internal_service(my_internal_service)
         local_processing_latency = time.time() - start_local_processing
         INTERNAL_PROCESSING.labels(ZONE, K8S_APP, request.method, request.path).observe(local_processing_latency)
         RESPONSE_SIZE.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr, ID).observe(len(body))
@@ -102,7 +118,7 @@ def start_worker():
         start_external_request_processing = time.time()
         print("*************** EXTERNAL SERVICES STARTED ***************")
         if len(my_service_mesh) > 0:
-            service_error_dict = run_external_service(my_service_mesh, work_model)
+            service_error_dict = run_external_service(my_service_mesh,globalDict['work_model'])
             if len(service_error_dict):
                 pprint(service_error_dict)
                 app.logger.error("Error in request external services")
