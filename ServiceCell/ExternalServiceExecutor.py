@@ -31,7 +31,10 @@ def init_gRPC(my_service_mesh, workmodel, server_port):
 
 
 def request_REST(service):
-    return requests.get(f'http://{work_model[service]["url"]}{work_model[service]["path"]}')
+    if  len(query_string)==0:
+        return requests.get(f'http://{work_model[service]["url"]}{work_model[service]["path"]}')
+    else:
+        return requests.get(f'http://{work_model[service]["url"]}{work_model[service]["path"]}?{query_string}')
 
 
 def request_gRPC(service):
@@ -88,13 +91,14 @@ def external_service(group):
     return service_error_flag, service_error_dict
 
 
-def run_external_service(services_group, model):
-    global work_model
+def run_external_service(services_group, model, query_s):
+    global work_model, query_string
     print("** EXTERNAL SERVICES")
     
     service_error_dict = dict()
 
     work_model = model
+    query_string = query_s
 
     number_of_groups = len(services_group)
     pool = ThreadPoolExecutor(number_of_groups)

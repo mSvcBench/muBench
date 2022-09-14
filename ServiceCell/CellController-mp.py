@@ -50,6 +50,7 @@ TN = os.environ["TN"] # Number of thread per process
 globalDict=Manager().dict()
 globalDict['work_model'] = read_config_files()    # must be shared among processes for hot update
 
+
 if "request_method" in globalDict['work_model'][ID].keys():
     request_method = globalDict['work_model'][ID]["request_method"].lower()
 else:
@@ -86,8 +87,9 @@ def update():
 @app.route(f"{globalDict['work_model'][ID]['path']}", methods=['GET'])
 def start_worker():
     global globalDict
+    query_string = request.query_string.decode()
     behaviour_id = request.args.get('bid', default = 'default', type = str)
-
+    
     # default behaviour
     my_work_model = globalDict['work_model'][ID]
     my_service_mesh = my_work_model['external_services'] 
@@ -118,7 +120,7 @@ def start_worker():
         start_external_request_processing = time.time()
         print("*************** EXTERNAL SERVICES STARTED ***************")
         if len(my_service_mesh) > 0:
-            service_error_dict = run_external_service(my_service_mesh,globalDict['work_model'])
+            service_error_dict = run_external_service(my_service_mesh,globalDict['work_model'],query_string)
             if len(service_error_dict):
                 pprint(service_error_dict)
                 app.logger.error("Error in request external services")

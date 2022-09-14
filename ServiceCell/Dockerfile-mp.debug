@@ -1,15 +1,15 @@
 FROM python:slim
 
 RUN apt update
-RUN apt install -y screen
+RUN apt -y install vim iproute2 curl screen
+RUN rm -rf /var/lib/apt/lists/*
+
 COPY requirements.txt /app/
 
 WORKDIR /app
 
 RUN pip install -r requirements.txt
 RUN pip install gunicorn
-
-RUN apt -y install vim iproute2 vim curl
 
 EXPOSE 8080
 EXPOSE 51313
