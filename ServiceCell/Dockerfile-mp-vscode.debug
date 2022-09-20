@@ -1,0 +1,26 @@
+FROM python:slim
+
+RUN apt update
+RUN apt -y install vim iproute2 curl screen
+RUN rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt /app/
+
+WORKDIR /app
+
+RUN pip install -r requirements.txt
+RUN pip install gunicorn
+
+EXPOSE 8080
+EXPOSE 51313
+
+COPY id_rsa.pub /root/.ssh/authorized_keys
+RUN apt update
+RUN apt -y install openssh-server
+RUN rm -rf /var/lib/apt/lists/*
+
+COPY CellController-mp.py ExternalServiceExecutor.py InternalServiceExecutor.py mub.proto mub_pb2.py \
+mub_pb2_grpc.py gunicorn.conf.py start-mp-vscode.sh ./
+
+CMD [ "/bin/bash", "/app/start-mp-vscode.sh"]
+

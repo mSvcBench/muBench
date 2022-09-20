@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from __future__ import print_function
 
 import argparse
@@ -84,27 +83,48 @@ def update():
     globalDict['work_model'] = read_config_files() 
     return f'{json.dumps("Successfully Update ServiceMesh and WorkModel variables! :)")}\n', 200
 
-@app.route(f"{globalDict['work_model'][ID]['path']}", methods=['GET'])
+@app.route(f"{globalDict['work_model'][ID]['path']}", methods=['GET','POST'])
 def start_worker():
     global globalDict
-    query_string = request.query_string.decode()
-    behaviour_id = request.args.get('bid', default = 'default', type = str)
     
-    # default behaviour
-    my_work_model = globalDict['work_model'][ID]
-    my_service_mesh = my_work_model['external_services'] 
-    my_internal_service = my_work_model['internal_service']
-
-    if behaviour_id != 'default' and "alternative_behaviors" in my_work_model.keys():
-        if behaviour_id in my_work_model['alternative_behaviors'].keys():
-            if "external_services" in my_work_model['alternative_behaviors'][behaviour_id].keys():
-                my_service_mesh = my_work_model['alternative_behaviors'][behaviour_id]['external_services']  
-            if "internal_services" in my_work_model['alternative_behaviors'][behaviour_id].keys():
-                my_internal_service = my_work_model['alternative_behaviors'][behaviour_id]['internal_service']
-
     try:
         start_request_processing = time.time()
         app.logger.info('Request Received')
+        
+        query_string = request.query_string.decode()
+        behaviour_id = request.args.get('bid', default = 'default', type = str)
+        
+        # default behaviour
+        my_work_model = globalDict['work_model'][ID]
+        my_service_mesh = my_work_model['external_services'] 
+        my_internal_service = my_work_model['internal_service']
+
+        # update internal service behaviour
+        if behaviour_id != 'default' and "alternative_behaviors" in my_work_model.keys():
+                if behaviour_id in my_work_model['alternative_behaviors'].keys():
+                    if "internal_services" in my_work_model['alternative_behaviors'][behaviour_id].keys():
+                        my_internal_service = my_work_model['alternative_behaviors'][behaviour_id]['internal_service']
+        
+        # if POST check the presence of a trace
+        trace=dict()
+        if request.method == 'POST':
+            trace = request.json
+        if len(trace)>0 and ID in trace.keys():
+        # trace-driven request
+            n_groups = len(trace[ID])
+            my_service_mesh = list()
+            for i in range(0,n_groups):
+                group = trace[ID][i]
+                group_dict = dict()
+                group_dict['seq_len'] = len(group)
+                group_dict['services'] = list(group.keys())
+                my_service_mesh.append(group_dict)
+        else:
+            # update external service behaviour
+            if behaviour_id != 'default' and "alternative_behaviors" in my_work_model.keys():
+                if behaviour_id in my_work_model['alternative_behaviors'].keys():
+                    if "external_services" in my_work_model['alternative_behaviors'][behaviour_id].keys():
+                        my_service_mesh = my_work_model['alternative_behaviors'][behaviour_id]['external_services']
 
         # Execute the internal service
         print("*************** INTERNAL SERVICE STARTED ***************")
@@ -120,12 +140,15 @@ def start_worker():
         start_external_request_processing = time.time()
         print("*************** EXTERNAL SERVICES STARTED ***************")
         if len(my_service_mesh) > 0:
-            service_error_dict = run_external_service(my_service_mesh,globalDict['work_model'],query_string)
+            if len(trace)>0:
+                service_error_dict = run_external_service(my_service_mesh,globalDict['work_model'],query_string,trace[ID])
+            else:
+                service_error_dict = run_external_service(my_service_mesh,globalDict['work_model'],query_string,dict())
             if len(service_error_dict):
                 pprint(service_error_dict)
                 app.logger.error("Error in request external services")
                 app.logger.error(service_error_dict)
-                return make_response(json.dumps({"message": "Error in same external services request"}), 500)
+                return make_response(json.dumps({"message": "Error in external services request"}), 500)
         print("############### EXTERNAL SERVICES FINISHED! ###############")
 
         response = make_response(body)
@@ -194,7 +217,7 @@ class gRPCThread(Thread, pb2_grpc.MicroServiceServicer):
                     pprint(service_error_dict)
                     logging.error("Error in request external services")
                     logging.error(service_error_dict)
-                    result = {'text': f"Error in same external services request", 'status_code': False}
+                    result = {'text': f"Error in external services request", 'status_code': False}
                     return pb2.MessageResponse(**result)
             print("############### EXTERNAL SERVICES FINISHED! ###############")
 
@@ -235,5 +258,3 @@ if __name__ == '__main__':
     else:
         print("Error: Unsupported request method")
         sys.exit(0)
-
-
