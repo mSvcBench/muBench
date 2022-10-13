@@ -6,11 +6,9 @@ import os
 import sys
 import time
 import traceback
-import logging
 from threading import Thread
 from concurrent import futures
 from multiprocessing import Array, Manager, Value
-from pprint import pprint
 
 import gunicorn.app.base
 from flask import Flask, Response, json, make_response, request
@@ -27,28 +25,29 @@ import grpc
 
 # Configuration of global variables
 
+# Flask APP
+app = Flask(__name__)
+ID = os.environ["APP"]
+ZONE = os.environ["ZONE"]  # Pod Zone
+K8S_APP = os.environ["K8S_APP"]  # K8s label app
+PN = os.environ["PN"] # Number of processes
+TN = os.environ["TN"] # Number of thread per process
+traceEscapeString = "__"
+
+globalDict=Manager().dict()
 def read_config_files():
     res = dict()
     with open('MSConfig/workmodel.json') as f:
         workmodel = json.load(f)
         # shrink workmodel
         for service in workmodel:
-            print(f'service: {service}')
+            app.logger.info(f'service: {service}')
             if service==ID:
                 res[service]=workmodel[service]
             else:
                 res[service]={"url":workmodel[service]["url"],"path":workmodel[service]["path"]}
     return res
-
-ID = os.environ["APP"]
-ZONE = os.environ["ZONE"]  # Pod Zone
-K8S_APP = os.environ["K8S_APP"]  # K8s label app
-PN = os.environ["PN"] # Number of processes
-TN = os.environ["TN"] # Number of thread per process
-
-globalDict=Manager().dict()
 globalDict['work_model'] = read_config_files()    # must be shared among processes for hot update
-
 
 if "request_method" in globalDict['work_model'][ID].keys():
     request_method = globalDict['work_model'][ID]["request_method"].lower()
@@ -73,12 +72,12 @@ REQUEST_PROCESSING = Summary('mub_request_processing_latency_seconds', 'Request 
                            ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service'],registry=registry
                            )
 
-# Flask APP
-app = Flask(__name__)
+
+
 
 @app.route("/update", methods=['GET'])
 def update():
-    print("updatePath")
+    app.logger.info("updatePath")
     global globalDict
     globalDict['work_model'] = read_config_files() 
     return f'{json.dumps("Successfully Update ServiceMesh and WorkModel variables! :)")}\n', 200
@@ -109,7 +108,18 @@ def start_worker():
         trace=dict()
         if request.method == 'POST':
             trace = request.json
-        if len(trace)>0 and ID in trace.keys():
+            # sanity_check
+            assert len(trace.keys())==1, 'bad trace format'
+            # if len(trace.keys())!=1:
+            #     raise ValueError('bad trace format')
+            assert ID == list(trace)[0].split(traceEscapeString)[0], "bad trace format, ID"
+            # if ID != list(trace)[0].split(traceEscapeString)[0]:
+            #     raise ValueError('bad trace format')
+            trace[ID] = trace[list(trace)[0]] # We insert 1 more key "s0": [value] 
+            
+        
+
+        if len(trace)>0:
         # trace-driven request
             n_groups = len(trace[ID])
             my_service_mesh = list()
@@ -127,29 +137,30 @@ def start_worker():
                         my_service_mesh = my_work_model['alternative_behaviors'][behaviour_id]['external_services']
 
         # Execute the internal service
-        print("*************** INTERNAL SERVICE STARTED ***************")
+        app.logger.info("*************** INTERNAL SERVICE STARTED ***************")
         start_local_processing = time.time()
         body = run_internal_service(my_internal_service)
         local_processing_latency = time.time() - start_local_processing
         INTERNAL_PROCESSING.labels(ZONE, K8S_APP, request.method, request.path).observe(local_processing_latency)
         RESPONSE_SIZE.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr, ID).observe(len(body))
-        print("len(body): %d" % len(body))
-        print("############### INTERNAL SERVICE FINISHED! ###############")
+        app.logger.info("len(body): %d" % len(body))
+        app.logger.info("############### INTERNAL SERVICE FINISHED! ###############")
 
         # Execute the external services
         start_external_request_processing = time.time()
-        print("*************** EXTERNAL SERVICES STARTED ***************")
+        app.logger.info("*************** EXTERNAL SERVICES STARTED ***************")
+        
         if len(my_service_mesh) > 0:
             if len(trace)>0:
-                service_error_dict = run_external_service(my_service_mesh,globalDict['work_model'],query_string,trace[ID])
+                service_error_dict = run_external_service(my_service_mesh,globalDict['work_model'],query_string,trace[ID],app)
             else:
-                service_error_dict = run_external_service(my_service_mesh,globalDict['work_model'],query_string,dict())
+                service_error_dict = run_external_service(my_service_mesh,globalDict['work_model'],query_string,dict(),app)
             if len(service_error_dict):
-                pprint(service_error_dict)
+                app.logger.error(service_error_dict)
                 app.logger.error("Error in request external services")
                 app.logger.error(service_error_dict)
                 return make_response(json.dumps({"message": "Error in external services request"}), 500)
-        print("############### EXTERNAL SERVICES FINISHED! ###############")
+        app.logger.info("############### EXTERNAL SERVICES FINISHED! ###############")
 
         response = make_response(body)
         response.mimetype = "text/plain"
@@ -158,7 +169,7 @@ def start_worker():
 
         return response
     except Exception as err:
-        print(traceback.format_exc())
+        app.logger.error(traceback.format_exc())
         return json.dumps({"message": "Error"}), 500
 
 # Prometheus
@@ -193,33 +204,33 @@ class gRPCThread(Thread, pb2_grpc.MicroServiceServicer):
     def GetMicroServiceResponse(self, req, context):
         try:
             start_request_processing = time.time()
-            logging.info('Request Received')
+            app.logger.info.info('Request Received')
             message = req.message
             remote_address = context.peer().split(":")[1]
-            print(f'I am service: {ID} and I received this message: --> "{message}"')
+            app.logger.info(f'I am service: {ID} and I received this message: --> "{message}"')
 
             # Execute the internal service
-            print("*************** INTERNAL SERVICE STARTED ***************")
+            app.logger.info("*************** INTERNAL SERVICE STARTED ***************")
             start_local_processing = time.time()
             body = run_internal_service(my_work_model["internal_service"])
             local_processing_latency = time.time() - start_local_processing
             INTERNAL_PROCESSING.labels(ZONE, K8S_APP, "grpc", "grpc").observe(local_processing_latency)
             RESPONSE_SIZE.labels(ZONE, K8S_APP, "grpc", "grpc", remote_address, ID).observe(len(body))
-            print("len(body): %d" % len(body))
-            print("############### INTERNAL SERVICE FINISHED! ###############")
+            app.logger.info("len(body): %d" % len(body))
+            app.logger.info("############### INTERNAL SERVICE FINISHED! ###############")
 
             # Execute the external services
-            print("*************** EXTERNAL SERVICES STARTED ***************")
+            app.logger.info("*************** EXTERNAL SERVICES STARTED ***************")
             start_external_request_processing = time.time()
             if len(my_service_mesh) > 0:
                 service_error_dict = run_external_service(my_service_mesh, globalDict['work_model'])
                 if len(service_error_dict):
-                    pprint(service_error_dict)
-                    logging.error("Error in request external services")
-                    logging.error(service_error_dict)
+                    app.logger.error(service_error_dict)
+                    app.logger.error("Error in request external services")
+                    app.logger.error(service_error_dict)
                     result = {'text': f"Error in external services request", 'status_code': False}
                     return pb2.MessageResponse(**result)
-            print("############### EXTERNAL SERVICES FINISHED! ###############")
+            app.logger.info("############### EXTERNAL SERVICES FINISHED! ###############")
 
             result = {'text': body, 'status_code': True}
             EXTERNAL_PROCESSING.labels(ZONE, K8S_APP, "grpc", "grpc").observe(time.time() - start_external_request_processing)
@@ -227,7 +238,7 @@ class gRPCThread(Thread, pb2_grpc.MicroServiceServicer):
                 time.time() - start_request_processing)
             return pb2.MessageResponse(**result)
         except Exception as err:
-            print("Error: in GetMicroServiceResponse,", err)
+            app.logger.error("Error: in GetMicroServiceResponse,", err)
             result = {'text': f"Error: in GetMicroServiceResponse, {str(err)}", 'status_code': False}
             return pb2.MessageResponse(**result)
 
@@ -237,9 +248,8 @@ class gRPCThread(Thread, pb2_grpc.MicroServiceServicer):
         self.server.start()
 
 if __name__ == '__main__':
-    global data
     if request_method == "rest":
-        init_REST()
+        init_REST(app)
         # Start Gunicorn HTTP REST Server (multi-process)
         options_gunicorn = {
             'bind': '%s:%s' % ('0.0.0.0', 8080),
@@ -249,12 +259,12 @@ if __name__ == '__main__':
         }
         HttpServer(app, options_gunicorn).run()
     elif request_method == "grpc":
-        init_gRPC(my_service_mesh, globalDict['work_model'], gRPC_port)
+        init_gRPC(my_service_mesh, globalDict['work_model'], gRPC_port,app)
         # Start the gRPC server
         grpc_thread = gRPCThread()
         grpc_thread.run()
         # Flask HTTP REST server started for Prometheus metrics and for the entry point (s0) that anyway receives REST requests from API gateway
         app.run(host='0.0.0.0', port=8080, threaded=True)
     else:
-        print("Error: Unsupported request method")
+        app.logger.info("Error: Unsupported request method")
         sys.exit(0)

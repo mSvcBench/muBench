@@ -1,8 +1,12 @@
+from readline import append_history_file
 import threading
 import os
 import glob
 import random
 import jsonmerge
+
+internal_service_function = None
+internal_service_params_v = None
 
 # Dinamyc import of all function in InternalServiceFunctions folder
 for path in glob.glob('MSConfig/InternalServiceFunctions/[!_]*.py'):
@@ -13,12 +17,13 @@ for path in glob.glob('MSConfig/InternalServiceFunctions/[!_]*.py'):
 class InternalServiceExecutor(threading.Thread):
     def __init__(self, internal_service_function, params, response):
         threading.Thread.__init__(self)
-        self.internal_service_function = f'{internal_service_function}({params})'
+        self.params = params
+        self.internal_service_function = internal_service_function
         self.response = response
 
     def run(self):
-        # self.internal_service_function()
-        self.response.set_body(eval(self.internal_service_function))
+        self.response.set_body(self.internal_service_function(self.params))
+        # self.response.set_body(eval(self.internal_service_function))
 
 
 class ThreadReturnedValue:
@@ -52,25 +57,31 @@ def compute_pi(params):
                 counter = counter+1
         else:
             q, r, t, k, m, x = q*k, (2*q+r)*x, t*x, k+1, (q*(7*k+2)+r*x)//(t*x), x+2
-    print("Service complexity: %d - Number of cycles for pi computation: %d" % (cpu_load, cpu_load + 1))
-
+  
 
     bandwidth_load = random.expovariate(1 / params["mean_bandwidth"])
-    print("E[bandwidth] = 1/%d ---> Response size = %d KB" % (params["mean_bandwidth"], bandwidth_load))
     num_chars = 1000 * bandwidth_load  # Response in kB
     response_body = 'L' * int(num_chars)
 
     return response_body
 
 
-def run_internal_service(internal_service_params):
+def set_internal_service_function(internal_service_params):
+    global internal_service_function, internal_service_params_v
     function_name = list(internal_service_params)[0]
     internal_service_params_v = list(internal_service_params.values())[0]
+    internal_service_function = eval(function_name)
+
+def run_internal_service(internal_service_params):
+    global internal_service_function, internal_service_params_v
+    if internal_service_function == None:
+        set_internal_service_function(internal_service_params)
+    #function_name = list(internal_service_params)[0]
+    #internal_service_params_v = list(internal_service_params.values())[0]
     # response = list()
     # response = dict()
     response = ThreadReturnedValue()
-    thread = InternalServiceExecutor(function_name, internal_service_params_v, response)
+    thread = InternalServiceExecutor(internal_service_function, internal_service_params_v, response)
     thread.start()
     thread.join()
     return response.get_body()
-
