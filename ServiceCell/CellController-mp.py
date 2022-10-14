@@ -25,6 +25,22 @@ import grpc
 
 # Configuration of global variables
 
+incoming_headers = [
+    'x-request-id',
+    'x-b3-traceid',
+    'x-b3-spanid',
+    'x-b3-parentspanid',
+    'x-b3-sampled',
+    'x-b3-flags',
+    'x-datadog-trace-id',
+    'x-datadog-parent-id',
+    'x-datadog-sampling-priority',
+    'x-ot-span-context',
+    'grpc-trace-bin',
+    'traceparent',
+    'x-cloud-trace-context',
+],
+
 # Flask APP
 app = Flask(__name__)
 ID = os.environ["APP"]
@@ -103,7 +119,14 @@ def start_worker():
                 if behaviour_id in my_work_model['alternative_behaviors'].keys():
                     if "internal_services" in my_work_model['alternative_behaviors'][behaviour_id].keys():
                         my_internal_service = my_work_model['alternative_behaviors'][behaviour_id]['internal_service']
-        
+
+        # trace context propagation
+        trace_propagation_headers = dict()
+        for ihdr in incoming_headers:
+            val = request.headers.get(ihdr)
+            if val is not None:
+                trace_propagation_headers[ihdr] = val
+
         # if POST check the presence of a trace
         trace=dict()
         if request.method == 'POST':
@@ -152,9 +175,9 @@ def start_worker():
         
         if len(my_service_mesh) > 0:
             if len(trace)>0:
-                service_error_dict = run_external_service(my_service_mesh,globalDict['work_model'],query_string,trace[ID],app)
+                service_error_dict = run_external_service(my_service_mesh,globalDict['work_model'],query_string,trace[ID],app, trace_propagation_headers)
             else:
-                service_error_dict = run_external_service(my_service_mesh,globalDict['work_model'],query_string,dict(),app)
+                service_error_dict = run_external_service(my_service_mesh,globalDict['work_model'],query_string,dict(),app, trace_propagation_headers)
             if len(service_error_dict):
                 app.logger.error(service_error_dict)
                 app.logger.error("Error in request external services")
@@ -167,9 +190,13 @@ def start_worker():
         EXTERNAL_PROCESSING.labels(ZONE, K8S_APP, request.method, request.path).observe(time.time() - start_external_request_processing)
         REQUEST_PROCESSING.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr, ID).observe(time.time() - start_request_processing)
 
+        # Add trace context propagation headers to the response
+        response.headers.update(trace_propagation_headers)
+
         return response
     except Exception as err:
-        app.logger.error(traceback.format_exc())
+        app.logger.error("Error in start_worker", err)
+        # app.logger.error(traceback.format_exc())
         return json.dumps({"message": "Error"}), 500
 
 # Prometheus
