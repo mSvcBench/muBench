@@ -25,7 +25,7 @@ Additionally, the topology C has a `workmodelC-multi.json` with introduced rando
 * the other microservices either load the memory or the disk with read/write operations.
 
 
-# Alibaba derived application and traces
+# Alibaba derived applications and traces
 The alibaba folder contains the Matlab code we used to create 30 applications from [Alibaba microservice traces] (https://github.com/alibaba/clusterdata/tree/master/cluster-trace-microservices-v2021).
 
 The traces-mbench.zip file contains parallel (`par` folder) and sequential (`seq` folder) traces of these applications. Each application has its folder that contain the traces and a `servicemesh.json`. file that can be used to generate the `workmodel.json` file through the `WorkModelGenerator`.
