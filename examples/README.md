@@ -23,3 +23,14 @@ Additionally, the topology C has a `workmodelC-multi.json` with introduced rando
 * the microservice `s8` is the only one that stresses the CPU. 
 * the microservice `s0` does not perform any internal-service
 * the other microservices either load the memory or the disk with read/write operations.
+
+
+# Alibaba derived application and traces
+The alibaba folder contains the Matlab code we used to create 30 applications from [Alibaba microservice traces] (https://github.com/alibaba/clusterdata/tree/master/cluster-trace-microservices-v2021).
+
+The traces-mbench.zip file contains parallel (`par` folder) and sequential (`seq` folder) traces of these applications. Each application has its folder that contain the traces and a `servicemesh.json`. file that can be used to generate the `workmodel.json` file through the `WorkModelGenerator`.
+
+To perform a trace-based request it is possible to use 
+```zsh
+curl -X POST -i <access-gateway-ip>:31113/s0  -H 'Content-Type: application/json' -d @TRACE_FILE
+```

@@ -51,112 +51,112 @@ The description of a µBench application, i.e. the set of internal and external 
 
 ```json
 {
-  "s0": {
-    "external_services": [
-      {
-        "seq_len": 100,
-        "services": [
-          "s1"
-        ],
-        "probabilities": {
-          "s1": 1
-        }
-      }
-      },
-      {
-        "seq_len": 1,
-        "services": [
-          "sdb1"
-        ],
-      }
-    ],
-    "internal_service": {
-      "compute_pi": {
-        "mean_bandwidth": 10,
-        "range_complexity": [
-          50,
-          100
-        ]
-      }
-    },
-    "request_method": "rest",
-    "workers": 4,
-    "threads": 16,
-    "cpu-requests": "1000m",
-    "cpu-limits": "1000m",
-    "pod_antiaffinity": false,
-    "replicas": 1
-  },
-  "sdb1": {
-    "external_services": [],
-    "internal_service": {
-      "compute_pi": {
-        "mean_bandwidth": 1,
-        "range_complexity": [
-          1,
-          10
-        ]
-      }
-    },
-    "request_method": "rest",
-    "workers": 4,
-    "threads": 16,
-    "pod_antiaffinity": false,
-    "replicas": 1,
-    "cpu-requests": "1000m",
-    "cpu-limits": "1000m"
-  },
-  "s1": {
-    "external_services": [
-      {
-        "seq_len": 100,
-        "services": [
-          "s2"
-        ],        
-        "probabilities": {
-          "s2": 1
-        }
-      }
-    ],
-    "internal_service": {
-      "colosseum": {
-        "mean_bandwidth": 10
-      }
-    },
-    "request_method": "rest",
-    "workers": 4,
-    "threads": 16,
-    "cpu-requests": "1000m",
-    "cpu-limits": "1000m",
-    "pod_antiaffinity": false,
-    "replicas": 1
-  },
-  "s2": {
-    "external_services": [
-      {
-        "seq_len": 1,
-        "services": [
-          "sdb1"
-        ]
-      }
-    ],
-    "internal_service": {
-      "compute_pi": {
-        "mean_bandwidth": 15,
-        "range_complexity": [
-          10,
-          20
-        ]
-      }
-    },
-    "request_method": "rest",
-    "workers": 4,
-    "threads": 16,
-    "cpu-requests": "1000m",
-    "cpu-limits": "1000m",
-    "pod_antiaffinity": false,
-    "replicas": 1
-  }
+	"s0": {
+		"external_services": [{
+				"seq_len": 100,
+				"services": [
+					"s1"
+				],
+				"probabilities": {
+					"s1": 1
+				}
+			},
+			{
+				"seq_len": 1,
+				"services": [
+					"sdb1"
+				],
+				"probabilities": {
+					"sdb1": 1
+				}
+			}
+		],
+		"internal_service": {
+			"compute_pi": {
+				"mean_bandwidth": 10,
+				"range_complexity": [
+					50,
+					100
+				]
+			}
+		},
+		"request_method": "rest",
+		"workers": 4,
+		"threads": 16,
+		"cpu-requests": "1000m",
+		"cpu-limits": "1000m",
+		"pod_antiaffinity": false,
+		"replicas": 1
+	},
+	"sdb1": {
+		"external_services": [],
+		"internal_service": {
+			"compute_pi": {
+				"mean_bandwidth": 1,
+				"range_complexity": [
+					1,
+					10
+				]
+			}
+		},
+		"request_method": "rest",
+		"workers": 4,
+		"threads": 16,
+		"pod_antiaffinity": false,
+		"replicas": 1,
+		"cpu-requests": "1000m",
+		"cpu-limits": "1000m"
+	},
+	"s1": {
+		"external_services": [{
+			"seq_len": 100,
+			"services": [
+				"s2"
+			],
+			"probabilities": {
+				"s2": 1
+			}
+		}],
+		"internal_service": {
+			"colosseum": {
+				"mean_bandwidth": 10
+			}
+		},
+		"request_method": "rest",
+		"workers": 4,
+		"threads": 16,
+		"cpu-requests": "1000m",
+		"cpu-limits": "1000m",
+		"pod_antiaffinity": false,
+		"replicas": 1
+	},
+	"s2": {
+		"external_services": [{
+			"seq_len": 1,
+			"services": [
+				"sdb1"
+			],
+			"probabilities": {
+				"sdb1": 1
+			}
+		}],
+		"internal_service": {
+			"compute_pi": {
+				"mean_bandwidth": 15,
+				"range_complexity": [
+					10,
+					20
+				]
+			}
+		},
+		"request_method": "rest",
+		"workers": 4,
+		"threads": 16,
+		"cpu-requests": "1000m",
+		"cpu-limits": "1000m",
+		"pod_antiaffinity": false,
+		"replicas": 1
+	}
 }
 ```
 
@@ -300,9 +300,11 @@ If we change the values of the BA model, we are able to generate microservice ap
 The BA algorithm builds the mesh topology as follows: at each step, a new service is added as a vertex of a directed tree. This new service is connected with an edge to a single *parent* service already present in the topology. The edge direction is from the parent service to the new *child* service, this means that the parent service includes the new service in its external-services.  
 The parent service is chosen according to a preferred attachment strategy using a *power-law* distribution. Specifically, vertex *i* is chosen as a parent with a (non-normalized) probability equal to *P<sub>i</sub> = d<sub>i</sub><sup>&alpha;</sup> + a*, where *d<sub>i* is the number of services that have already chosen the service *i* as a parent, *&alpha;* is the power-law exponent, and *a* is the zero-appeal parameters i.e., the probability of a service being chosen as a parent when no other service has yet chosen it.
 
-#### Service Mesh Travel Strategy <!-- omit in toc -->
-
+#### Sequential and Parallel Downstream Calls <!-- omit in toc -->
 To simulate parallel and sequential calls of external-services, the whole set of external-services of a service-cell is organized in *external-service-groups**. Each group contains a different set of external-services and the insertion of external-services in groups is made according to a water-filling algorithm.
+#### Stochastic Mesh Span <!-- omit in toc -->
+
+A user request can be served by µBench with two approaches, stochastic-driven and trace-driven (see below). For stochastic-driven benchmarks, a request involves a random set of microservices according to the following stochastic spanning model.
 When a service request is received, a service executes its internal-service and then the external-services contained in the external-service groups. For each group, a dedicated thread randomly selects `seq_len` external-services from it and invokes (e.g., HTTP call) them sequentially. If a selected service has a probability, its actual call depends on this probability. Properly configuring `seq_len` and `probabilities` we can move from a traveling strategy completely driven by `seq_len` (in the case all `probabilities` are equal to 1) to a traveling strategy completely driven by `probabilities` by using a value of seq_len greater than the number of microservices on the application.
 These threads are executed in parallel, one per group. If the number of external-services is less than the configured number of service groups, some service groups do not exist and existing groups contain only a single external-service (water-filling). If the number of external-services in a group is lower than `seq_len`, all external-services in the service group are invoked sequentially.
 
@@ -646,15 +648,19 @@ python3 Autopilots/K8sAutopilot/K8sAutopilot.py -c Configs/K8sAutopilotConf.json
 
 ---
 
-## Benchmark tools
+## Benchmarks strategies
+### Stochastic-driven benchmarks <!-- omit in toc -->
+For stochastic benchmarks, the user can submit HTTP GET to microservice `s0` and this request will  involve a random set of microservices according to the calling probabilities specifieed in the `workmodel.json` file.    
+### Trace-driven benchmarks <!-- omit in toc -->
 
-µBench provides simple benchmark tools in the `Benchmarks` directory. Besides these tools, you can 
-use other open-souce tools, e.g. *ab - Apache HTTP server benchmarking tool * as it follows, where <access-gateway-ip>:31113 is the IP address (e.g., that of K8s master node) and port through which it is possible to contact the NGINX API gateway:
+## Benchmarks tools
+µBench provides simple benchmark tools in the `Benchmarks` directory, for stochastic-driven benchmarks only. Besides this tool, you can use other open-souce tools, e.g. *ab - Apache HTTP server benchmarking tool * as it follows, where <access-gateway-ip>:31113 is the IP address (e.g., that of K8s master node) and port through which it is possible to contact the NGINX API gateway:
 
 ```zsh
 ab -n 100 -c 2 http://<access-gateway-ip>:31113/s0
 ```
 
+Another benchmarking tool we have used successfully is * Apache JMeter * through which both stochastic and trace-driven benchmarks can be run.
 ### Traffic Generator and Runner <!-- omit in toc -->
 
 `TrafficGenerator` and `Runner` are two tools used to load a µBench microservice application with a sequence of HTTP requests and observe its performance both through simple metrics offered by the Runner and by Prometheus metrics.  
