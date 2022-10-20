@@ -650,17 +650,99 @@ python3 Autopilots/K8sAutopilot/K8sAutopilot.py -c Configs/K8sAutopilotConf.json
 
 ## Benchmarks strategies
 ### Stochastic-driven benchmarks <!-- omit in toc -->
-For stochastic benchmarks, the user can submit HTTP GET to microservice `s0` and this request will  involve a random set of microservices according to the calling probabilities specifieed in the `workmodel.json` file.    
+For stochastic benchmarks, the user can submit HTTP GET to service `s0` and this request will involve a random set of services according to the calling probabilities specifieed in the `workmodel.json` file.    
 ### Trace-driven benchmarks <!-- omit in toc -->
+The Trace-driven bencharks, instead of the stocastic bencharks, allow users to send a trace file to the NGINX API gateway, with the exact sequences of the services to be requested.
+
+CANCELLARE --> L'utente deve fare una richiesta HTTP POST verso il gateway inserendo come body il file trace che è semplicemente un JSON con questa struttura.
+
+The users send an HTTP POST request to the gateway and include, as body, a JSON file that represent the trace. An example of the structure of the trace file is given below:
+
+```json
+{
+   "s0__47072":[{
+      "s24__71648":[{}],
+      "s28__64944":[{
+         "s6__5728":[{}],
+         "s20__61959":[{}]
+         }]
+   }]
+}
+```
+The key is the service that perform the requests, while the value is a list of the service groups to be contacted in parallel. Each service in the groups are requested sequentially. Since in microservice applications the same services are often requested multiple times and the structure of a JSON file does not allow duplicated keys, we insert an escape sequence (double underscore `__`) followed by a random number. In the example trace the service `s0__47072` perform the requests to the services `s24__71648` and `s28__64944` sequentally.
+
+In the examples directory there is the alibaba folder with a collection of applications obtained from processing the real alibaba [traces](#https://link.alibaba.com/tracce), in the same directory we find the Matlab script used for the processing.
+We can see an example of a trace-driver benchark.
+Firstly we need to unzip the [trace-mbench.zip](#examples/alibaba/trace-mbench.zip) file inside the `examples/alibaba` directory, as result of this operation we obtain the `trace-mbench` directory within two folder `par` and `seq`. Each of this two folder contains 29 applications. The differences beetween the apps in two folder is that apps in the `par` directory execute requests between its services in a parallel way, whereas the apps in the `seq` directory execute requests in a sequentially way. Then we can start to deploy the example.
+
+
+```zsh
+muBench/
+├─ examples/
+│  ├─ alibaba/
+│  │  ├─ Matlab/
+│  │  ├─ traces-mbench/
+│  │  │  ├─ par/
+│  │  │  │  ├─ app2/
+│  │  │  │  ├─ app3/
+│  │  │  │  ├─ ...
+│  │  │  ├─ seq/
+│  │  │  │  ├─ app2/
+│  │  │  │  ├─ app3/
+│  │  │  │  ├─ ...
+
+```
+In each app folder, we find the `service_mesh.json` file that represents the app and the relative traces. To complete the benchmark, we need to perform some steps:
+- Generate the workmodel file
+- Deploy the application
+- Send a trace to the application
+
+#### Generate Workmodel
+To generate the workmodel.json file you can use the WorkModelGenerator. Edit the parameter `ServiceMeshFilePath` inside the WorkModelParameters.json with the correct path of the selected app service_mesh.
+
+```json
+      "ServiceMeshFilePath": {
+         "type": "metadata", 
+         "value":"examples/alibaba/traces-mbench/seq/app3/service_mesh.json"
+      },
+     "OutputPath": {
+         "type":"metadata",
+         "value":"examples/alibaba/traces-mbench/seq/app3"
+      }
+```
+Run the WorkModelGenerator
+
+```zsh
+python3 WorkModelGenerator/RunWorkModelGen.py -c Configs/WorkModelParameters.json
+```
+
+#### Kubernetes Deployment
+Before running K8sDeployer, to deploy the application, you need to edit the K8sParameters.json file to specify the correct path of the working model created in the previous step.
+```json
+   "InternalServiceFilePath": "CustomFunctions",
+   "OutputPath": "SimulationWorkspace/",
+   "WorkModelPath": "examples/alibaba/traces-mbench/seq/app3/workmodel.json",
+```
+Run the K8sDeployer
+
+```zsh
+python3 Deployers/K8sDeployer/RunK8sDeployer.py -c Configs/K8sParameters.json
+```
+
+#### Send Traces
+To send a trace you need to do an HTTP POST request to the NGINX API gateway with the trace JSON file as the body, you can use Curl.
+```zsh
+curl -X POST -H "Content-Type: application/json" http://<access-gateway-ip>:31113/s0 -d @examples/alibaba/traces-mbench/seq/app3/trace00001.json
+```
 
 ## Benchmarks tools
-µBench provides simple benchmark tools in the `Benchmarks` directory, for stochastic-driven benchmarks only. Besides this tool, you can use other open-souce tools, e.g. *ab - Apache HTTP server benchmarking tool * as it follows, where <access-gateway-ip>:31113 is the IP address (e.g., that of K8s master node) and port through which it is possible to contact the NGINX API gateway:
+µBench provides simple benchmark tools in the `Benchmarks` directory, for stochastic-driven benchmarks only. Besides this tool, you can use other open-souce tools, e.g. *ab - Apache HTTP server benchmarking tool* as it follows, where `<access-gateway-ip>:31113` is the IP address (e.g., that of K8s master node) and port through which it is possible to contact the NGINX API gateway:
 
 ```zsh
 ab -n 100 -c 2 http://<access-gateway-ip>:31113/s0
 ```
 
-Another benchmarking tool we have used successfully is * Apache JMeter * through which both stochastic and trace-driven benchmarks can be run.
+Another benchmarking tool we have used successfully is *Apache JMeter* through which both stochastic and trace-driven benchmarks can be run.
 ### Traffic Generator and Runner <!-- omit in toc -->
 
 `TrafficGenerator` and `Runner` are two tools used to load a µBench microservice application with a sequence of HTTP requests and observe its performance both through simple metrics offered by the Runner and by Prometheus metrics.  

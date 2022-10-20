@@ -39,7 +39,6 @@ To install Istio we used:
 
 ```zsh
  curl -L https://istio.io/downloadIstio | sh -
- curl -L https://istio.io/downloadIstio | sh -
  cd istio-1.12.2/
 export PATH=$PWD/bin:$PATH
 istioctl install --set profile=demo -y
