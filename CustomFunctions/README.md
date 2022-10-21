@@ -4,17 +4,17 @@
 
 Function that returns a simple asci art of Colosseum
 
-*Function name* : `colosseum`
+*Function name*: `colosseum`
 
-*Input Paramenters* : none
+*Input Paramenters*: none
 
 ## ComputePI
 
 This *single-thread* internal function (included in the service-cell code) stresses the CPU by computing `D` decimal points of pi, where `D` is a random integer in `range_complexity` (e.g. 50,100). The return is a string whose length is a sample of an exp neg random variable with mean `mean_bandwidth` kBytes  
 
-*Function name* : `compute_pi`
+*Function name*: `compute_pi`
 
-*Default Input Paramenters* :
+*Default Input Paramenters*:
 
 ```json
 {
@@ -35,9 +35,9 @@ The disk stress is performed by creating the file `tmp_file_name`. Writing `disk
 
 The sleep stress is performed (if `run`=true) by sleeping for `sleep_time` seconds.
 
-*Function name* : `loader`
+*Function name*: `loader`
 
-*Default Input Paramenters* :
+*Default Input Paramenters*:
 
 ```json
 {

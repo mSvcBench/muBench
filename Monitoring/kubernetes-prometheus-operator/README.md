@@ -1,6 +1,6 @@
 # Prometheus operator
 
-You can install [Prometheus operator] (https://github.com/prometheus-operator/prometheus-operator) via helm: 
+You can install [Prometheus operator](https://github.com/prometheus-operator/prometheus-operator) via helm: 
 
 ```zsh
 kubectl create namespace monitoring
@@ -33,7 +33,7 @@ kubectl get secret prometheus-grafana -o jsonpath="{.data.admin-password}" -n mo
 ``` 
 
 # Istio
-[Istio] (https://istio.io/) service mesh can be included in the cluster for a deeper monitoring.
+[Istio](https://istio.io/) service mesh can be included in the cluster for a deeper monitoring.
 
 To install Istio we used:
 
@@ -50,4 +50,4 @@ Then it is necessary to add Prometheus PodMonitor and ServiceMonitor:
 k apply -f istio-prometheus-operator.yaml
 ```
 
-Istio may use [Metrics merging] (https://istio.io/latest/docs/ops/integrations/prometheus/), therefore the µBench metrics can be shown two times, even though with different 'job' labels. To avoid this, in presence of Istio, can be convenient not to run the aforementioned µBench PodMonitor. 
+Istio may use [Metrics merging](https://istio.io/latest/docs/ops/integrations/prometheus/), therefore the µBench metrics can be shown two times, even though with different 'job' labels. To avoid this, in presence of Istio, can be convenient not to run the aforementioned µBench PodMonitor. 

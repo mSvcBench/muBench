@@ -11,7 +11,7 @@
     - [Service Mesh Generator](#service-mesh-generator)
     - [Work Model Generator](#work-model-generator)
     - [Autopilots](#autopilots)
-  - [Benchmark tools](#benchmark-tools)
+  - [Benchmarks strategies](#benchmarks-strategies)
   - [Monitoring with Prometheus](#monitoring-with-prometheus)
   - [Installation and Getting Started](#installation-and-getting-started)
 
@@ -25,7 +25,7 @@
 - calling a set of *external-services*, i.e.  the services of other service-cells, and wait for their results
 - sending back the number of dummy bytes produced by the internal-service to the callers
 
-Services communicate with each other using either HTTP REST request/response mechanisms or gRPC. Users can access the µBench microservice application through an API gateway, an NGINX server, that exposes an HTTP endpoint per service, e.g. *NGINX_ip:port/s0*, *NGINX_ip:port/s1*, etc. These endpoints can be used by software for performance evaluation that loads the system with service requests, such as our [Runner](Manual.md#benchmark-tools), [ApacheBench](https://httpd.apache.org/docs/2.4/programs/ab.html), [JMeter] .
+Services communicate with each other using either HTTP REST request/response mechanisms or gRPC. Users can access the µBench microservice application through an API gateway, an NGINX server, that exposes an HTTP endpoint per service, e.g. *NGINX_ip:port/s0*, *NGINX_ip:port/s1*, etc. These endpoints can be used by software for performance evaluation that loads the system with service requests, such as our [Runner](Manual.md#benchmark-tools), [ApacheBench](https://httpd.apache.org/docs/2.4/programs/ab.html), [JMeter](https://jmeter.apache.org/).
 µBench services report their observed performance to a global [Prometheus](/Monitoring/kubernetes-prometheus/README.md#Prometheus) monitoring system. The underlying platform (e.g. Kubernetes) running the µBench microservice application can report its metrics to Prometheus too.
 
 ---
@@ -206,7 +206,7 @@ Some custom functions are already available in the `CustomFunction` folder that 
 
 ### Real Internal-Service functions <!-- omit in toc -->
 
-µBench can support the execution of real software within a service-cell by using *sidecar* containers that share the namespaces with the main container of the service-cell. For instance, a user can include a MongoDB database in the _sdb1_ service by changing the `workmodel.json`` as follows:
+µBench can support the execution of real software within a service-cell by using *sidecar* containers that share the namespaces with the main container of the service-cell. For instance, a user can include a MongoDB database in the _sdb1_ service by changing the `workmodel.json` as follows:
 
 ```json
   "sdb1": {
@@ -220,7 +220,7 @@ Some custom functions are already available in the `CustomFunction` folder that 
     }
 ```
 
-where `sidecar` is the name of the docker image to be used as sidecar and `mongo_fun` is a possible (TODO) function executed by the service-cell as internal-service, which interacts with the sidecar MongoDB by executing a random number of reading and writing operations within the uniform interval 10,20. However, any internal-service function can be used.  
+Where `sidecar` is the name of the docker image to be used as sidecar and `mongo_fun` is a possible (TODO) function executed by the service-cell as internal-service, which interacts with the sidecar MongoDB by executing a random number of reading and writing operations within the uniform interval 10,20. However, any internal-service function can be used.  
 
 ---
 
@@ -247,7 +247,6 @@ The K8sDeployer uses the `workmodel.json` file and other config files to create 
 | ConfigMap            | gw-nginx          | ConfigMap for nginx configuration                         |
 | ConfigMap            | internal-services | ConfigMap includig custom functions of internal-services  |
 | ConfigMap            | internal-services | ConfigMap includig workmodel.json                         |
-|----------------------|-------------------|-----------------------------------------------------------|
 
 The K8sDeployer takes as input a JSON file, like the following one, which contains information about the path of the `workmodel.json` file (`WorkModelPath`) and custom functions (`InternalServiceFilePath`) to be stored in the related ConfigMaps, and Kubernetes parameters. The Kubernetes parameters are the Docker `image` of the service-cell, the `namespace` of the deployment, as well as the K8s `cluster_domain` and the URL `path` used to trigger the service of service-cells. Between the deployment of a service-cell and the next one, there is a waiting period equal to `sleep` seconds to avoid K8s API server overload. The user can change the name of the output YAML files by specifying the `prefix_yaml_file` and these files will be inserted in the `OutputPath` directory. NGINX gateway needs the name of the K8s DNS service and this value is stored in `dns-resolver` (be careful that some K8s clusters can use `codedns.` instead of the default `kube-dns.`)
 
@@ -289,7 +288,7 @@ The following figure shows how they can be sequentially used with the K8sDeploye
 
 ### Service Mesh Generator
 
-The ServiceMeshGenerator generates a random *service mesh* of a µBench microservice application. A service mesh is usually defined as the set of external-services called by each service. It is represented as a graph, whose nodes are the services and a link exists between service A and B if service _A_ calls service _B_*, i.e., *B* is an external-service of *A*. A link can have a weigth that is the probability of actually performing the call *A*->*B*.
+The ServiceMeshGenerator generates a random *service mesh* of a µBench microservice application. A service mesh is usually defined as the set of external-services called by each service. It is represented as a graph, whose nodes are the services and a link exists between service A and B if service _A_ calls service *B*, i.e., *B* is an external-service of *A*. A link can have a weigth that is the probability of actually performing the call *A*->*B*.
 The ServiceMeshGenerator creates a `servicemesh.json` file that includes this topological informations and also other information concerning the strategy used to call the possible external-services, in order to mimic a random traveling of the service-mesh.
 
 #### Service Mesh Topology <!-- omit in toc -->
@@ -301,7 +300,7 @@ The BA algorithm builds the mesh topology as follows: at each step, a new servic
 The parent service is chosen according to a preferred attachment strategy using a *power-law* distribution. Specifically, vertex *i* is chosen as a parent with a (non-normalized) probability equal to *P<sub>i</sub> = d<sub>i</sub><sup>&alpha;</sup> + a*, where *d<sub>i* is the number of services that have already chosen the service *i* as a parent, *&alpha;* is the power-law exponent, and *a* is the zero-appeal parameters i.e., the probability of a service being chosen as a parent when no other service has yet chosen it.
 
 #### Sequential and Parallel Downstream Calls <!-- omit in toc -->
-To simulate parallel and sequential calls of external-services, the whole set of external-services of a service-cell is organized in *external-service-groups**. Each group contains a different set of external-services and the insertion of external-services in groups is made according to a water-filling algorithm.
+To simulate parallel and sequential calls of external-services, the whole set of external-services of a service-cell is organized in *external-service-groups*. Each group contains a different set of external-services and the insertion of external-services in groups is made according to a water-filling algorithm.
 #### Stochastic Mesh Span <!-- omit in toc -->
 
 A user request can be served by µBench with two approaches, stochastic-driven and trace-driven (see below). For stochastic-driven benchmarks, a request involves a random set of microservices according to the following stochastic spanning model.
@@ -654,8 +653,6 @@ For stochastic benchmarks, the user can submit HTTP GET to service `s0` and this
 ### Trace-driven benchmarks <!-- omit in toc -->
 The Trace-driven bencharks, instead of the stocastic bencharks, allow users to send a trace file to the NGINX API gateway, with the exact sequences of the services to be requested.
 
-CANCELLARE --> L'utente deve fare una richiesta HTTP POST verso il gateway inserendo come body il file trace che è semplicemente un JSON con questa struttura.
-
 The users send an HTTP POST request to the gateway and include, as body, a JSON file that represent the trace. An example of the structure of the trace file is given below:
 
 ```json
@@ -697,7 +694,7 @@ In each app folder, we find the `service_mesh.json` file that represents the app
 - Deploy the application
 - Send a trace to the application
 
-#### Generate Workmodel
+#### Generate Workmodel <!-- omit in toc -->
 To generate the workmodel.json file you can use the WorkModelGenerator. Edit the parameter `ServiceMeshFilePath` inside the WorkModelParameters.json with the correct path of the selected app service_mesh.
 
 ```json
@@ -716,7 +713,7 @@ Run the WorkModelGenerator
 python3 WorkModelGenerator/RunWorkModelGen.py -c Configs/WorkModelParameters.json
 ```
 
-#### Kubernetes Deployment
+#### Kubernetes Deployment <!-- omit in toc -->
 Before running K8sDeployer, to deploy the application, you need to edit the K8sParameters.json file to specify the correct path of the working model created in the previous step.
 ```json
    "InternalServiceFilePath": "CustomFunctions",
@@ -729,13 +726,13 @@ Run the K8sDeployer
 python3 Deployers/K8sDeployer/RunK8sDeployer.py -c Configs/K8sParameters.json
 ```
 
-#### Send Traces
+#### Send Traces <!-- omit in toc -->
 To send a trace you need to do an HTTP POST request to the NGINX API gateway with the trace JSON file as the body, you can use Curl.
 ```zsh
 curl -X POST -H "Content-Type: application/json" http://<access-gateway-ip>:31113/s0 -d @examples/alibaba/traces-mbench/seq/app3/trace00001.json
 ```
 
-## Benchmarks tools
+## Benchmarks tools  <!-- omit in toc -->
 µBench provides simple benchmark tools in the `Benchmarks` directory, for stochastic-driven benchmarks only. Besides this tool, you can use other open-souce tools, e.g. *ab - Apache HTTP server benchmarking tool* as it follows, where `<access-gateway-ip>:31113` is the IP address (e.g., that of K8s master node) and port through which it is possible to contact the NGINX API gateway:
 
 ```zsh
@@ -798,7 +795,7 @@ In `file` mode, the `Runner` takes as input one or more *workload* description f
 
 The `Runner` schedules the events defined in the workload files and then uses a thread pool to execute HTTP requests to the related services through the NGINX access gateway, whose IP address is specified in the `ms_access_gateway` parameter.
 
-The workload files are specified in the `workload_files_path_list`` parameter as the path of a single file or as the path of a directory where multiple workload files are saved. In this way, you can simulate different workload scenarios one after the other.
+The workload files are specified in the `workload_files_path_list` parameter as the path of a single file or as the path of a directory where multiple workload files are saved. In this way, you can simulate different workload scenarios one after the other.
 The `Runner` sequentially executes one by one these files and saves a test result file whose name is the value of `result_file` key and the output directory is the value of `OutputPath` key. Also, you can specify how many times you want to cycle through the workload directory with the `workload_rounds` parameter, as well as the size of the thread pool allocated for each test with `thread_pool_size`. The parameters `workload_events`, `rate` and `service` are not used for `file` mode.
 
 *Greedy mode*
@@ -917,7 +914,7 @@ In this section, we describe how to deploy a µBench example application and mak
 
 ### Step 1 - Platform Configuration <!-- omit in toc -->
 
-- Create a Kubernetes cluster with [Prometheus] (#monitoring-with-prometheus) installed.
+- Create a Kubernetes cluster with [Prometheus](#monitoring-with-prometheus) installed.
 - Get access via SSH to master-node, or use a client terminal from which it is possible to control the cluster via `kubectl` 
 - Install Python3 (v3.7 or above)
 - Clone the git repository of µBench and move into `muBench` directory
