@@ -651,9 +651,9 @@ python3 Autopilots/K8sAutopilot/K8sAutopilot.py -c Configs/K8sAutopilotConf.json
 ### Stochastic-driven benchmarks <!-- omit in toc -->
 For stochastic benchmarks, the user can submit HTTP GET to service `s0` and this request will involve a random set of services according to the calling probabilities specifieed in the `workmodel.json` file.    
 ### Trace-driven benchmarks <!-- omit in toc -->
-The Trace-driven bencharks, instead of the stocastic bencharks, allow users to send a trace file to the NGINX API gateway, with the exact sequences of the services to be requested.
+For trace-driven bencharks, the user sends a trace file to the NGINX API gateway, with the exact sequences of the services to be requested.
 
-The users send an HTTP POST request to the gateway and include, as body, a JSON file that represent the trace. An example of the structure of the trace file is given below:
+The user sends an HTTP POST request to the gateway and includes, as body, a JSON file that represents the trace. An example of the structure of the trace file is given below:
 
 ```json
 {
@@ -666,17 +666,33 @@ The users send an HTTP POST request to the gateway and include, as body, a JSON 
    }]
 }
 ```
-The key is the service that perform the requests, while the value is a list of the service groups to be contacted in parallel. Each service in the groups are requested sequentially. Since in microservice applications the same services are often requested multiple times and the structure of a JSON file does not allow duplicated keys, we insert an escape sequence (double underscore `__`) followed by a random number. In the example trace the service `s0__47072` perform the requests to the services `s24__71648` and `s28__64944` sequentally.
+The key is the service executing the requests, while the value is a list of external-service groups to be contacted in parallel. Microservices in an external-service group are requested sequentially. Since in microservice applications the same services are often requested multiple times and the structure of a JSON file does not allow duplicate keys, we have encoded a specific service with its name (e.g. `s0`) followed by a *escape* sequence (`__`) and a random number. This is not mandatory, but necessary when you need to have the same microservice repeated at the same JSON level.     
+In the example trace, microservice `s0` has a single external-service group consisting of microservices `s24` and `s28`, which are called sequentially. In turn, `s28` has a single group of external-services consisting of the microservices `s6` and `s20`. Consequently, the sequence of the called microservices is: `s0`-->`s24`, then `s0`-->`s28`, then `s28`-->`s6`, then `s28`-->`s20`.
 
-In the examples directory there is the alibaba folder with a collection of applications obtained from processing the real alibaba [traces](#https://link.alibaba.com/tracce), in the same directory we find the Matlab script used for the processing.
-We can see an example of a trace-driver benchark.
-Firstly we need to unzip the [trace-mbench.zip](#examples/alibaba/trace-mbench.zip) file inside the `examples/alibaba` directory, as result of this operation we obtain the `trace-mbench` directory within two folder `par` and `seq`. Each of this two folder contains 29 applications. The differences beetween the apps in two folder is that apps in the `par` directory execute requests between its services in a parallel way, whereas the apps in the `seq` directory execute requests in a sequentially way. Then we can start to deploy the example.
+To change the sequence of calls from sequential to parallel the JSON trace should be the following:
+
+```json
+{
+   "s0__47072":[
+      {"s24__71648":[{}]},
+      {"s28__64944":[
+         {"s6__5728":[{}]},
+         {"s20__61959":[{}]}
+         ]
+      }
+   ]
+}
+```
+In this case, microservice `s0` has two groups of external-services consisting of microservices `s24` and `s28` that are called in parallel. In turn, `s28` has two groups of external-services consisting of the microservices `s6` and `s20`. Consequently, the sequence of the called microservices is: `s0`-->`s24,s28`, then `s28`-->`s6,s20`.
+
+In the `examples` directory there is the `Alibaba` folder with a collection of applications obtained from processing the real alibaba [traces](#https://link.alibaba.com/tracce), in the same directory we find the Matlab scripts used for the processing of the traces.
+To use these applications, first, we need to unzip the [trace-mbench.zip](#examples/Alibaba/trace-mbench.zip) file inside the `examples/Alibaba` directory. As result of this operation we obtain the `trace-mbench` directory within two folders: `par` and `seq`. 
 
 
 ```zsh
 muBench/
 ├─ examples/
-│  ├─ alibaba/
+│  ├─ Alibaba/
 │  │  ├─ Matlab/
 │  │  ├─ traces-mbench/
 │  │  │  ├─ par/
@@ -689,22 +705,25 @@ muBench/
 │  │  │  │  ├─ ...
 
 ```
-In each app folder, we find the `service_mesh.json` file that represents the app and the relative traces. To complete the benchmark, we need to perform some steps:
-- Generate the workmodel file
-- Deploy the application
-- Send a trace to the application
+Each folder contains 29 applications, each one with a set of traces. The differences beetween the traces in two folder is that traces in the `par` directory execute downstream requests in parallel, whereas the traces in the `seq` directory execute requests in sequence. 
+In each app folder, you will find the `service_mesh.json` file that represents the app's service mesh and its traces. To benchmark an app, the following steps must be performed:
+- Generate a `workmodel.json` file with the WorkModelGenerator by providing as input the `service_mesh.json` file of the app you intend to test. 
+- Deploy the application with K8sDeployer by providing as input the `workmodel.json` file created in the previous step.
+- Send traces to the application
+
+In what folows we provide an exaple for the app no. 3
 
 #### Generate Workmodel <!-- omit in toc -->
-To generate the workmodel.json file you can use the WorkModelGenerator. Edit the parameter `ServiceMeshFilePath` inside the WorkModelParameters.json with the correct path of the selected app service_mesh.
+To generate the `workmodel.json` file you can use the WorkModelGenerator. It is necessary to edit the parameter `ServiceMeshFilePath` inside the `WorkModelParameters.json` with the correct path of the selected app service_mesh, e.g.
 
 ```json
       "ServiceMeshFilePath": {
          "type": "metadata", 
-         "value":"examples/alibaba/traces-mbench/seq/app3/service_mesh.json"
+         "value":"examples/Alibaba/traces-mbench/seq/app3/service_mesh.json"
       },
      "OutputPath": {
          "type":"metadata",
-         "value":"examples/alibaba/traces-mbench/seq/app3"
+         "value":"examples/Alibaba/traces-mbench/seq/app3"
       }
 ```
 Run the WorkModelGenerator
@@ -714,11 +733,11 @@ python3 WorkModelGenerator/RunWorkModelGen.py -c Configs/WorkModelParameters.jso
 ```
 
 #### Kubernetes Deployment <!-- omit in toc -->
-Before running K8sDeployer, to deploy the application, you need to edit the K8sParameters.json file to specify the correct path of the working model created in the previous step.
+Before running K8sDeployer, to deploy the application, you need to edit the `K8sParameters.json` file to specify the correct path of the working model created in the previous step.
 ```json
    "InternalServiceFilePath": "CustomFunctions",
    "OutputPath": "SimulationWorkspace/",
-   "WorkModelPath": "examples/alibaba/traces-mbench/seq/app3/workmodel.json",
+   "WorkModelPath": "examples/Alibaba/traces-mbench/seq/app3/workmodel.json",
 ```
 Run the K8sDeployer
 
@@ -729,7 +748,7 @@ python3 Deployers/K8sDeployer/RunK8sDeployer.py -c Configs/K8sParameters.json
 #### Send Traces <!-- omit in toc -->
 To send a trace you need to do an HTTP POST request to the NGINX API gateway with the trace JSON file as the body, you can use Curl.
 ```zsh
-curl -X POST -H "Content-Type: application/json" http://<access-gateway-ip>:31113/s0 -d @examples/alibaba/traces-mbench/seq/app3/trace00001.json
+curl -X POST -H "Content-Type: application/json" http://<access-gateway-ip>:31113/s0 -d @examples/Alibaba/traces-mbench/seq/app3/trace00001.json
 ```
 
 ## Benchmarks tools  <!-- omit in toc -->
