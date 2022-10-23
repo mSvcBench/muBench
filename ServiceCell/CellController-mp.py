@@ -8,7 +8,7 @@ import time
 import traceback
 from threading import Thread
 from concurrent import futures
-from multiprocessing import Array, Manager, Value
+#from multiprocessing import Array, Manager, Value
 
 import gunicorn.app.base
 from flask import Flask, Response, json, make_response, request
@@ -34,7 +34,8 @@ PN = os.environ["PN"] # Number of processes
 TN = os.environ["TN"] # Number of thread per process
 traceEscapeString = "__"
 
-globalDict=Manager().dict()
+#globalDict=Manager().dict()
+globalDict=dict()
 def read_config_files():
     res = dict()
     with open('MSConfig/workmodel.json') as f:
@@ -73,15 +74,6 @@ REQUEST_PROCESSING = Summary('mub_request_processing_latency_seconds', 'Request 
                            )
 
 
-
-
-@app.route("/update", methods=['GET'])
-def update():
-    app.logger.info("updatePath")
-    global globalDict
-    globalDict['work_model'] = read_config_files() 
-    return f'{json.dumps("Successfully Update ServiceMesh and WorkModel variables! :)")}\n', 200
-
 @app.route(f"{globalDict['work_model'][ID]['path']}", methods=['GET','POST'])
 def start_worker():
     global globalDict
@@ -110,15 +102,9 @@ def start_worker():
             trace = request.json
             # sanity_check
             assert len(trace.keys())==1, 'bad trace format'
-            # if len(trace.keys())!=1:
-            #     raise ValueError('bad trace format')
             assert ID == list(trace)[0].split(traceEscapeString)[0], "bad trace format, ID"
-            # if ID != list(trace)[0].split(traceEscapeString)[0]:
-            #     raise ValueError('bad trace format')
             trace[ID] = trace[list(trace)[0]] # We insert 1 more key "s0": [value] 
             
-        
-
         if len(trace)>0:
         # trace-driven request
             n_groups = len(trace[ID])
@@ -259,6 +245,8 @@ if __name__ == '__main__':
         }
         HttpServer(app, options_gunicorn).run()
     elif request_method == "grpc":
+        my_work_model = globalDict['work_model'][ID]
+        my_service_mesh = my_work_model['external_services']
         init_gRPC(my_service_mesh, globalDict['work_model'], gRPC_port,app)
         # Start the gRPC server
         grpc_thread = gRPCThread()

@@ -60,8 +60,8 @@ def compute_pi(params):
   
 
     bandwidth_load = random.expovariate(1 / params["mean_bandwidth"])
-    num_chars = 1000 * bandwidth_load  # Response in kB
-    response_body = 'L' * int(num_chars)
+    num_chars = max(1, 1000 * bandwidth_load)  # Response in kB
+    response_body = 'm' * int(num_chars)
 
     return response_body
 

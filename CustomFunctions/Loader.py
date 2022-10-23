@@ -5,6 +5,8 @@ from concurrent.futures import ThreadPoolExecutor, wait
 import jsonmerge
 import string
 
+params_processed = False
+
 def cpu_loader_job(params):
     cpu_load = random.randint(params["range_complexity"][0], params["range_complexity"][1])
     trials = int(params["trials"])
@@ -41,8 +43,8 @@ def cpu_loader(params):
 def bandwidth_loader(params):
     # print("--------> Network stress start")
     bandwidth_load = random.expovariate(1 / params["mean_bandwidth"])
-    num_chars = 1000 * bandwidth_load  # Response in kB
-    response_body = 'A' * int(num_chars)
+    num_chars = max(1, 1000 * bandwidth_load)  # Response in kB
+    response_body = 'm' * int(num_chars)
     # print("--------> Network stress stop")
     return response_body
 
@@ -99,15 +101,19 @@ def sleep_loader(params):
     return
 
 def loader(params):
+    global params_processed
 
-    default_params = {
-        "cpu_stress": {"run":False,"range_complexity": [100, 100], "thread_pool_size": 1, "trials": 1},
-        "memory_stress":{"run":False, "memory_size": 10000, "memory_io": 1000},
-        "disk_stress":{"run":False,"tmp_file_name":  "mubtestfile.txt", "disk_write_block_count": 1000, "disk_write_block_size": 1024},
-        "sleep_stress":{"run":True,"sleep_time": 0.01},
-        "mean_bandwidth": 11}
-    
-    params = jsonmerge.merge(default_params,params)
+    if not params_processed:
+        default_params = {
+            "cpu_stress": {"run":False,"range_complexity": [100, 100], "thread_pool_size": 1, "trials": 1},
+            "memory_stress":{"run":False, "memory_size": 10000, "memory_io": 1000},
+            "disk_stress":{"run":False,"tmp_file_name":  "mubtestfile.txt", "disk_write_block_count": 1000, "disk_write_block_size": 1024},
+            "sleep_stress":{"run":True,"sleep_time": 0.01},
+            "mean_bandwidth": 11}
+
+        params = jsonmerge.merge(default_params,params)
+        params_processed = True
+        
     if params['cpu_stress']['run']: 
         cpu_loader(params['cpu_stress'])
     if params['memory_stress']['run']:
