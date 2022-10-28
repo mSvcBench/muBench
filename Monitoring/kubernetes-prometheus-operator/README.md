@@ -1,6 +1,6 @@
 # Prometheus operator
 
-You can install [Prometheus operator](https://github.com/prometheus-operator/prometheus-operator) via helm: 
+You can install [Prometheus operator](https://github.com/prometheus-operator/prometheus-operator) via Helm ([install Helm](https://helm.sh/docs/intro/install)): 
 
 ```zsh
 kubectl create namespace monitoring
@@ -38,8 +38,9 @@ kubectl get secret prometheus-grafana -o jsonpath="{.data.admin-password}" -n mo
 To install Istio we used:
 
 ```zsh
- curl -L https://istio.io/downloadIstio | sh -
- cd istio-1.12.2/
+export ISTIO_VERSION=1.15.2
+curl -L https://istio.io/downloadIstio | sh -
+cd istio-$ISTIO_VERSION
 export PATH=$PWD/bin:$PATH
 istioctl install --set profile=demo -y
 kubectl label namespace default istio-injection=enabled
