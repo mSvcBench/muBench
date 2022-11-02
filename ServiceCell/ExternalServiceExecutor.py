@@ -32,7 +32,7 @@ def init_gRPC(my_service_mesh, workmodel, server_port, app):
             # bind the client and the server
             service_stub[service] = pb2_grpc.MicroServiceStub(channel)
 
-def request_REST(service,id,work_model,s,trace,query_string, app):
+def request_REST(service,id,work_model,s,trace,query_string, app, trace_context):
     try:
         service_no_escape = service.split("__")[0]
         if len(trace)==0 and len(query_string)==0:
@@ -41,6 +41,7 @@ def request_REST(service,id,work_model,s,trace,query_string, app):
         elif len(trace)>0:
             # trace-driven request
             headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+            headers.update(trace_context)
             json_dict = dict()
             json_dict[service] = trace[id][service]
             json_payload = json.dumps(json_dict)
@@ -50,7 +51,7 @@ def request_REST(service,id,work_model,s,trace,query_string, app):
                 return s.post(f'http://{work_model[service_no_escape]["url"]}{work_model[service_no_escape]["path"]}?{query_string}',data=json_payload,headers=headers)
         elif  len(query_string)>0:
             # request with enclosed behaviour information
-            return s.get(f'http://{work_model[service_no_escape]["url"]}{work_model[service_no_escape]["path"]}?{query_string}')  
+            return s.get(f'http://{work_model[service_no_escape]["url"]}{work_model[service_no_escape]["path"]}?{query_string}', headers=trace_context)  
         else:
             r = requests.Response()
             r.status_code = 505
@@ -61,14 +62,14 @@ def request_REST(service,id,work_model,s,trace,query_string, app):
         r.status_code = 505
         return r
 
-def request_gRPC(service,id,work_model,s,trace,query_string,app):
+def request_gRPC(service,id,work_model,s,trace,query_string,app, trace_context=None):
     message = pb2.Message(message=f"Hello service: {service}")
     # app.logger.info(f'{message}')
     response = service_stub[service].GetMicroServiceResponse(message)
     return response
 
 
-def external_service(group,id,work_model,trace,query_string, app):
+def external_service(group,id,work_model,trace,query_string, app, trace_context):
     app.logger.info("**** Start SERVICES in thread: %s" % str(group))
     global request_function
     if group["seq_len"] < len(group["services"]):
@@ -99,7 +100,7 @@ def external_service(group,id,work_model,trace,query_string, app):
                 p = 1
             if random.random() < p :
                 # service called with probability p
-                r = request_function(service,id,work_model,s,trace,query_string, app)
+                r = request_function(service,id,work_model,s,trace,query_string, app, trace_context)
                 app.logger.info("Service: %s -> Status_code: %s -- len(text): %d" % (service, r.status_code, len(r.text)))
                 if type(r.status_code) == bool and not r.status_code:
                     raise Exception(f"Error in external service: {service} -- (gRPC) status_code: {r.status_code}")
@@ -115,7 +116,7 @@ def external_service(group,id,work_model,trace,query_string, app):
     return service_error_flag, service_error_dict
 
 
-def run_external_service(services_group, work_model, query_string, trace, app):
+def run_external_service(services_group, work_model, query_string, trace, app, trace_context=None):
     
     app.logger.info("** EXTERNAL SERVICES")
     service_error_dict = dict()
@@ -124,7 +125,7 @@ def run_external_service(services_group, work_model, query_string, trace, app):
     futures = list()
     id = 0
     for group in services_group:
-        futures.append(pool.submit(external_service, group, id, work_model, trace, query_string, app))
+        futures.append(pool.submit(external_service, group, id, work_model, trace, query_string, app, trace_context))
         id = id + 1
     wait(futures)
     for x in as_completed(futures):
