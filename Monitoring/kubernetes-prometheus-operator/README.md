@@ -35,6 +35,8 @@ kubectl get secret prometheus-grafana -o jsonpath="{.data.admin-password}" -n mo
 # Istio
 [Istio](https://istio.io/) service mesh can be included in the cluster for a deeper monitoring.
 
+(If you want to also install Jaeger jump to the optional section below)
+
 To install Istio we used:
 
 ```zsh
@@ -44,7 +46,69 @@ cd istio-$ISTIO_VERSION
 export PATH=$PWD/bin:$PATH
 istioctl install --set profile=demo -y
 kubectl label namespace default istio-injection=enabled
-``` 
+```
+
+## Optional Jaeger Installation
+Before to install Istio, we used the Istio provided basic [sample installation](https://istio.io/latest/docs/ops/integrations/jaeger/) to quickly get Jaeger up and running in the same namespace of istio (`istio-system`)
+
+```zsh
+wget https://raw.githubusercontent.com/istio/istio/release-1.15/samples/addons/jaeger.yaml
+```
+Edit the file just downloaded and replace the `ClusterIP` with a `NodePort` in the ***tracing*** Service 
+
+```yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tracing
+  namespace: istio-system
+  labels:
+    app: jaeger
+spec:
+  type: NodePort
+  ports:
+    - name: http-query
+      port: 80
+      protocol: TCP
+      targetPort: 16686
+    - name: grpc-query
+      port: 16685
+      protocol: TCP
+      targetPort: 16685
+  selector:
+    app: jaeger
+```
+
+If the namespace istio-system does not exist, create it:
+
+```zsh
+kubectl create namespace istio-system
+```
+
+Then applay the edited yaml file:
+
+```zsh
+kubectl apply -f jaeger.yaml
+```
+
+Now we install Istio:
+
+Get the *jaeger-collector* address:
+
+```zsh
+kubectl get service jaeger-collector -n istio-system
+```
+And continue:
+
+```zsh
+export ISTIO_VERSION=1.15.2
+curl -L https://istio.io/downloadIstio | sh -
+cd istio-$ISTIO_VERSION
+export PATH=$PWD/bin:$PATH
+istioctl install --set profile=demo --set values.global.tracer.zipkin.address=<jaeger-collector-address>:9411 -y
+kubectl label namespace default istio-injection=enabled
+```
 
 Then it is necessary to add Prometheus PodMonitor and ServiceMonitor:
 ```zsh
