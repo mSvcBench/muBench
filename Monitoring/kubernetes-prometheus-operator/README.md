@@ -48,7 +48,7 @@ istioctl install --set profile=demo -y
 kubectl label namespace default istio-injection=enabled
 ```
 
-## Optional Jaeger Installation
+### Optional Jaeger Installation
 Before to install Istio, we used the Istio provided basic [sample installation](https://istio.io/latest/docs/ops/integrations/jaeger/) to quickly get Jaeger up and running in the same namespace of istio (`istio-system`)
 
 ```zsh
@@ -80,26 +80,17 @@ spec:
     app: jaeger
 ```
 
-If the namespace istio-system does not exist, create it:
+If the namespace *istio-system* does not exist, create it and apply the edited yaml:
 
 ```zsh
 kubectl create namespace istio-system
-```
-
-Then applay the edited yaml file:
-
-```zsh
 kubectl apply -f jaeger.yaml
 ```
-
-Now we install Istio:
-
-Get the *jaeger-collector* address:
+Get the address of the *jaeger-collector* service and continue with the **Istio** installation:
 
 ```zsh
 kubectl get service jaeger-collector -n istio-system
 ```
-And continue:
 
 ```zsh
 export ISTIO_VERSION=1.15.2
@@ -110,9 +101,16 @@ istioctl install --set profile=demo --set values.global.tracer.zipkin.address=<j
 kubectl label namespace default istio-injection=enabled
 ```
 
+To get the NodePort on which the Jaeger UI is available use:
+```zsh
+kubectl get service tracing -n istio-system
+```
+![Jaeger UI](JaegerUI.png)
+
+## Prometheus Monitor
 Then it is necessary to add Prometheus PodMonitor and ServiceMonitor:
 ```zsh
-k apply -f istio-prometheus-operator.yaml
+kubectl apply -f istio-prometheus-operator.yaml
 ```
 
 Istio may use [Metrics merging](https://istio.io/latest/docs/ops/integrations/prometheus/), therefore the µBench metrics can be shown two times, even though with different 'job' labels. To avoid this, in presence of Istio, can be convenient not to run the aforementioned µBench PodMonitor. 
