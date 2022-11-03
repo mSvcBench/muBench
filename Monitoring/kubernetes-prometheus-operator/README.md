@@ -105,7 +105,10 @@ To get the NodePort on which the Jaeger UI is available use:
 ```zsh
 kubectl get service tracing -n istio-system
 ```
-![Jaeger UI](JaegerUI.png)
+
+<p align="center">
+<img width="550" src="JaegerUI.png">
+</p>
 
 ## Prometheus Monitor
 Then it is necessary to add Prometheus PodMonitor and ServiceMonitor:
