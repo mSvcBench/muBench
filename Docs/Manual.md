@@ -12,7 +12,7 @@
     - [Work Model Generator](#work-model-generator)
     - [Autopilots](#autopilots)
   - [Benchmarks strategies](#benchmarks-strategies)
-  - [Monitoring with Prometheus](#monitoring-with-prometheus)
+  - [Monitoring and Tracing](#monitoring-and-tracing)
   - [Installation and Getting Started](#installation-and-getting-started)
 
 ## Microservice Model
@@ -882,48 +882,14 @@ With the following steps, you will deploy on your Kubernetes environment: [Prome
 
 ---
 
-## Monitoring with Prometheus
-µBench service-cells export some metrics to a Prometheus server running in the cluster.
-
-
-### Prometheus installation <!-- omit in toc -->
-
-We considered two ways to install Prometheus: the first one directly uses k8s yaml files and is descibed [here](../Monitoring/kubernetes-prometheus/README.md); the second (recommended) solution uses the prometheus-operator installed via Helm and installs Grafana too, related documentation is [here](../Monitoring/kubernetes-prometheus-operator/README.md)      
-
-#### Prometheus Adapter (optional) <!-- omit in toc -->
-
-Prometheus Adapter is suitable for use with the [Kubernetes Horizontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/).
-It can also replace the metrics server on clusters that already run Prometheus and collect the appropriate metrics.
-You can install it using [Helm](https://helm.sh/docs/intro/install/).
-We'll use the `prometheus-adapter-values.yaml` file for defining the µBench custom metrics to analyze.
-
-```bash
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-helm repo update
-helm install --namespace monitoring -f kubernetes-prometheus-adapter/prometheus-adapter-values.yaml prometheus-adapter prometheus-community/prometheus-adapter
-
-# to check the status of the release
-$ helm status prometheus-adapter --namespace monitoring
-```
-
-#### Grafana  <!-- omit in toc -->
-
-Prometheus metrics can be shown by using [Grafana](https://grafana.com/) tool.
-To install Grafana in the Kubernetes cluster you can use the following command and Grafana services will be available at: `http://<access-gateway-ip>:30001`. If you istalled the prometheus-operator Grafana is already running, so this step is not required. 
-
-```bash
-kubectl create namespace monitoring
-kubectl apply -f Monitoring/kubernetes-grafana
-```
-
-### Service metrics <!-- omit in toc -->
-
-Each µBench service-cell exports the following Prometheus Summary metrics:
-
+## Monitoring and Tracing
+µBench service-cells export some metrics to a Prometheus server running in the cluster. The exported metrics are:
 - *mub_response_size* : size of the request response in bytes;
 - *mub_request_latency_seconds* : request latency including the execution of internal and extrenal services;
 - *mub_internal_processing_latency_seconds* : duration of the execution of the internal-service
 - *mub_external_processing_latency_seconds* :  duration of the execution of the external-service
+
+By using Istio and Jaeger tools the monitoring can be deeper. To install the monitoring framework into the Kubernetes cluster read this [manual](../Monitoring/kubernetes-prometheus-operator/README.md).
 
 ---
 
@@ -931,7 +897,7 @@ Each µBench service-cell exports the following Prometheus Summary metrics:
 
 In this section, we describe how to deploy a µBench example application and make a simple performance test. We use the configuration files contained in the `Config` directory.
 
-### Step 1 - Platform Configuration <!-- omit in toc -->
+### Step 1 - Install the required software <!-- omit in toc -->
 
 - Create a Kubernetes cluster with [Prometheus](#monitoring-with-prometheus) installed.
 - Get access via SSH to master-node, or use a client terminal from which it is possible to control the cluster via `kubectl` 

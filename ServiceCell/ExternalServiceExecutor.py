@@ -32,16 +32,16 @@ def init_gRPC(my_service_mesh, workmodel, server_port, app):
             # bind the client and the server
             service_stub[service] = pb2_grpc.MicroServiceStub(channel)
 
-def request_REST(service,id,work_model,s,trace,query_string, app, trace_context):
+def request_REST(service,id,work_model,s,trace,query_string, app, jaeger_context):
     try:
         service_no_escape = service.split("__")[0]
         if len(trace)==0 and len(query_string)==0:
             # default 
-            return s.get(f'http://{work_model[service_no_escape]["url"]}{work_model[service_no_escape]["path"]}')
+            return s.get(f'http://{work_model[service_no_escape]["url"]}{work_model[service_no_escape]["path"]}', headers=jaeger_context)
         elif len(trace)>0:
             # trace-driven request
             headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-            headers.update(trace_context)
+            headers.update(jaeger_context)
             json_dict = dict()
             json_dict[service] = trace[id][service]
             json_payload = json.dumps(json_dict)
@@ -51,7 +51,7 @@ def request_REST(service,id,work_model,s,trace,query_string, app, trace_context)
                 return s.post(f'http://{work_model[service_no_escape]["url"]}{work_model[service_no_escape]["path"]}?{query_string}',data=json_payload,headers=headers)
         elif  len(query_string)>0:
             # request with enclosed behaviour information
-            return s.get(f'http://{work_model[service_no_escape]["url"]}{work_model[service_no_escape]["path"]}?{query_string}', headers=trace_context)  
+            return s.get(f'http://{work_model[service_no_escape]["url"]}{work_model[service_no_escape]["path"]}?{query_string}', headers=jaeger_context)  
         else:
             r = requests.Response()
             r.status_code = 505

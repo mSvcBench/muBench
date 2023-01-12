@@ -9,7 +9,7 @@ helm repo update
 helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring
 ```
 
-Deploy the Prometheus µBench PodMonitor with
+If Istio/Jaeger tools are not necessary, to get metrics from µBench services it is necessary to deploy the Prometheus `µBench PodMonitor` with
 ```zsh
 kubectl apply -f ./mub-monitor.yaml
 ```
@@ -33,68 +33,41 @@ kubectl get secret prometheus-grafana -o jsonpath="{.data.admin-password}" -n mo
 ``` 
 
 # Istio
-[Istio](https://istio.io/) service mesh can be included in the cluster for a deeper monitoring.
+[Istio](https://istio.io/) service mesh can be included in the cluster for deeper monitoring.
 
-(If you want to also install Jaeger jump to the optional section below)
-
-To install Istio we used:
+To install Istio we used [Helm](https://istio.io/latest/docs/setup/install/helm/):
 
 ```zsh
-export ISTIO_VERSION=1.15.2
-curl -L https://istio.io/downloadIstio | sh -
-cd istio-$ISTIO_VERSION
-export PATH=$PWD/bin:$PATH
-istioctl install --set profile=demo -y
-kubectl label namespace default istio-injection=enabled
+helm repo add istio https://istio-release.storage.googleapis.com/charts
+helm repo update
+kubectl create namespace istio-system
+helm install istio-base istio/base -n istio-system
+helm install istiod istio/istiod -n istio-system --wait
+kubectl create namespace istio-ingress
+kubectl label namespace istio-ingress istio-injection=enabled
+helm install istio-ingress istio/gateway -n istio-ingress --wait
 ```
 
-### Jaeger
-Before to install Istio, we used the Istio provided basic [sample installation](https://istio.io/latest/docs/ops/integrations/jaeger/) to quickly get Jaeger up and running in the same namespace of istio (`istio-system`)
+## Integration with Prometheus
+To expose Istio metrics to Prometheus it is necessary to add Prometheus PodMonitor and ServiceMonitor:
+```zsh
+kubectl apply -f istio-prometheus-operator.yaml
+```
+
+Istio may use [Metrics merging](https://istio.io/latest/docs/ops/integrations/prometheus/), therefore the µBench metrics can be shown two times, even though with different 'job' labels. To avoid this, in presence of Istio, we have avoided to run install the µBench PodMonitor. 
+
+## Jaeger Tracing
+[Jaeger](https://www.jaegertracing.io/) can be used to monitoring a µBench application at trace-level. 
+Istio is [integrated](https://istio.io/latest/docs/tasks/observability/distributed-tracing/jaeger/) with Jaeger, therefore to get Jaeger up and running it is enough to install Istio and then use the following Istio addon.
 
 ```zsh
 wget https://raw.githubusercontent.com/istio/istio/release-1.15/samples/addons/jaeger.yaml
 kubectl apply -f jaeger.yaml
 ```
-To expose Jaeger service on NodePort 30002 (http) and 30003 (grpc) use
+To expose Jaeger service as NodePort Service on port 30002 (HTTP) and 30003 (GRPC) use
 
 ```zsh
 kubectl apply -f jaeger-nodeport.yaml
 ```
 
-If the namespace *istio-system* does not exist, create it and apply the edited yaml:
 
-```zsh
-kubectl create namespace istio-system
-kubectl apply -f jaeger.yaml
-```
-Get the address of the *jaeger-collector* service and continue with the **Istio** installation:
-
-```zsh
-kubectl get service jaeger-collector -n istio-system
-```
-
-```zsh
-export ISTIO_VERSION=1.15.2
-curl -L https://istio.io/downloadIstio | sh -
-cd istio-$ISTIO_VERSION
-export PATH=$PWD/bin:$PATH
-istioctl install --set profile=demo --set values.global.tracer.zipkin.address=<jaeger-collector-address>:9411 -y
-kubectl label namespace default istio-injection=enabled
-```
-
-To get the NodePort on which the Jaeger UI is available use:
-```zsh
-kubectl get service tracing -n istio-system
-```
-
-<p align="center">
-<img width="550" src="JaegerUI.png">
-</p>
-
-## Prometheus Monitor
-Then it is necessary to add Prometheus PodMonitor and ServiceMonitor:
-```zsh
-kubectl apply -f istio-prometheus-operator.yaml
-```
-
-Istio may use [Metrics merging](https://istio.io/latest/docs/ops/integrations/prometheus/), therefore the µBench metrics can be shown two times, even though with different 'job' labels. To avoid this, in presence of Istio, can be convenient not to run the aforementioned µBench PodMonitor. 

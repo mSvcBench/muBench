@@ -2,7 +2,7 @@
    "K8sParameters": {
       "prefix_yaml_file":"MicroServiceDeployment",
       "namespace": "default",
-      "image": "msvcbench/microservice_v3-screen:latest",
+      "image": "msvcbench/microservice_v4-screen:latest",
       "cluster_domain": "cluster",
       "path": "/api/v1",
       "sleep": 2,

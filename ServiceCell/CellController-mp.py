@@ -25,7 +25,7 @@ import grpc
 
 # Configuration of global variables
 
-incoming_headers = [
+jaeger_headers_list = [
     'x-request-id',
     'x-b3-traceid',
     'x-b3-spanid',
@@ -39,7 +39,7 @@ incoming_headers = [
     'grpc-trace-bin',
     'traceparent',
     'x-cloud-trace-context',
-],
+]
 
 # Flask APP
 app = Flask(__name__)
@@ -113,11 +113,11 @@ def start_worker():
                         my_internal_service = my_work_model['alternative_behaviors'][behaviour_id]['internal_service']
 
         # trace context propagation
-        trace_propagation_headers = dict()
-        for ihdr in incoming_headers:
-            val = request.headers.get(ihdr)
+        jaeger_headers = dict()
+        for jhdr in jaeger_headers_list:
+            val = request.headers.get(jhdr)
             if val is not None:
-                trace_propagation_headers[ihdr] = val
+                jaeger_headers[jhdr] = val
 
         # if POST check the presence of a trace
         trace=dict()
@@ -161,9 +161,9 @@ def start_worker():
         
         if len(my_service_mesh) > 0:
             if len(trace)>0:
-                service_error_dict = run_external_service(my_service_mesh,globalDict['work_model'],query_string,trace[ID],app, trace_propagation_headers)
+                service_error_dict = run_external_service(my_service_mesh,globalDict['work_model'],query_string,trace[ID],app, jaeger_headers)
             else:
-                service_error_dict = run_external_service(my_service_mesh,globalDict['work_model'],query_string,dict(),app, trace_propagation_headers)
+                service_error_dict = run_external_service(my_service_mesh,globalDict['work_model'],query_string,dict(),app, jaeger_headers)
             if len(service_error_dict):
                 app.logger.error(service_error_dict)
                 app.logger.error("Error in request external services")
@@ -177,7 +177,7 @@ def start_worker():
         REQUEST_PROCESSING.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr, ID).observe(time.time() - start_request_processing)
 
         # Add trace context propagation headers to the response
-        response.headers.update(trace_propagation_headers)
+        response.headers.update(jaeger_headers)
 
         return response
     except Exception as err:
