@@ -48,36 +48,17 @@ istioctl install --set profile=demo -y
 kubectl label namespace default istio-injection=enabled
 ```
 
-### Optional Jaeger Installation
+### Jaeger
 Before to install Istio, we used the Istio provided basic [sample installation](https://istio.io/latest/docs/ops/integrations/jaeger/) to quickly get Jaeger up and running in the same namespace of istio (`istio-system`)
 
 ```zsh
 wget https://raw.githubusercontent.com/istio/istio/release-1.15/samples/addons/jaeger.yaml
+kubectl apply -f jaeger.yaml
 ```
-Edit the file just downloaded and replace the `ClusterIP` with a `NodePort` in the ***tracing*** Service 
+To expose Jaeger service on NodePort 30002 (http) and 30003 (grpc) use
 
-```yaml
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: tracing
-  namespace: istio-system
-  labels:
-    app: jaeger
-spec:
-  type: NodePort
-  ports:
-    - name: http-query
-      port: 80
-      protocol: TCP
-      targetPort: 16686
-    - name: grpc-query
-      port: 16685
-      protocol: TCP
-      targetPort: 16685
-  selector:
-    app: jaeger
+```zsh
+kubectl apply -f jaeger-nodeport.yaml
 ```
 
 If the namespace *istio-system* does not exist, create it and apply the edited yaml:

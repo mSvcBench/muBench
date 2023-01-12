@@ -59,7 +59,7 @@
     "request_method": "rest",
     "workers": 8,
     "threads": 128,
-    "cpu-requests": "500m"
+    "cpu-requests": "100m"
   },
   "s1": {
     "external_services": [],
@@ -96,7 +96,7 @@
     "request_method": "rest",
     "workers": 8,
     "threads": 128,
-    "cpu-requests": "500m"
+    "cpu-requests": "100m"
   },
   "s2": {
     "external_services": [],
@@ -133,7 +133,7 @@
     "request_method": "rest",
     "workers": 8,
     "threads": 128,
-    "cpu-requests": "500m"
+    "cpu-requests": "100m"
   },
   "s3": {
     "external_services": [],
@@ -170,7 +170,7 @@
     "request_method": "rest",
     "workers": 8,
     "threads": 128,
-    "cpu-requests": "500m"
+    "cpu-requests": "100m"
   },
   "s4": {
     "external_services": [],
@@ -207,7 +207,7 @@
     "request_method": "rest",
     "workers": 8,
     "threads": 128,
-    "cpu-requests": "500m"
+    "cpu-requests": "100m"
   },
   "s5": {
     "external_services": [],
@@ -244,7 +244,7 @@
     "request_method": "rest",
     "workers": 8,
     "threads": 128,
-    "cpu-requests": "500m"
+    "cpu-requests": "100m"
   },
   "s6": {
     "external_services": [],
@@ -281,7 +281,7 @@
     "request_method": "rest",
     "workers": 8,
     "threads": 128,
-    "cpu-requests": "500m"
+    "cpu-requests": "100m"
   },
   "s7": {
     "external_services": [],
@@ -318,7 +318,7 @@
     "request_method": "rest",
     "workers": 8,
     "threads": 128,
-    "cpu-requests": "500m"
+    "cpu-requests": "100m"
   },
   "s8": {
     "external_services": [],
@@ -355,7 +355,7 @@
     "request_method": "rest",
     "workers": 8,
     "threads": 128,
-    "cpu-requests": "500m"
+    "cpu-requests": "100m"
   },
   "s9": {
     "external_services": [],
@@ -392,7 +392,7 @@
     "request_method": "rest",
     "workers": 8,
     "threads": 128,
-    "cpu-requests": "500m"
+    "cpu-requests": "100m"
   },
   "s10": {
     "external_services": [],
@@ -429,7 +429,7 @@
     "request_method": "rest",
     "workers": 8,
     "threads": 128,
-    "cpu-requests": "500m"
+    "cpu-requests": "100m"
   },
   "s11": {
     "external_services": [],
@@ -466,7 +466,7 @@
     "request_method": "rest",
     "workers": 8,
     "threads": 128,
-    "cpu-requests": "500m"
+    "cpu-requests": "100m"
   },
   "s12": {
     "external_services": [],
@@ -503,7 +503,7 @@
     "request_method": "rest",
     "workers": 8,
     "threads": 128,
-    "cpu-requests": "500m"
+    "cpu-requests": "100m"
   },
   "s13": {
     "external_services": [],
@@ -540,7 +540,7 @@
     "request_method": "rest",
     "workers": 8,
     "threads": 128,
-    "cpu-requests": "500m"
+    "cpu-requests": "100m"
   },
   "s14": {
     "external_services": [],
@@ -577,7 +577,7 @@
     "request_method": "rest",
     "workers": 8,
     "threads": 128,
-    "cpu-requests": "500m"
+    "cpu-requests": "100m"
   },
   "s15": {
     "external_services": [],
@@ -614,7 +614,7 @@
     "request_method": "rest",
     "workers": 8,
     "threads": 128,
-    "cpu-requests": "500m"
+    "cpu-requests": "100m"
   },
   "s16": {
     "external_services": [],
@@ -651,7 +651,7 @@
     "request_method": "rest",
     "workers": 8,
     "threads": 128,
-    "cpu-requests": "500m"
+    "cpu-requests": "100m"
   },
   "s17": {
     "external_services": [],
@@ -688,7 +688,7 @@
     "request_method": "rest",
     "workers": 8,
     "threads": 128,
-    "cpu-requests": "500m"
+    "cpu-requests": "100m"
   },
   "s18": {
     "external_services": [],
@@ -725,7 +725,7 @@
     "request_method": "rest",
     "workers": 8,
     "threads": 128,
-    "cpu-requests": "500m"
+    "cpu-requests": "100m"
   },
   "s19": {
     "external_services": [],
@@ -762,6 +762,6 @@
     "request_method": "rest",
     "workers": 8,
     "threads": 128,
-    "cpu-requests": "500m"
+    "cpu-requests": "100m"
   }
 }
