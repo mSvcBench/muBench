@@ -16,7 +16,7 @@
   - [Installation and Getting Started](#installation-and-getting-started)
       - [µBench in a Docker Container](#µbench-in-a-docker-container)
       - [µBench in the Host](#µbench-in-the-host)
-    - [Step 4 - Install the monitoring framework](#step-4---install-the-monitoring-framework)
+    - [Step 4 - Install and access the monitoring framework](#step-4---install-and-access-the-monitoring-framework)
     - [Step 3 - The First µBench Application](#step-3---the-first-µbench-application)
 
 ## Microservice Model
@@ -1049,10 +1049,24 @@ pip3 install -r requirements.txt
 
 Note: if you had errors in installing the required modules may be that some of them have not been properly compiled in your device. There could be some missing `ffi` dev and `cairo` libraries that can be installed with `sudo apt-get install libffi-dev libcairo2`, or it may help to install C/C++ building tools, e.g. `sudo apt-get install build-essential`, `sudo apt-get install cmake` (or `sudo snap install cmake --classic` for latest version) on Ubuntu.
 
-### Step 4 - Install the monitoring framework
-µBench uses Prometheus, Grafana, Istio and Jaeger to get metrics and traces of generated applications.
-The file monitoring-install.sh
-To install this framework in the cluster
+### Step 4 - Install and access the monitoring framework
+µBench uses Prometheus, Grafana, Istio and Jaeger to get metrics and traces of generated applications as described [here](../Monitoring/kubernetes-prometheus-operator/README.md) .
+The file `monitoring-install.sh` install this framework in the cluster. It can be run either from the µBench Docker bash or by the host shell with 
+
+```zsh
+cd muBench/Monitoring/kubernetes-prometheus-operator
+sh ./monitoring-install.sh
+```
+To access the monitoring framework you can use a browser and the following URL
+- <MASTER_IP>:30000 for Prometheus
+- <MASTER_IP>:30001 for Grafana
+- <MASTER_IP>:30002 for Jaeger
+
+In the case of a minikube Kubernetes cluster that uses Docker driver, you have to access these services with: 
+
+- minikube service -n monitoring prometheus-nodeport
+- minikube service -n monitoring grafana-nodeport
+- minikube service -n istio-system tracing-nodeport
 
 
 ### Step 3 - The First µBench Application

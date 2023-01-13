@@ -64,7 +64,7 @@ Istio is [integrated](https://istio.io/latest/docs/tasks/observability/distribut
 wget https://raw.githubusercontent.com/istio/istio/release-1.15/samples/addons/jaeger.yaml
 kubectl apply -f jaeger.yaml
 ```
-To expose Jaeger service as NodePort Service on port 30002 (HTTP) and 30003 (GRPC) use
+To expose Jaeger service as NodePort Service on port 30002 (HTTP) use
 
 ```zsh
 kubectl apply -f jaeger-nodeport.yaml
