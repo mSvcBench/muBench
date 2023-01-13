@@ -14,6 +14,10 @@
   - [Benchmarks strategies](#benchmarks-strategies)
   - [Monitoring and Tracing](#monitoring-and-tracing)
   - [Installation and Getting Started](#installation-and-getting-started)
+      - [µBench in a Docker Container](#µbench-in-a-docker-container)
+      - [µBench in the Host](#µbench-in-the-host)
+    - [Step 4 - Install the monitoring framework](#step-4---install-the-monitoring-framework)
+    - [Step 3 - The First µBench Application](#step-3---the-first-µbench-application)
 
 ## Microservice Model
 
@@ -895,21 +899,144 @@ By using Istio and Jaeger tools the monitoring can be deeper. To install the mon
 
 ## Installation and Getting Started
 
-In this section, we describe how to deploy a µBench example application and make a simple performance test. We use the configuration files contained in the `Config` directory.
+In this section, we describe how to install and use µBench.
 
-### Step 1 - Install the required software <!-- omit in toc -->
+The quick way is to use a µBench Docker container, even though for extending the code may be better to run µBench directly in your host.
 
-- Create a Kubernetes cluster with [Prometheus](#monitoring-with-prometheus) installed.
-- Get access via SSH to master-node, or use a client terminal from which it is possible to control the cluster via `kubectl` 
-- Install Python3 (v3.7 or above)
-- Clone the git repository of µBench and move into `muBench` directory
+To gain initial experience with µBench, without the burden of configuring a production-grade cluster Kubernetes, you can use [minikube](https://minikube.sigs.k8s.io/docs/start/) to create the cluster. However, to carry out research activities, it is recommended to use a production-grade Kubernetes cluster. 
+
+### Step 1 - Create and get access to a Kubernetes cluster <!-- omit in toc -->
+
+
+#### Minikube <!-- omit in toc -->
+A quick way to gain initial experience with Kubernetes and µBench is to create a local Kubernetes cluster with [minikube](https://minikube.sigs.k8s.io/docs/start/). It is enough to have Docker installed (and running) in your host, or any other [virtualization driver](https://minikube.sigs.k8s.io/docs/drivers/) supported by minikube.
+
+After installing minikube software, you can create a single-node Kubernetes cluster with
+
+```zsh
+minikube config set memory 8192
+minikube config set cpus 4
+
+minikube start
+```
+
+You should see something like this when minikube is using Docker as virtualization driver
+
+```zsh
+😄  minikube v1.28.0 on Darwin 13.1
+✨  Using the docker driver based on existing profile
+👍  Starting control plane node minikube in cluster minikube
+🚜  Pulling base image ...
+🔄  Restarting existing docker container for "minikube" ...
+🐳  Preparing Kubernetes v1.25.3 on Docker 20.10.20 ...
+🔎  Verifying Kubernetes components...
+    ▪ Using image gcr.io/k8s-minikube/storage-provisioner:v5
+🌟  Enabled addons: storage-provisioner, default-storageclass
+🏄  Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
+```
+
+It is useful to take note of the IP address of the master node of the cluster
+
+```zsh
+MASTER_IP=$(minikube ip)
+```
+
+Minikube automatically configures the `$HOME/.kube/config` file to access the cluster with `minikube kubectl` CLI from the host.
+
+#### Production environment <!-- omit in toc -->
+To create a production-grade Kubernetes cluster you need a set of real or virtual machines and then you can use different tools to deploy Kubernetes software such as [kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/) or [kubespray](https://kubernetes.io/docs/setup/production-environment/tools/kubespray/).
+
+To access the cluster from a host, you must install `kubectl` into the host and configure the file `$HOME/.kube/config` to get the right of accessing the cluster. If your host is the master-node, this step is already done. Otherwise, follow the official [documentation](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/).
+
+
+### Step 2 - Install µBench software <!-- omit in toc -->
+
+#### µBench in a Docker Container
+µBench software is packaged in a Docker image, named ``msvcbench/mubench``, which contains
+- latest µBench software in `/root/muBench` folder
+- `kubectl` and `helm` tools for controlling the backend Kubernetes cluster
+- a bash script `/root/monitoring-install.sh` for installing the µBench [monitoring framework](../Monitoring/kubernetes-prometheus-operator/README.md) in the cluster, which is made of Prometheus, Grafana, Istio and Jaeger.
+
+This container has been built with the Dockerfile in `muBench/Docker` folder of the repository.
+
+If you use a minikube Kubernetes cluster and minikube uses Docker as a virtualization driver, you have to run the µBench container in the same Docker network of minikube as follows
+
+```zsh
+docker run -d --name mubench --network minikube msvcbench/mubench
+```
+
+For other cluster configurations, you can run the µBench container in the default Docker network with
+
+```zsh
+docker run -d --name mubench msvcbench/mubench
+```
+
+After running the container, it is necessary to provide the container with the `.kube/config` file to allow accessing the kubernetes cluster from the container.  
+
+In the case of a minikube cluster, you can get the config file from your host with
+
+```zsh
+minikube kubectl -- config view --flatten > config
+```
+
+Otherwise you should use,
+```zsh
+kubectl config view --flatten > config
+```
+
+Open the produced `config` file and make sure that the `server` key  is equal to
+```zsh
+server : https://<MASTER_IP>:\<API_SERVER_PORT> 
+```
+Where MASTER_IP is the IP address of the master-node of the cluster and API_SERVER_PORT is the port of the Kubernetes API server.
+- For a minikube Kubernetes cluster the API_SERVER_PORT is the 8443. Moreover, if Docker driver is used, the `server` key is `server: https://127.0.0.1:58881`. So both IP and port values have to be changed, e.g., into `server: https://192.168.49.2:8443`, assuming that 192.168.49.2 is the IP address of the master-node.
+- For a production-grade Kubernetes cluster the API_SERVER_PORT port is the 6433.
+
+Next step is to copy the modified config file into the µBench container
+
+```zsh
+docker cp config mubench:/root/.kube/config
+```  
+
+Now you can enter into the µBench container with
+```zsh
+docker exec -it mubench bash
+``` 
+You should see the following terminal and check the ability to access Kubernetes cluster with `kubectl get pods -A`
+
+```zsh
+╱╱╱╭━━╮╱╱╱╱╱╱╱╱╱╭╮
+╱╱╱┃╭╮┃╱╱╱╱╱╱╱╱╱┃┃
+╭╮╭┫╰╯╰┳━━┳━╮╭━━┫╰━╮
+┃╰╯┃╭━╮┃┃━┫╭╮┫╭━┫╭╮┃
+┃┃┃┃╰━╯┃┃━┫┃┃┃╰━┫┃┃┃
+╰┻┻┻━━━┻━━┻╯╰┻━━┻╯╰╯
+
+root@dc378ff780b5:~# kubectl get pods -A
+NAMESPACE     NAME                               READY   STATUS    RESTARTS   AGE
+kube-system   coredns-565d847f94-l82fm           1/1     Running   0          41m
+kube-system   etcd-minikube                      1/1     Running   0          41m
+kube-system   kube-apiserver-minikube            1/1     Running   0          41m
+kube-system   kube-controller-manager-minikube   1/1     Running   0          41m
+kube-system   kube-proxy-qskdb                   1/1     Running   0          41m
+kube-system   kube-scheduler-minikube            1/1     Running   0          41m
+kube-system   storage-provisioner                1/1     Running   0          41m 
+``` 
+
+#### µBench in the Host
+
+To run µBench directly in a host, the host must have `kubectl` installed and the `$HOME/.kube/config` file properly configured to access the cluster. 
+
+Moreover, the host must have the `helm` tool to install the µBench [monitoring framework](../Monitoring/kubernetes-prometheus-operator/README.md)
+
+Clone the git repository of µBench and move into `muBench` directory
 
 ```zsh
 git clone https://github.com/mSvcBench/muBench.git
 cd muBench
 ```
 
-- Create and activate a Python virtual environment, and install required modules
+Create and activate a Python virtual environment, and install required modules
 
 ```zsh
 python3 -m venv .venv
@@ -920,7 +1047,19 @@ pip3 install wheel
 pip3 install -r requirements.txt
 ```
 
-Note: if you had errors in installing required modules may be that some of them have not been properly compiled in your device. There could be some missing `ffi` dev and `cairo` libraries that can be installed with `sudo apt-get install libffi-dev libcairo2`, or it may help to install C/C++ building tools, e.g. `sudo apt-get install build-essential`, `sudo apt-get install cmake` (or `sudo snap install cmake --classic` for latest version) on Ubuntu;   
+Note: if you had errors in installing the required modules may be that some of them have not been properly compiled in your device. There could be some missing `ffi` dev and `cairo` libraries that can be installed with `sudo apt-get install libffi-dev libcairo2`, or it may help to install C/C++ building tools, e.g. `sudo apt-get install build-essential`, `sudo apt-get install cmake` (or `sudo snap install cmake --classic` for latest version) on Ubuntu.
+
+### Step 4 - Install the monitoring framework
+µBench uses Prometheus, Grafana, Istio and Jaeger to get metrics and traces of generated applications.
+The file monitoring-install.sh
+To install this framework in the cluster
+
+
+### Step 3 - The First µBench Application
+
+From the
+
+python3 Deployers/K8sDeployer/RunK8sDeployer.py -c Configs/K8sParameters.json
 
 ### Step 2 -  Service mesh generation <!-- omit in toc -->
 
@@ -961,10 +1100,10 @@ In this figure, we see a µBench application made of two services (s0 and s1) wi
 
 ### Step 5: Test service response <!-- omit in toc -->
 
-Test the correct execution of the application with (access-gateway-ip is the public IP address of a node of the cluster, e.g. the master node)
+Test the correct execution of the application with (`$MASTER_IP` is the IP address of the master node of the cluster)
 
 ```zsh
-curl http://<access-gateway-ip>:31113/s0
+curl http://$MASTER_IP:31113/s0
 ```
 
 <p align="center">
