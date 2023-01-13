@@ -5,10 +5,10 @@
       "image": "msvcbench/microservice_v4-screen:latest",
       "cluster_domain": "cluster",
       "path": "/api/v1",
-      "sleep": 2,
+      "sleep": 1,
       "dns-resolver":"kube-dns.kube-system.svc.cluster.local"
    },
    "InternalServiceFilePath": "CustomFunctions",
    "OutputPath": "SimulationWorkspace",
-   "WorkModelPath": "examples/workmodelC-multi.json"
+   "WorkModelPath": "examples/workmodel-serial-10services.json"
 }
