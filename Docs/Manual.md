@@ -1150,7 +1150,7 @@ Processed request 24, latency 139, pending requests 1
 You can use Grafana and Jaeger to monitor your application. For Grafana, there is a demo dashboard in the `Monitoring` folder that you can import.
 
 <p align="center">
-<img width="300" src="../Monitoring/kubernetes-prometheus-operator/muBenchMonitors.png">
+<img width="100%" src="../Monitoring/kubernetes-prometheus-operator/muBenchMonitors.png">
 </p>
 
 ### Service mesh generation

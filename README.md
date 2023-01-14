@@ -16,7 +16,7 @@ The tool creates *dummy* microservice applications that can be customized by the
 µBench provides a comprehensive monitoring framework consisting of Prometheus, Grafana, Istio, and Jaeger through which to observe the performance of the produced benchmark applications.
 
 <p align="center">
-<img width="300" src="Monitoring/kubernetes-prometheus-operator/muBenchMonitors.png">
+<img width="100%" src="Monitoring/kubernetes-prometheus-operator/muBenchMonitors.png">
 </p>
 
 You can learn how to use µBench to create and monitor your application [here](Docs/Manual.md).
