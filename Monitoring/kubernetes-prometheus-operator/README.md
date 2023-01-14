@@ -43,13 +43,15 @@ helm repo update
 kubectl create namespace istio-system
 helm install istio-base istio/base -n istio-system
 helm install istiod istio/istiod -n istio-system --wait
+kubectl label namespace default istio-injection=enabled
+
 kubectl create namespace istio-ingress
 kubectl label namespace istio-ingress istio-injection=enabled
 helm install istio-ingress istio/gateway -n istio-ingress --wait
 ```
 
 ## Integration with Prometheus
-To expose Istio metrics to Prometheus it is necessary to add Prometheus PodMonitor and ServiceMonitor:
+To expose Istio [metrics](https://istio.io/latest/docs/reference/config/metrics/) to Prometheus it is necessary to add Prometheus PodMonitor and ServiceMonitor:
 ```zsh
 kubectl apply -f istio-prometheus-operator.yaml
 ```

@@ -4,7 +4,7 @@ RUN apt update
 
 # muBench software
 WORKDIR /root
-RUN apt install -y git --no-install-recommends
+RUN apt install -y git libpangocairo-1.0-0 --no-install-recommends
 RUN git clone https://github.com/mSvcBench/muBench.git
 RUN pip3 install -r muBench/requirements.txt
 
@@ -30,6 +30,11 @@ RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/h
 RUN apt update
 RUN apt install -y helm
 
+# Apache tools for benchmark
+RUN apt install -y apache2-utils --no-install-recommends
+
+# VIM, nano, iproute2, iputils-ping
+RUN apt install -y vim nano iproute2 iputils-ping --no-install-recommends
 # welcome message
 COPY welcome.sh /etc/profile.d
 RUN chmod a+rx /etc/profile.d/welcome.sh

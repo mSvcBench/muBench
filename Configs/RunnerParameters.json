@@ -1,9 +1,9 @@
 {
    "RunnerParameters":{
-      "ms_access_gateway": "http://160.80.103.216:31113",
+      "ms_access_gateway": "http://192.168.49.2:31113",
       "workload_files_path_list": ["SimulationWorkspace/workload.json"],
       "workload_rounds": 1,
-      "workload_type": "file",
+      "workload_type": "greedy",
       "workload_events": 5000,
       "thread_pool_size": 4,
       "result_file": "result"

@@ -16,8 +16,7 @@
   - [Installation and Getting Started](#installation-and-getting-started)
       - [µBench in a Docker Container](#µbench-in-a-docker-container)
       - [µBench in the Host](#µbench-in-the-host)
-    - [Step 4 - Install and access the monitoring framework](#step-4---install-and-access-the-monitoring-framework)
-    - [Step 3 - The First µBench Application](#step-3---the-first-µbench-application)
+    - [Install and access the monitoring framework](#install-and-access-the-monitoring-framework)
 
 ## Microservice Model
 
@@ -905,7 +904,7 @@ The quick way is to use a µBench Docker container, even though for extending th
 
 To gain initial experience with µBench, without the burden of configuring a production-grade cluster Kubernetes, you can use [minikube](https://minikube.sigs.k8s.io/docs/start/) to create the cluster. However, to carry out research activities, it is recommended to use a production-grade Kubernetes cluster. 
 
-### Step 1 - Create and get access to a Kubernetes cluster <!-- omit in toc -->
+### Create and get access to a Kubernetes cluster <!-- omit in toc -->
 
 
 #### Minikube <!-- omit in toc -->
@@ -949,7 +948,7 @@ To create a production-grade Kubernetes cluster you need a set of real or virtua
 To access the cluster from a host, you must install `kubectl` into the host and configure the file `$HOME/.kube/config` to get the right of accessing the cluster. If your host is the master-node, this step is already done. Otherwise, follow the official [documentation](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/).
 
 
-### Step 2 - Install µBench software <!-- omit in toc -->
+### Install µBench software <!-- omit in toc -->
 
 #### µBench in a Docker Container
 µBench software is packaged in a Docker image, named ``msvcbench/mubench``, which contains
@@ -1033,12 +1032,12 @@ Clone the git repository of µBench and move into `muBench` directory
 
 ```zsh
 git clone https://github.com/mSvcBench/muBench.git
-cd muBench
 ```
 
 Create and activate a Python virtual environment, and install required modules
 
 ```zsh
+cd $HOME/muBench
 python3 -m venv .venv
 
 source .venv/bin/activate
@@ -1049,33 +1048,108 @@ pip3 install -r requirements.txt
 
 Note: if you had errors in installing the required modules may be that some of them have not been properly compiled in your device. There could be some missing `ffi` dev and `cairo` libraries that can be installed with `sudo apt-get install libffi-dev libcairo2`, or it may help to install C/C++ building tools, e.g. `sudo apt-get install build-essential`, `sudo apt-get install cmake` (or `sudo snap install cmake --classic` for latest version) on Ubuntu.
 
-### Step 4 - Install and access the monitoring framework
+### Install and access the monitoring framework
 µBench uses Prometheus, Grafana, Istio and Jaeger to get metrics and traces of generated applications as described [here](../Monitoring/kubernetes-prometheus-operator/README.md) .
 The file `monitoring-install.sh` install this framework in the cluster. It can be run either from the µBench Docker bash or by the host shell with 
 
 ```zsh
-cd muBench/Monitoring/kubernetes-prometheus-operator
+cd $HOME/muBench/Monitoring/kubernetes-prometheus-operator
 sh ./monitoring-install.sh
 ```
-To access the monitoring framework you can use a browser and the following URL
-- <MASTER_IP>:30000 for Prometheus
-- <MASTER_IP>:30001 for Grafana
-- <MASTER_IP>:30002 for Jaeger
+To access the monitoring framework you can use a browser of your host and the following URLs
+s
+- http://<MASTER_IP>:30000 for Prometheus
+- http://<MASTER_IP>:30001 for Grafana
+- http://<MASTER_IP>:30002 for Jaeger
 
-In the case of a minikube Kubernetes cluster that uses Docker driver, you have to access these services with: 
+In the case of a minikube Kubernetes cluster that uses Docker driver, you have to get the URL of the services by runing these commands from the host. Each command requires a different terminal window as documented [here](https://minikube.sigs.k8s.io/docs/handbook/accessing/): 
+```zsh
+minikube service -n monitoring prometheus-nodeport
+minikube service -n monitoring grafana-nodeport
+minikube service -n istio-system jaeger-nodeport
+```
 
-- minikube service -n monitoring prometheus-nodeport
-- minikube service -n monitoring grafana-nodeport
-- minikube service -n istio-system tracing-nodeport
+NOTE: to get the default Grafana username is `admin` and the password is `prom-operator` 
 
+### My first µBench application <!-- omit in toc -->
 
-### Step 3 - The First µBench Application
-
-From the
-
+From the µBench container or the host move into the muBench folder and run  
+```zsh
+cd $HOME/muBench
 python3 Deployers/K8sDeployer/RunK8sDeployer.py -c Configs/K8sParameters.json
+```
+This command creates the µBench application described in `Configs/K8sParameters.json`. It uses the `examples/workmodel-serial-10services.json` workmodel that specifies an application made of 10 microservices with star topology. 
 
-### Step 2 -  Service mesh generation <!-- omit in toc -->
+You should see an output like this
+```zsh
+root@64ae03d1e5b8:~/muBench# python3 Deployers/K8sDeployer/RunK8sDeployer.py -c Configs/K8sParameters.json
+---
+Work Model Updated!
+Deployment Created!
+The following files are created: [...]
+---
+######################
+We are going to DEPLOY the the configmap: workmodel
+######################
+ConfigMap 'workmodel' created.
+---
+...
+######################
+We are going to DEPLOY the yaml files in the following folder: SimulationWorkspace/yamls
+######################
+Deployment s9 created.
+Service 's9' created.
+---
+...
+Deployment s0 created.
+Service 's0' created.
+---
+```
+
+To eventually un-deploy, run again the same command and answer `y`
+
+To see the Pods of the application you can use `kubectl get pods`
+```zsh
+root@64ae03d1e5b8:~/muBench# kubectl get pods
+NAME                        READY   STATUS    RESTARTS   AGE
+gw-nginx-5b66796c85-tlvm7   1/1     Running   0          20s
+s0-7d7f8c875b-j2wsq         1/1     Running   0          10s
+s1-8fcb67d75-2lkcr          1/1     Running   0          11s
+s2-558f544b94-hltgn         1/1     Running   0          12s
+s3-79485f9857-9r988         1/1     Running   0          13s
+s4-9b6f9f77b-cwl58          1/1     Running   0          15s
+s5-6ccddd9b47-4br9x         1/1     Running   0          16s
+s6-7c87c79cd6-x9knb         1/1     Running   0          17s
+s7-5fb7cbff7c-pkfqb         1/1     Running   0          18s
+s8-5549949968-x5c2r         1/1     Running   0          19s
+s9-9576b784c-26v9k          1/1     Running   0          20s
+```
+
+To load the application you can use the µBench [Runner](#runner)
+```zsh
+cd $HOME/muBench
+python3 Benchmarks/Runner/Runner.py -c Configs/RunnerParameters.json
+```
+You should see something like this
+```zsh
+root@64ae03d1e5b8:~/muBench# python3 Benchmarks/Runner/Runner.py -c Configs/RunnerParameters.json
+###############################################
+############   Run Forrest Run!!   ############
+###############################################
+Start Time: 09:13:04.291510 - 23/01/2023
+Processed request 2, latency 139, pending requests 1 
+Processed request 13, latency 129, pending requests 1 
+Processed request 24, latency 139, pending requests 1 
+....
+```
+
+You can use Grafana and Jaeger to monitor your application. For Grafana, there is a demo dashboard in the `Monitoring` folder that you can import.
+
+<p align="center">
+<img width="300" src="../Monitoring/kubernetes-prometheus-operator/muBenchMonitors.png">
+</p>
+
+### Service mesh generation <!-- omit in toc -->
 
 Generate the [service mesh](#service-mesh-generator) to obtain two files `servicemesh.json` and `servicemesh.png` in the `SimulationWorkspace` directory. The .png is a picture of the generated mesh. 
 
