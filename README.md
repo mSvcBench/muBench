@@ -19,7 +19,8 @@ The tool creates *dummy* microservice applications that can be customized by the
 <img width="100%" src="Monitoring/kubernetes-prometheus-operator/muBenchMonitors.png">
 </p>
 
-You can learn how to use µBench to create and monitor your application [here](Docs/Manual.md).
+##µBench Manual
+You can learn how to use µBench to create and monitor your application by reading the **[µBench manual](Docs/Manual.md)**.
 
 
   
@@ -66,6 +67,7 @@ root@64ae03d1e5b8:~#
 
 Deploy the µBench demo app with
 ```zsh
+cd $HOME/muBench
 python3 Deployers/K8sDeployer/RunK8sDeployer.py -c Configs/K8sParameters.json
 ``` 
 
