@@ -17,6 +17,10 @@
       - [µBench in a Docker Container](#µbench-in-a-docker-container)
       - [µBench in the Host](#µbench-in-the-host)
     - [Install and access the monitoring framework](#install-and-access-the-monitoring-framework)
+    - [My first µBench application](#my-first-µbench-application)
+    - [Service mesh generation](#service-mesh-generation)
+    - [Work model generation](#work-model-generation)
+    - [Deploy on Kubernetes](#deploy-on-kubernetes)
 
 ## Microservice Model
 
@@ -1071,14 +1075,14 @@ minikube service -n istio-system jaeger-nodeport
 
 NOTE: to get the default Grafana username is `admin` and the password is `prom-operator` 
 
-### My first µBench application <!-- omit in toc -->
+### My first µBench application 
 
 From the µBench container or the host move into the muBench folder and run  
 ```zsh
 cd $HOME/muBench
 python3 Deployers/K8sDeployer/RunK8sDeployer.py -c Configs/K8sParameters.json
 ```
-This command creates the µBench application described in `Configs/K8sParameters.json`. It uses the `examples/workmodel-serial-10services.json` workmodel that specifies an application made of 10 microservices with star topology. 
+This command creates the µBench application described in `Configs/K8sParameters.json`. It uses the [examples/workmodel-serial-10services.json](../examples/workmodel-serial-10services.json) workmodel that specifies an application made of 10 microservices. Clients send requests to s0 and s0 sequentially calls all other services before sending the result to clients. Each service equally stresses the CPU.
 
 You should see an output like this
 ```zsh
@@ -1149,53 +1153,106 @@ You can use Grafana and Jaeger to monitor your application. For Grafana, there i
 <img width="300" src="../Monitoring/kubernetes-prometheus-operator/muBenchMonitors.png">
 </p>
 
-### Service mesh generation <!-- omit in toc -->
+### Service mesh generation
 
-Generate the [service mesh](#service-mesh-generator) to obtain two files `servicemesh.json` and `servicemesh.png` in the `SimulationWorkspace` directory. The .png is a picture of the generated mesh. 
+To customize the application, the first task is to generate your [service mesh](#service-mesh-generator) and obtain two files `servicemesh.json` and `servicemesh.png` in the `SimulationWorkspace` directory. The .png is a picture of the generated mesh. You can specify your service mesh parameters by, e.g., editing `Configs/ServiceMeshParameters.json` and running  
 
 ```zsh
+cd $HOME/muBench
 python3 ServiceMeshGenerator/RunServiceMeshGen.py -c Configs/ServiceMeshParameters.json
 ```
 
 > Note: if you have problems with cairo library this may help on Ubuntu: `sudo apt-get install libpangocairo-1.0-0`
   
-### Step 3: Work model generation <!-- omit in toc -->
-
-Generate the [work model](#work-model) to obtain the `workmodel.json` file in the `SimulationWorkspace` directory.
+### Work model generation
+Once the service mesh has been created, you have to create your [work model](#work-model) that describes the internal-service performed by each service of the mesh. You can specify your workmodel parameters by, e.g., editing `Configs/WorkModelParameters.json` and running the following command that produces a `workmodel.json` file in `SimulationWorkspace` directory that will be eventually used to deploy your µBench app in the Kubernetes cluster.
 
 ```zsh
+cd $HOME/muBench
 python3 WorkModelGenerator/RunWorkModelGen.py -c Configs/WorkModelParameters.json
 ```
 
-### Step 4: Deploy on Kubernetes <!-- omit in toc -->
+### Deploy on Kubernetes 
 
-Deploy the generated µBench microservice application on Kubernetes cluster and manually monitor that all pods are Running 
+To deploy your µBench application in the Kubernetes cluster, you have to edit the `Configs/K8sParameters.json` inserting the correct path of your workmodel file, e.g., 
+```json
+`"WorkModelPath": "SimulationWorkspace/workmodel.json"
+```
+Then you have to run the `K8sDeployer` and monitor the deployment status of your pod and services with `kubectl`
 
 ```zsh
+cd $HOME/muBench
 python3 Deployers/K8sDeployer/RunK8sDeployer.py -c Configs/K8sParameters.json
-
 kubectl get pods
+kubectl get svc
 ```
 
-In this figure, we see a µBench application made of two services (s0 and s1) with two replicas, a database (sdb1) and the NGINX access gateway
-
-<p align="center">
-<img width="400" src="mubenchrunning.png">
-</p>  
-
-
-> Note that steps 2,3,4 can be performed all at once by using the [Kubernetes Autopilot](#k8sautopilot)
-
-### Step 5: Test service response <!-- omit in toc -->
-
-Test the correct execution of the application with (`$MASTER_IP` is the IP address of the master node of the cluster)
+For instance, we see below a µBench application made of two services (s0 and s1) with two replicas, a database (sdb1) and the NGINX access gateway
 
 ```zsh
-curl http://$MASTER_IP:31113/s0
+root@64ae03d1e5b8:~/muBench# kubectl get pods
+NAME                        READY   STATUS    RESTARTS   AGE
+gw-nginx-5b66796c85-dz8qb   2/2     Running   0          10m
+s0-7758f68966-hgvl8         2/2     Running   0          10m
+s0-7758f68966-q9ffx         2/2     Running   0          10m
+s1-b6c5dc97c-c4tws          2/2     Running   0          10m
+s1-b6c5dc97c-xjwzs          2/2     Running   0          10m
+sdb1-5948b568f5-gtl8f       3/3     Running   0          10m
+
+root@64ae03d1e5b8:~/muBench# kubectl get svc
+NAME         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)                        AGE
+gw-nginx     NodePort    10.104.42.53   <none>        80:31113/TCP                   10m
+kubernetes   ClusterIP   10.96.0.1      <none>        443/TCP                        19h
+s0           NodePort    10.96.221.91   <none>        80:31471/TCP,51313:31907/TCP   10m
+s1           NodePort    10.97.251.68   <none>        80:30916/TCP,51313:30451/TCP   10m
+sdb1         NodePort    10.102.58.96   <none>        80:32240/TCP,51313:31011/TCP   10m
+
 ```
 
-<p align="center">
-<img width="400" src="test.png">
-</p>
+> Note that steps the creation of service mesh and of the workmodel and the eventual deployment of Kubernetes can be performed all at once by using the [Kubernetes Autopilot](#k8sautopilot)
+
+### Test service response <!-- omit in toc -->
+
+Test the correct execution of the application with curl http://`$MASTER_IP`:31113/s0, where `$MASTER_IP` is the IP address of the master-node of the cluster, e.g.,
+
+```zsh
+root@64ae03d1e5b8:~/muBench# curl http://192.168.49.2:31113/s0
+
+                        `-+shNy-
+                    -+ymMMMMNhs:.`              ___   _____   _   _   _  ___   _               
+                -+hNMMMNho//+ydNMm.            /_\ \ / / __| | | | | | |/ __| /_\              
+             :smMMMNho//sdNMMMMMMMd`          / _ \ V /| _|  | |_| |_| | (__ / _ \             
+          -sNMMMds:/smMMMMMMMMMMMMMy         /_/ \_\_/ |___| |____\___/ \___/_/ \_\            
+       `omMMMd+:+hNMMMMMMMMMMMMMMMMMo           ___  ___ ___ ___    _   ___ ___ ___   _____ ___ 
+     `oNMMdo-+dMMMd+sMMMMMMMMMMMMMMMN/-`       / _ \| _ \ __| _ \  /_\ | _ \_ _|_ _| |_   _| __|
+    :mMNy:/hNMMMMMs /MMMMMMMMMMMMMMMMMMNo     | (_) |  _/ _||   / / _ \|   /| | | |    | | | _| 
+   +Mmo-oNNMMMMMMMddNMMMMMMMMMmdhso+/:::-      \___/|_| |___|_|_\/_/ \_\_|_\___|___|   |_| |___|
+  /m+-yNMo-MMMMMMMMMMMNdyo/::/+oshdmNMMMd          ___   _   _   _   _ _____ _   _  _ _____     
+  --hMMMM-/MMMMMMNho/:/+ydNMMMMMMMMMMMMMh         / __| /_\ | | | | | |_   _/_\ | \| |_   _|    
+  .myyMMMNMMMds/:/sdNMMMMMMMMMMMy:-+NMMMh-        \__ \/ _ \| |_| |_| | | |/ _ \| .` | | |      
+ -mM/sMMMms/:+hNMMMMMMMMNoodMMMh    :MMMMN`       |___/_/ \_\____\___/  |_/_/ \_\_|\_| |_|      
+ `NMmMms:/yNMMMMMMd::dMM.   dMMy    :MMMMMy
+  hMh//yNMMMMs`-mM-  :MM`   hMMy    :MMMMMN:   `
+  +/yNMMm:/NM-  sM-  :MM`   hMMh-:/+sMMMMMMNddNMh`           `mNNNmmmmddhhysso+/:-.`
+ -hMMd:mo  sM-  yM-  :MMoshdNMMMMMMMMMMMMMMMMMMMMo `......---sMMMMMMMMMMMs-yMMMMMMMNmmdyo:`
+:MMNMo yo  yM- `hMyhmNMMMMMMMMMMMMMMMMMMMMMMMMMMMo NMMMMMMMMMMMMMMMMMMMMM+ sMMMMMMMm /MMMMNmy+.
+:Nm`mo yo`-hMNNMMMMMMMMMMMMMMMMMMMMMMMMMMMMNMMMMMo`NMMMMMMMMMMMMMMMMMMMMMNmNMMNsomMN-+MMMMd`mMMms-
+ sm ho:dNNMMMMMMMMMMMMMMMNMMMMMNy/+hMMMMN+` .yMMMo`NMMMMMMMMMMMMMMMMMMMMMMMMMMo  /MMMMMMMMm+mMMMNmy`
+ oN/mMMMMMMMMMMMMmosNMMm- `hMMM+    hMMM+     mMMN.+h+/yMMMNs:.-oNMMMMMMMMMMMMdo+yMMMMMMMMMMMh`dh+M/
+.hMMMMMNyhMM+ -NM-  +MMo   -MMM/    sMMM+     dMMMm`    sMM+     /MMMMMMMmosNMMdhNMMNNMMMMMMMy`hMNM:
+dMMMd:m+  dM   dM.  /MMo   :MMM/    sMMM+     dMMMMh    +NN:     .MMMMMMN`  :Ms  :Mh  yM+.yMmsNMMMMs
+/Moh+ y/  hM   dM.  /MMo   :MMM/    sMMMo....-mMMMMMy++++++++++++sMMMMMMm   .M+  `M+  /m  -M- /MosMo
+`N.++ y/  hM``.mM+//yMMdsyydMMMmmmNNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMN   .M+  .M+  /m  -M. :M..Mo
+`N.+s:dhyhNMNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMN-..:Mo``.Mo  +m  -M. :M..Mo
+`NmNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNNNMmmmMhsyM+/Mo
+yMMMMMMMMMMMMMMMMNNMMMMMmdmMMMMNhyhNMMMMNyooyNMMMMNs//+hMMMMMNdmNMMMMNmmNMMMMMNNMMMMNMMMMMMMMMMMMMMm
+:MMhNhyM//NN-`yMm. .hMMh   +MMN-   `mMMm.    -MMMM:     hMMM+   `hMMh`  `hMMN/ `yMN- :MM/:mMN/yMNsMh
+.Mm do.N  mh  -Md   /MMs   .MMm     hMMd      mMMM.     oMMN     :MM+    +MMm   :Mh   dd  sMd -Mh My
+-Mm ho.N  dh  .Md   /MMs   `MMN`    yMMd      dMMM.     oMMN     -MM+    /MMm   -Mh   dh  oMd .Mh My
+-Mm do-M  dd  `Nm   /MMs   `MMN`    sMMd      dMMM.     oMMN     -MM+    +MMm   -Mh   dd  oMd .Mh Ns
+`-- -.`/  :/   oo   -yho   `mmN`    yMMd      dMNM.     +mmm     -mm/    /ddh   -ho   oo  :o/ `:.
+```
+
+Note that in this example the service s0 implements the `Colosseum.py` internal service that sends back this ASCII ART image. The `Loader.py` function sends back a sequence of random characters.
 
 For other tests refer to [Benchmarks](#benchmarks-tools) tools.
