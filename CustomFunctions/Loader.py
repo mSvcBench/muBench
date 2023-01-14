@@ -43,7 +43,7 @@ def cpu_loader(params):
 def bandwidth_loader(params):
     # print("--------> Network stress start")
     bandwidth_load = random.expovariate(1 / params["mean_bandwidth"])
-    num_chars = max(1, 1000 * bandwidth_load)  # Response in kB
+    num_chars = int(max(1, 1000 * bandwidth_load))  # Response in kB
     response_body = ''.join(random.choice(string.ascii_letters) for i in range(num_chars))
     # print("--------> Network stress stop")
     return response_body
