@@ -14,13 +14,18 @@
   - [Benchmarks strategies](#benchmarks-strategies)
   - [Monitoring and Tracing](#monitoring-and-tracing)
   - [Installation and Getting Started](#installation-and-getting-started)
+    - [Create and get access to a Kubernetes cluster](#create-and-get-access-to-a-kubernetes-cluster)
+      - [Minikube](#minikube)
+      - [Production environment](#production-environment)
+    - [Install µBench software](#install-µbench-software)
       - [µBench in a Docker Container](#µbench-in-a-docker-container)
       - [µBench in the Host](#µbench-in-the-host)
     - [Install and access the monitoring framework](#install-and-access-the-monitoring-framework)
     - [My first µBench application](#my-first-µbench-application)
-    - [Service mesh generation](#service-mesh-generation)
-    - [Work model generation](#work-model-generation)
-    - [Deploy on Kubernetes](#deploy-on-kubernetes)
+    - [µBench custom applications](#µbench-custom-applications)
+      - [Service mesh generation](#service-mesh-generation)
+      - [Work model generation](#work-model-generation)
+      - [Execution on Kubernetes](#execution-on-kubernetes)
 
 ## Microservice Model
 
@@ -908,10 +913,10 @@ The quick way is to use a µBench Docker container, even though for extending th
 
 To gain initial experience with µBench, without the burden of configuring a production-grade cluster Kubernetes, you can use [minikube](https://minikube.sigs.k8s.io/docs/start/) to create the cluster. However, to carry out research activities, it is recommended to use a production-grade Kubernetes cluster. 
 
-### Create and get access to a Kubernetes cluster <!-- omit in toc -->
+### Create and get access to a Kubernetes cluster
 
 
-#### Minikube <!-- omit in toc -->
+#### Minikube
 A quick way to gain initial experience with Kubernetes and µBench is to create a local Kubernetes cluster with [minikube](https://minikube.sigs.k8s.io/docs/start/). It is enough to have Docker installed (and running) in your host, or any other [virtualization driver](https://minikube.sigs.k8s.io/docs/drivers/) supported by minikube.
 
 After installing minikube software, you can create a single-node Kubernetes cluster with
@@ -946,13 +951,13 @@ MASTER_IP=$(minikube ip)
 
 Minikube automatically configures the `$HOME/.kube/config` file to access the cluster with `minikube kubectl` CLI from the host.
 
-#### Production environment <!-- omit in toc -->
+#### Production environment 
 To create a production-grade Kubernetes cluster you need a set of real or virtual machines and then you can use different tools to deploy Kubernetes software such as [kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/) or [kubespray](https://kubernetes.io/docs/setup/production-environment/tools/kubespray/).
 
 To access the cluster from a host, you must install `kubectl` into the host and configure the file `$HOME/.kube/config` to get the right of accessing the cluster. If your host is the master-node, this step is already done. Otherwise, follow the official [documentation](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/).
 
 
-### Install µBench software <!-- omit in toc -->
+### Install µBench software
 
 #### µBench in a Docker Container
 µBench software is packaged in a Docker image, named ``msvcbench/mubench``, which contains
@@ -1067,7 +1072,7 @@ To access the monitoring framework you can use a browser of your host and the fo
 - http://<MASTER_IP>:30002 for Jaeger
 - http://<MASTER_IP>:30003 for Kiali
 
-In the case of a minikube Kubernetes cluster that uses Docker driver, you have to get the URL of the services by runing these commands from the host. Each command requires a different terminal window as documented [here](https://minikube.sigs.k8s.io/docs/handbook/accessing/): 
+In the case of a minikube Kubernetes cluster that uses Docker driver, you have to get the URL of the services by running these commands from the host. Each command requires a different terminal window as documented [here](https://minikube.sigs.k8s.io/docs/handbook/accessing/): 
 ```zsh
 minikube service -n monitoring prometheus-nodeport
 minikube service -n monitoring grafana-nodeport
@@ -1160,8 +1165,8 @@ To observe the service-mesh you can access Kiali dashboard from your browser.
 <img width="70%" src="../Monitoring/kubernetes-full-monitoring/kiali.png">
 </p>
 
-
-### Service mesh generation
+### µBench custom applications
+#### Service mesh generation
 
 To customize the application, the first task is to generate your [service mesh](#service-mesh-generator) and obtain two files `servicemesh.json` and `servicemesh.png` in the `SimulationWorkspace` directory. The .png is a picture of the generated mesh. You can specify your service mesh parameters by, e.g., editing `Configs/ServiceMeshParameters.json` and running  
 
@@ -1172,7 +1177,7 @@ python3 ServiceMeshGenerator/RunServiceMeshGen.py -c Configs/ServiceMeshParamete
 
 > Note: if you have problems with cairo library this may help on Ubuntu: `sudo apt-get install libpangocairo-1.0-0`
   
-### Work model generation
+#### Work model generation
 Once the service mesh has been created, you have to create your [work model](#work-model) that describes the internal-service performed by each service of the mesh. You can specify your workmodel parameters by, e.g., editing `Configs/WorkModelParameters.json` and running the following command that produces a `workmodel.json` file in `SimulationWorkspace` directory that will be eventually used to deploy your µBench app in the Kubernetes cluster.
 
 ```zsh
@@ -1180,7 +1185,7 @@ cd $HOME/muBench
 python3 WorkModelGenerator/RunWorkModelGen.py -c Configs/WorkModelParameters.json
 ```
 
-### Deploy on Kubernetes 
+#### Execution on Kubernetes 
 
 To deploy your µBench application in the Kubernetes cluster, you have to edit the `Configs/K8sParameters.json` inserting the correct path of your workmodel file, e.g., 
 ```json
