@@ -39,6 +39,7 @@ RUN echo "/etc/profile.d/welcome.sh" >> /root/.bashrc
 # muBench software
 RUN apt install -y git libpangocairo-1.0-0 --no-install-recommends
 COPY . /root/muBench
+#WORKDIR /root
 #RUN git clone https://github.com/mSvcBench/muBench.git
 RUN pip3 install -r /root/muBench/requirements.txt
 
