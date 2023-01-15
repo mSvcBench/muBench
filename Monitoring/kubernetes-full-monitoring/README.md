@@ -63,7 +63,6 @@ Istio may use [Metrics merging](https://istio.io/latest/docs/ops/integrations/pr
 Istio is [integrated](https://istio.io/latest/docs/tasks/observability/distributed-tracing/jaeger/) with Jaeger, therefore to get Jaeger up and running it is enough to install Istio and then use the following Istio addon.
 
 ```zsh
-wget https://raw.githubusercontent.com/istio/istio/release-1.15/samples/addons/jaeger.yaml
 kubectl apply -f jaeger.yaml
 ```
 To expose Jaeger service as NodePort Service on port 30002 (HTTP) use
@@ -72,4 +71,10 @@ To expose Jaeger service as NodePort Service on port 30002 (HTTP) use
 kubectl apply -f jaeger-nodeport.yaml
 ```
 
+## Kiali Istio Dashboard
+[kiali](https://kiali.io/) can be used as Istio dashboard. To deploy kiali it is enough to deploy the next kiali resources, which include a kiali-nodeport NodePort service on port `30002` use.
+```zsh
+kubectl apply -f kilai.yaml
+kubectl apply -f kilai-nodeport.yaml
+```
 

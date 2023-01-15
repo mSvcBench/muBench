@@ -13,10 +13,10 @@ The tool creates *dummy* microservice applications that can be customized by the
 - the microservice-to-microservice API (HTTP or gRPC)
 - the CPU and Memory resources assigned to microservices and their number of replicas  
 
-µBench provides a comprehensive monitoring framework consisting of Prometheus, Grafana, Istio, and Jaeger through which to observe the performance of the produced benchmark applications.
+µBench provides a comprehensive monitoring framework consisting of Prometheus, Grafana, Istio, Kiali, and Jaeger through which to observe the performance of the produced benchmark applications.
 
 <p align="center">
-<img width="100%" src="Monitoring/kubernetes-prometheus-operator/muBenchMonitors.png">
+<img width="100%" src="Monitoring/kubernetes-full-monitoring/muBenchMonitors.png">
 </p>
 
 ##µBench Manual
@@ -103,7 +103,7 @@ Read the [manual](Docs/Manual.md) to create and monitor your benchmark apps.
   
 > **_NOTE:_**: edit Configs/K8sParameters.json if your Kubernetes dns-resolver is different from kube-dns
 
-##Cite Us
+## Cite Us
 The description of µBench and some use-cases has been published in IEEE Transactions on Parallel and Distributed Systems. If you use the µBench please cite the following publication:
 
 >A. Detti, L. Funari, L. Petrucci, "µBench: an open-source factory of benchmark microservice applications", IEEE Transactions on Parallel and Distributed Systems

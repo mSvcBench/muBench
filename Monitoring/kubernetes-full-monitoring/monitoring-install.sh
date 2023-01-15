@@ -30,3 +30,10 @@ kubectl apply -f jaeger.yaml
 
 # Jaeger NodePort Service (30002)
 kubectl apply -f jaeger-nodeport.yaml
+
+#Kiali
+kubectl apply -f kilai.yaml
+
+#Kiali NodePort Service (30003)
+kubectl apply -f kilai-nodeport.yaml
+

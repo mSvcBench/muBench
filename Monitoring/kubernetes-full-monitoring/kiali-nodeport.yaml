@@ -1,0 +1,26 @@
+# Source: kiali-server/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: kiali-nodeport
+  namespace: istio-system
+  labels:
+    helm.sh/chart: kiali-server-1.59.1
+    app: kiali
+    app.kubernetes.io/name: kiali
+    app.kubernetes.io/instance: kiali
+    version: "v1.59.1"
+    app.kubernetes.io/version: "v1.59.1"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: "kiali"
+  annotations:
+spec:
+  type: NodePort
+  ports:
+  - name: http
+    protocol: TCP
+    port: 20001
+    nodePort: 30003
+  selector:
+    app.kubernetes.io/name: kiali
+    app.kubernetes.io/instance: kiali

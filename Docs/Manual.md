@@ -896,7 +896,7 @@ With the following steps, you will deploy on your Kubernetes environment: [Prome
 - *mub_internal_processing_latency_seconds* : duration of the execution of the internal-service
 - *mub_external_processing_latency_seconds* :  duration of the execution of the external-service
 
-By using Istio and Jaeger tools the monitoring can be deeper. To install the monitoring framework into the Kubernetes cluster read this [manual](../Monitoring/kubernetes-prometheus-operator/README.md).
+By using Istio and Jaeger tools the monitoring can be deeper. To install the monitoring framework into the Kubernetes cluster read this [manual](../Monitoring/kubernetes-full-monitoring/README.md).
 
 ---
 
@@ -958,7 +958,7 @@ To access the cluster from a host, you must install `kubectl` into the host and 
 µBench software is packaged in a Docker image, named ``msvcbench/mubench``, which contains
 - latest µBench software in `/root/muBench` folder
 - `kubectl` and `helm` tools for controlling the backend Kubernetes cluster
-- a bash script `/root/monitoring-install.sh` for installing the µBench [monitoring framework](../Monitoring/kubernetes-prometheus-operator/README.md) in the cluster, which is made of Prometheus, Grafana, Istio and Jaeger.
+- a bash script `/root/monitoring-install.sh` for installing the µBench [monitoring framework](../Monitoring/kubernetes-full-monitoring/README.md) in the cluster, which is made of Prometheus, Grafana, Istio and Jaeger.
 
 This container has been built with the Dockerfile in `muBench/Docker` folder of the repository.
 
@@ -1030,7 +1030,7 @@ kube-system   storage-provisioner                1/1     Running   0          41
 
 To run µBench directly in a host, the host must have `kubectl` installed and the `$HOME/.kube/config` file properly configured to access the cluster. 
 
-Moreover, the host must have the `helm` tool to install the µBench [monitoring framework](../Monitoring/kubernetes-prometheus-operator/README.md)
+Moreover, the host must have the `helm` tool to install the µBench [monitoring framework](../Monitoring/kubernetes-full-monitoring/README.md)
 
 Clone the git repository of µBench and move into `muBench` directory
 
@@ -1053,11 +1053,11 @@ pip3 install -r requirements.txt
 Note: if you had errors in installing the required modules may be that some of them have not been properly compiled in your device. There could be some missing `ffi` dev and `cairo` libraries that can be installed with `sudo apt-get install libffi-dev libcairo2`, or it may help to install C/C++ building tools, e.g. `sudo apt-get install build-essential`, `sudo apt-get install cmake` (or `sudo snap install cmake --classic` for latest version) on Ubuntu.
 
 ### Install and access the monitoring framework
-µBench uses Prometheus, Grafana, Istio and Jaeger to get metrics and traces of generated applications as described [here](../Monitoring/kubernetes-prometheus-operator/README.md) .
+µBench uses Prometheus, Grafana, Istio and Jaeger to get metrics and traces of generated applications as described [here](../Monitoring/kubernetes-full-monitoring/README.md) .
 The file `monitoring-install.sh` install this framework in the cluster. It can be run either from the µBench Docker bash or by the host shell with 
 
 ```zsh
-cd $HOME/muBench/Monitoring/kubernetes-prometheus-operator
+cd $HOME/muBench/Monitoring/kubernetes-full-monitoring
 sh ./monitoring-install.sh
 ```
 To access the monitoring framework you can use a browser of your host and the following URLs
@@ -1147,11 +1147,17 @@ Processed request 24, latency 139, pending requests 1
 ....
 ```
 
-You can use Grafana and Jaeger to monitor your application. For Grafana, there is a demo dashboard in the `Monitoring` folder that you can import.
+You can access Grafana and Jaeger dashboards from your browser to monitor your application. For Grafana, there is a demo dashboard in the `Monitoring` folder that you can import.
 
 <p align="center">
-<img width="100%" src="../Monitoring/kubernetes-prometheus-operator/muBenchMonitors.png">
+<img width="100%" src="../Monitoring/kubernetes-full-monitoring/muBenchMonitors.png">
 </p>
+
+To observe the service-mesh you can access Kiali dashboard from your browser.
+<p align="center">
+<img width="70%" src="../Monitoring/kubernetes-full-monitoring/kiali.png">
+</p>
+
 
 ### Service mesh generation
 
