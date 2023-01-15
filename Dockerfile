@@ -2,12 +2,6 @@ from python:3.8.16-slim-buster
 
 RUN apt update
 
-# muBench software
-WORKDIR /root
-RUN apt install -y git libpangocairo-1.0-0 --no-install-recommends
-RUN git clone https://github.com/mSvcBench/muBench.git
-RUN pip3 install -r muBench/requirements.txt
-
 # kubectl
 RUN mkdir /etc/apt/keyrings
 RUN apt install -y ca-certificates curl bash-completion --no-install-recommends
@@ -15,6 +9,7 @@ RUN curl -fsSLo /etc/apt/keyrings/kubernetes-archive-keyring.gpg https://package
 RUN echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
 RUN apt update
 RUN apt install -y kubectl
+RUN mkdir /root/.kube
 
 # kubectl autocomplete
 RUN apt install -y bash-completion --no-install-recommends 
@@ -30,17 +25,24 @@ RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/h
 RUN apt update
 RUN apt install -y helm
 
-# Apache tools for benchmark
+# Apache ab tools for benchmark
 RUN apt install -y apache2-utils --no-install-recommends
 
 # VIM, nano, iproute2, iputils-ping
 RUN apt install -y vim nano iproute2 iputils-ping --no-install-recommends
+
 # welcome message
 COPY welcome.sh /etc/profile.d
 RUN chmod a+rx /etc/profile.d/welcome.sh
-RUN echo "/etc/profile.d/welcome.sh" >> .bashrc
+RUN echo "/etc/profile.d/welcome.sh" >> /root/.bashrc
 
-RUN mkdir /root/.kube
+# muBench software
+RUN apt install -y git libpangocairo-1.0-0 --no-install-recommends
+COPY . /root/muBench
+#RUN git clone https://github.com/mSvcBench/muBench.git
+RUN pip3 install -r /root/muBench/requirements.txt
+
+WORKDIR /root/muBench
 
 CMD [ "sleep", "infinity"]
 

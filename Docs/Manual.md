@@ -1053,7 +1053,7 @@ pip3 install -r requirements.txt
 Note: if you had errors in installing the required modules may be that some of them have not been properly compiled in your device. There could be some missing `ffi` dev and `cairo` libraries that can be installed with `sudo apt-get install libffi-dev libcairo2`, or it may help to install C/C++ building tools, e.g. `sudo apt-get install build-essential`, `sudo apt-get install cmake` (or `sudo snap install cmake --classic` for latest version) on Ubuntu.
 
 ### Install and access the monitoring framework
-µBench uses Prometheus, Grafana, Istio and Jaeger to get metrics and traces of generated applications as described [here](../Monitoring/kubernetes-full-monitoring/README.md) .
+µBench uses Prometheus, Grafana, Istio, Kiali and Jaeger to get metrics and traces of generated applications as described [here](../Monitoring/kubernetes-full-monitoring/README.md) .
 The file `monitoring-install.sh` install this framework in the cluster. It can be run either from the µBench Docker bash or by the host shell with 
 
 ```zsh
@@ -1061,16 +1061,18 @@ cd $HOME/muBench/Monitoring/kubernetes-full-monitoring
 sh ./monitoring-install.sh
 ```
 To access the monitoring framework you can use a browser of your host and the following URLs
-s
+
 - http://<MASTER_IP>:30000 for Prometheus
 - http://<MASTER_IP>:30001 for Grafana
 - http://<MASTER_IP>:30002 for Jaeger
+- http://<MASTER_IP>:30003 for Kiali
 
 In the case of a minikube Kubernetes cluster that uses Docker driver, you have to get the URL of the services by runing these commands from the host. Each command requires a different terminal window as documented [here](https://minikube.sigs.k8s.io/docs/handbook/accessing/): 
 ```zsh
 minikube service -n monitoring prometheus-nodeport
 minikube service -n monitoring grafana-nodeport
 minikube service -n istio-system jaeger-nodeport
+minikube service -n istio-system kiali-nodeport
 ```
 
 NOTE: to get the default Grafana username is `admin` and the password is `prom-operator` 
