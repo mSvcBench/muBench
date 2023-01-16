@@ -1,3 +1,6 @@
+# Secure .kube
+chmod go-r -R ~/.kube/
+
 # Prometherus
 kubectl create namespace monitoring
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
@@ -16,7 +19,7 @@ helm install istio-base istio/base -n istio-system
 helm install istiod istio/istiod -n istio-system --wait
 kubectl create namespace istio-ingress
 kubectl label namespace istio-ingress istio-injection=enabled
-helm install istio-ingress istio/gateway -n istio-ingress --wait
+helm install istio-ingress istio/gateway -n istio-ingress
 
 # Istio - Prometeus integration
 kubectl apply -f istio-prometheus-operator.yaml
