@@ -1165,6 +1165,8 @@ To observe the service-mesh you can access Kiali dashboard from your browser.
 <img width="70%" src="../Monitoring/kubernetes-full-monitoring/kiali.png">
 </p>
 
+> **_NOTE:_**: edit Configs/K8sParameters.json if your Kubernetes dns-resolver service is different from `kube-dns`. For instance in some cluster it is named `coredns`.
+> 
 ### µBench custom applications
 #### Service mesh generation
 

@@ -101,7 +101,7 @@ If you receive back a sequence of random letters, it means that your first µBen
 
 Read the [manual](Docs/Manual.md) to create and monitor your benchmark apps.
   
-> **_NOTE:_**: edit Configs/K8sParameters.json if your Kubernetes dns-resolver is different from kube-dns
+> **_NOTE:_**: edit Configs/K8sParameters.json if your Kubernetes dns-resolver service is different from `kube-dns`. For instance in some cluster it is named `coredns`.
 
 ## Cite Us
 The description of µBench and some use-cases has been published in IEEE Transactions on Parallel and Distributed Systems. If you use the µBench please cite the following publication:
