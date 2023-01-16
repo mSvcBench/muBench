@@ -1,7 +1,3 @@
-
-# secure .kube/config file
-chmod ga-xr $HOME/.kube/config
-
 # Prometherus
 kubectl create namespace monitoring
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
