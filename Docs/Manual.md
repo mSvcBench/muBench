@@ -12,6 +12,9 @@
     - [Work Model Generator](#work-model-generator)
     - [Autopilots](#autopilots)
   - [Benchmarks strategies](#benchmarks-strategies)
+    - [Stochastic-driven benchmarks](#stochastic-driven-benchmarks)
+    - [Trace-driven benchmarks](#trace-driven-benchmarks)
+  - [Benchmarks tools](#benchmarks-tools)
   - [Monitoring and Tracing](#monitoring-and-tracing)
   - [Installation and Getting Started](#installation-and-getting-started)
     - [Create and get access to a Kubernetes cluster](#create-and-get-access-to-a-kubernetes-cluster)
@@ -34,7 +37,7 @@
 µBench generates dummy microservice applications consisting of a set of (micro) services that call each other to satisfy a client request. Each service has a different ID (e.g., *s0, s1, s2, sdb1*) and performs the following tasks
 
 - executing an *internal-service*, i.e. a function, that stresses specific *computing* resources (CPU, disk, memory, etc.) and produces some dummy bytes to stress *network* resources
-- calling a set of *external-services*, i.e.  the services of other service-cells, and wait for their results
+- calling a set of *external-services*, i.e.  the services of other service-cells, and waiting for their results
 - sending back the number of dummy bytes produced by the internal-service to the callers
 
 Services communicate with each other using either HTTP REST request/response mechanisms or gRPC. Users can access the µBench microservice application through an API gateway, an NGINX server, that exposes an HTTP endpoint per service, e.g. *NGINX_ip:port/s0*, *NGINX_ip:port/s1*, etc. These endpoints can be used by software for performance evaluation that loads the system with service requests, such as our [Runner](Manual.md#benchmark-tools), [ApacheBench](https://httpd.apache.org/docs/2.4/programs/ab.html), [JMeter](https://jmeter.apache.org/).
@@ -63,112 +66,112 @@ The description of a µBench application, i.e. the set of internal and external 
 
 ```json
 {
-	"s0": {
-		"external_services": [{
-				"seq_len": 100,
-				"services": [
-					"s1"
-				],
-				"probabilities": {
-					"s1": 1
-				}
-			},
-			{
-				"seq_len": 1,
-				"services": [
-					"sdb1"
-				],
-				"probabilities": {
-					"sdb1": 1
-				}
-			}
-		],
-		"internal_service": {
-			"compute_pi": {
-				"mean_bandwidth": 10,
-				"range_complexity": [
-					50,
-					100
-				]
-			}
-		},
-		"request_method": "rest",
-		"workers": 4,
-		"threads": 16,
-		"cpu-requests": "1000m",
-		"cpu-limits": "1000m",
-		"pod_antiaffinity": false,
-		"replicas": 1
-	},
-	"sdb1": {
-		"external_services": [],
-		"internal_service": {
-			"compute_pi": {
-				"mean_bandwidth": 1,
-				"range_complexity": [
-					1,
-					10
-				]
-			}
-		},
-		"request_method": "rest",
-		"workers": 4,
-		"threads": 16,
-		"pod_antiaffinity": false,
-		"replicas": 1,
-		"cpu-requests": "1000m",
-		"cpu-limits": "1000m"
-	},
-	"s1": {
-		"external_services": [{
-			"seq_len": 100,
-			"services": [
-				"s2"
-			],
-			"probabilities": {
-				"s2": 1
-			}
-		}],
-		"internal_service": {
-			"colosseum": {
-				"mean_bandwidth": 10
-			}
-		},
-		"request_method": "rest",
-		"workers": 4,
-		"threads": 16,
-		"cpu-requests": "1000m",
-		"cpu-limits": "1000m",
-		"pod_antiaffinity": false,
-		"replicas": 1
-	},
-	"s2": {
-		"external_services": [{
-			"seq_len": 1,
-			"services": [
-				"sdb1"
-			],
-			"probabilities": {
-				"sdb1": 1
-			}
-		}],
-		"internal_service": {
-			"compute_pi": {
-				"mean_bandwidth": 15,
-				"range_complexity": [
-					10,
-					20
-				]
-			}
-		},
-		"request_method": "rest",
-		"workers": 4,
-		"threads": 16,
-		"cpu-requests": "1000m",
-		"cpu-limits": "1000m",
-		"pod_antiaffinity": false,
-		"replicas": 1
-	}
+   "s0": {
+      "external_services": [{
+            "seq_len": 100,
+            "services": [
+               "s1"
+            ],
+            "probabilities": {
+               "s1": 1
+            }
+         },
+         {
+            "seq_len": 1,
+            "services": [
+               "sdb1"
+            ],
+            "probabilities": {
+               "sdb1": 1
+            }
+         }
+      ],
+      "internal_service": {
+         "compute_pi": {
+            "mean_bandwidth": 10,
+            "range_complexity": [
+               50,
+               100
+            ]
+         }
+      },
+      "request_method": "rest",
+      "workers": 4,
+      "threads": 16,
+      "cpu-requests": "1000m",
+      "cpu-limits": "1000m",
+      "pod_antiaffinity": false,
+      "replicas": 1
+   },
+   "sdb1": {
+      "external_services": [],
+      "internal_service": {
+         "compute_pi": {
+            "mean_bandwidth": 1,
+            "range_complexity": [
+               1,
+               10
+            ]
+         }
+      },
+      "request_method": "rest",
+      "workers": 4,
+      "threads": 16,
+      "pod_antiaffinity": false,
+      "replicas": 1,
+      "cpu-requests": "1000m",
+      "cpu-limits": "1000m"
+   },
+   "s1": {
+      "external_services": [{
+         "seq_len": 100,
+         "services": [
+            "s2"
+         ],
+         "probabilities": {
+            "s2": 1
+         }
+      }],
+      "internal_service": {
+         "colosseum": {
+            "mean_bandwidth": 10
+         }
+      },
+      "request_method": "rest",
+      "workers": 4,
+      "threads": 16,
+      "cpu-requests": "1000m",
+      "cpu-limits": "1000m",
+      "pod_antiaffinity": false,
+      "replicas": 1
+   },
+   "s2": {
+      "external_services": [{
+         "seq_len": 1,
+         "services": [
+            "sdb1"
+         ],
+         "probabilities": {
+            "sdb1": 1
+         }
+      }],
+      "internal_service": {
+         "compute_pi": {
+            "mean_bandwidth": 15,
+            "range_complexity": [
+               10,
+               20
+            ]
+         }
+      },
+      "request_method": "rest",
+      "workers": 4,
+      "threads": 16,
+      "cpu-requests": "1000m",
+      "cpu-limits": "1000m",
+      "pod_antiaffinity": false,
+      "replicas": 1
+   }
 }
 ```
 
@@ -182,7 +185,7 @@ Additional information includes the number of parallel processes (`workers`) and
 ## Internal-Service functions
 
 An internal-service is a function that users can define as a Python function. The Docker image of the service-cell provides a default function named `compute_pi` that computes a configurable number of decimals of pigreco to keep the CPU busy. 
-To stress other aspects (e.g. memory, storage, etc.), the user can develop his *custom functions* and save them into the subfolder `CustomFunctions`.  In this way, µBench supports the continuous integration of new benchmark functions without the need of changing the remaining code.
+To stress other aspects (e.g. memory, storage, etc.), the user can develop his *custom functions* and save them into the subfolder `CustomFunctions`. In this way, µBench supports the continuous integration of new benchmark functions without the need of changing the remaining code.
 
 ### How to write your own custom function <!-- omit in toc -->
 
@@ -638,7 +641,7 @@ Autopilots are sequential executors of the toolchain. An autopilot sequentially 
 
 #### K8sAutopilot <!-- omit in toc -->
 
-Currently, the `Autopilots` folder contains an Autopilot tool for Kubernetes in the subfolder `K8sAutopilot`. It uses the following configuration `K8sAutopilotConf.json` file whose keys specify the paths of the run tools and their configuration files.
+Currently, the `Autopilots` folder contains an Autopilot tool for Kubernetes in the subfolder `K8sAutopilot`. It uses the following configuration `K8sAutopilotConf.json` file, whose keys specify the paths of the run tools and their configuration files.
 
 ```json
 {
@@ -660,11 +663,12 @@ python3 Autopilots/K8sAutopilot/K8sAutopilot.py -c Configs/K8sAutopilotConf.json
 ---
 
 ## Benchmarks strategies
+
 ### Stochastic-driven benchmarks
-For stochastic benchmarks, a user sends an HTTP GET to service `s0` and this request will span a random set of services according to the calling probabilities specifieed in the `workmodel.json` file.    
+For stochastic benchmarks, a user sends an HTTP GET to service `s0` and this request will span a random set of services according to the calling probabilities specified in the `workmodel.json` file.
 
 ### Trace-driven benchmarks
-For trace-driven bencharks, a user sends an HTTP POST request to the gateway and includes, as body, a JSON object that represents a `trace`, i.e. the exact sequences of the services to be span for serving the request. An example of the structure of a trace is given below:
+For trace-driven benchmarks, a user sends an HTTP POST request to the gateway and includes, as body, a JSON object that represents a `trace`, i.e. the exact sequences of the services to be span for serving the request. An example of the structure of a trace is given below:
 
 ```json
 {
@@ -677,7 +681,7 @@ For trace-driven bencharks, a user sends an HTTP POST request to the gateway and
    }]
 }
 ```
-The key is the service executing the requests, while the value is a list of external-service groups to be contacted in parallel. Microservices in an external-service group are requested sequentially. Since in microservice applications same services are often requested multiple times and the structure of a JSON object does not allow duplicate keys, we have encoded a specific service with its name (e.g. `s0`) followed by a *escape* sequence (`__`) and a random number. This is not mandatory, but necessary when you need to have the same microservice repeated at the same JSON level.     
+The key is the service executing the requests, while the value is a list of external-service groups to be contacted in parallel. Microservices in an external-service group are requested sequentially. Since in microservice applications the same services are often requested multiple times and the structure of a JSON object does not allow duplicate keys, we have encoded a specific service with its name (e.g. `s0`) followed by a *escape* sequence (`__`) and a random number. This is not mandatory, but necessary when you need to have the same microservice repeated at the same JSON level.     
 In the example trace, microservice `s0` has a single external-service group consisting of microservices `s24` and `s28`, which are called sequentially. In turn, `s28` has a single group of external-services consisting of the microservices `s6` and `s20`. Consequently, the sequence of the called microservices is: `s0`-->`s24`, then `s0`-->`s28`, then `s28`-->`s6`, then `s28`-->`s20`.
 
 To change the sequence of calls from sequential to parallel the JSON trace should be the following:
@@ -696,8 +700,8 @@ To change the sequence of calls from sequential to parallel the JSON trace shoul
 ```
 In this case, microservice `s0` has two groups of external-services consisting of microservices `s24` and `s28` that are called in parallel. In turn, `s28` has two groups of external-services consisting of the microservices `s6` and `s20`. Consequently, the sequence of the called microservices is: `s0`-->`s24,s28`, then `s28`-->`s6,s20`.
 
-In the `examples` directory there is the `Alibaba` folder with a collection of applications obtained from processing the real alibaba [traces](#https://link.alibaba.com/tracce), in the same directory we find the Matlab scripts used for the processing of the traces.
-To use these applications, first, we need to unzip the [trace-mbench.zip](#examples/Alibaba/trace-mbench.zip) file inside the `examples/Alibaba` directory. As result of this operation we obtain the `trace-mbench` directory within two folders: `par` and `seq`. 
+In the `examples` directory, there is the `Alibaba` folder with a collection of applications obtained from processing the real Alibaba [traces](#https://link.alibaba.com/tracce), in the same directory we find the Matlab scripts used for the processing of the traces.
+To use these applications, first, we need to unzip the [trace-mbench.zip](#examples/Alibaba/trace-mbench.zip) file inside the `examples/Alibaba` directory. As result of this operation, we obtain the `trace-mbench` directory within two folders: `par` and `seq`. 
 
 
 ```zsh
@@ -716,13 +720,12 @@ muBench/
 │  │  │  │  ├─ ...
 
 ```
-Each folder contains 29 applications, each one with a set of traces. The differences beetween the traces in two folder is that traces in the `par` directory execute downstream requests in parallel, whereas the traces in the `seq` directory execute requests in sequence. 
+Each folder contains 29 applications, each one with a set of traces. The differences between the traces in two folders is that traces in the `par` directory execute downstream requests in parallel, whereas the traces in the `seq` directory execute requests in sequence. 
 In each app folder, you will find the `service_mesh.json` file that represents the app's service mesh and its traces. To benchmark an app, the following steps must be performed:
 - Generate a `workmodel.json` file with the WorkModelGenerator by providing as input the `service_mesh.json` file of the app you intend to test. 
 - Deploy the application with K8sDeployer by providing as input the `workmodel.json` file created in the previous step.
 - Send traces to the application
-
-In what folows we provide an example for the app no. 3
+In what follows, we provide an example for app no. 3
 
 #### Generate Workmodel <!-- omit in toc -->
 To generate the `workmodel.json` file you can use the WorkModelGenerator. It is necessary to edit the parameter `ServiceMeshFilePath` inside the `WorkModelParameters.json` with the correct path of the selected app service_mesh, e.g.
@@ -763,6 +766,7 @@ curl -X POST -H "Content-Type: application/json" http://<access-gateway-ip>:3111
 ```
 
 ## Benchmarks tools 
+
 µBench provides simple benchmark tools in the `Benchmarks` directory, for stochastic-driven benchmarks only. Besides this tool, you can use other open-souce tools, e.g. *ab - Apache HTTP server benchmarking tool* as it follows, where `<access-gateway-ip>:31113` is the IP address (e.g., that of K8s master node) and port through which it is possible to contact the NGINX API gateway:
 
 ```zsh
@@ -770,6 +774,7 @@ ab -n 100 -c 2 http://<access-gateway-ip>:31113/s0
 ```
 
 Another benchmarking tool we have used successfully is *Apache JMeter* through which both stochastic and trace-driven benchmarks can be run.
+
 ### Traffic Generator and Runner <!-- omit in toc -->
 
 `TrafficGenerator` and `Runner` are two tools used to load a µBench microservice application with a sequence of HTTP requests and observe its performance both through simple metrics offered by the Runner and by Prometheus metrics.  
@@ -845,18 +850,18 @@ After each test, the `Runner` can execute a custom python function (e.g. to fetc
 The `result_file` produced by the `Runner` contains five columns. Each row is written at the end of an HTTP request. The first column indicates the time of the execution of the request as a unix timestamp; the second column indicates the elapsed time, in *ms*, of the request; the third column reports the received HTTP status (e.g. 200 OK), the fourth and fifth columns are the number of processed and pending (on-going) requests at that time, respectively. 
 
 ```zsh
-1637682769350 	 171 	 200 	 6 	 5
-1637682769449 	 155 	 200 	 8 	 6
-1637682769499 	 164 	 200 	 9 	 6
-1637682769648 	 134 	 200 	 11 	 7
-1637682769749 	 155 	 200 	 14 	 9
-1637682769949 	 191 	 200 	 18 	 12
-1637682770001 	 158 	 200 	 19 	 12
-1637682769299 	 928 	 200 	 20 	 12
-1637682770050 	 181 	 200 	 20 	 11
-1637682769253 	 966 	 200 	 20 	 10
-1637682770100 	 175 	 200 	 21 	 10
-1637682769399 	 900 	 200 	 22 	 10
+1637682769350   171   200   6     5
+1637682769449   155   200   8     6
+1637682769499   164   200   9     6
+1637682769648   134   200   11    7
+1637682769749   155   200   14    9
+1637682769949   191   200   18    12
+1637682770001   158   200   19    12
+1637682769299   928   200   20    12
+1637682770050   181   200   20    11
+1637682769253   966   200   20    10
+1637682770100   175   200   21    10
+1637682769399   900   200   22    10
 ...
 ```
 
