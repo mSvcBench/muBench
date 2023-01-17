@@ -722,7 +722,7 @@ In each app folder, you will find the `service_mesh.json` file that represents t
 - Deploy the application with K8sDeployer by providing as input the `workmodel.json` file created in the previous step.
 - Send traces to the application
 
-In what folows we provide an exaple for the app no. 3
+In what folows we provide an example for the app no. 3
 
 #### Generate Workmodel <!-- omit in toc -->
 To generate the `workmodel.json` file you can use the WorkModelGenerator. It is necessary to edit the parameter `ServiceMeshFilePath` inside the `WorkModelParameters.json` with the correct path of the selected app service_mesh, e.g.
@@ -762,7 +762,7 @@ To send a trace you need to do an HTTP POST request to the NGINX API gateway wit
 curl -X POST -H "Content-Type: application/json" http://<access-gateway-ip>:31113/s0 -d @examples/Alibaba/traces-mbench/seq/app3/trace00001.json
 ```
 
-## Benchmarks tools  <!-- omit in toc -->
+## Benchmarks tools 
 µBench provides simple benchmark tools in the `Benchmarks` directory, for stochastic-driven benchmarks only. Besides this tool, you can use other open-souce tools, e.g. *ab - Apache HTTP server benchmarking tool* as it follows, where `<access-gateway-ip>:31113` is the IP address (e.g., that of K8s master node) and port through which it is possible to contact the NGINX API gateway:
 
 ```zsh
