@@ -660,12 +660,11 @@ python3 Autopilots/K8sAutopilot/K8sAutopilot.py -c Configs/K8sAutopilotConf.json
 ---
 
 ## Benchmarks strategies
-### Stochastic-driven benchmarks <!-- omit in toc -->
-For stochastic benchmarks, the user can submit HTTP GET to service `s0` and this request will involve a random set of services according to the calling probabilities specifieed in the `workmodel.json` file.    
-### Trace-driven benchmarks <!-- omit in toc -->
-For trace-driven bencharks, the user sends a trace file to the NGINX API gateway, with the exact sequences of the services to be requested.
+### Stochastic-driven benchmarks
+For stochastic benchmarks, a user sends an HTTP GET to service `s0` and this request will span a random set of services according to the calling probabilities specifieed in the `workmodel.json` file.    
 
-The user sends an HTTP POST request to the gateway and includes, as body, a JSON file that represents the trace. An example of the structure of the trace file is given below:
+### Trace-driven benchmarks
+For trace-driven bencharks, a user sends an HTTP POST request to the gateway and includes, as body, a JSON object that represents a `trace`, i.e. the exact sequences of the services to be span for serving the request. An example of the structure of a trace is given below:
 
 ```json
 {
@@ -678,7 +677,7 @@ The user sends an HTTP POST request to the gateway and includes, as body, a JSON
    }]
 }
 ```
-The key is the service executing the requests, while the value is a list of external-service groups to be contacted in parallel. Microservices in an external-service group are requested sequentially. Since in microservice applications the same services are often requested multiple times and the structure of a JSON file does not allow duplicate keys, we have encoded a specific service with its name (e.g. `s0`) followed by a *escape* sequence (`__`) and a random number. This is not mandatory, but necessary when you need to have the same microservice repeated at the same JSON level.     
+The key is the service executing the requests, while the value is a list of external-service groups to be contacted in parallel. Microservices in an external-service group are requested sequentially. Since in microservice applications same services are often requested multiple times and the structure of a JSON object does not allow duplicate keys, we have encoded a specific service with its name (e.g. `s0`) followed by a *escape* sequence (`__`) and a random number. This is not mandatory, but necessary when you need to have the same microservice repeated at the same JSON level.     
 In the example trace, microservice `s0` has a single external-service group consisting of microservices `s24` and `s28`, which are called sequentially. In turn, `s28` has a single group of external-services consisting of the microservices `s6` and `s20`. Consequently, the sequence of the called microservices is: `s0`-->`s24`, then `s0`-->`s28`, then `s28`-->`s6`, then `s28`-->`s20`.
 
 To change the sequence of calls from sequential to parallel the JSON trace should be the following:
