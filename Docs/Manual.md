@@ -290,7 +290,9 @@ python3 Deployers/K8sDeployer/RunK8sDeployer.py -c Configs/K8sParameters.json
 
 If the K8sDeployer found YAML files in the YAML folder, it will ask whether the user prefers to undeploy them before proceeding.
 
-Take care of controlling the eventual completion of the deployement/undeployment operation with `kubectl get pods` command.
+Take care of controlling the eventual completion of the deployment/undeployment operation with `kubectl get pods` command.
+
+> *NOTE* :  `K8sParameters` can contain the keys `replicas`, `cpu-requests`, `cpu-limits`, `memory-requests` ,`memory-limits` to enforce these properties for all Pods of the µBench applation, overriding possible values in `workmodel.json `. For instance, `"replicas": 2` implies that every service will have 2 replicas.
 
 ---
 
