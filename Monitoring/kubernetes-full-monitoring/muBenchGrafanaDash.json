@@ -83,7 +83,7 @@
               }
             ]
           },
-          "unit": "ms"
+          "unit": "s"
         },
         "overrides": []
       },
@@ -1118,6 +1118,6 @@
   "timezone": "",
   "title": "µBench-dashboard",
   "uid": "6IBeJ-b7k",
-  "version": 3,
+  "version": 4,
   "weekStart": ""
 }
