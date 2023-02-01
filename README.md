@@ -106,7 +106,7 @@ Read the [manual](Docs/Manual.md) to create and monitor your benchmark apps.
 ## Cite Us
 The description of µBench and some use-cases has been published in IEEE Transactions on Parallel and Distributed Systems. If you use the µBench please cite the following publication:
 
->A. Detti, L. Funari, L. Petrucci, "µBench: an open-source factory of benchmark microservice applications", IEEE Transactions on Parallel and Distributed Systems
+>A. Detti, L. Funari and L. Petrucci, "μBench: An Open-Source Factory of Benchmark Microservice Applications," in IEEE Transactions on Parallel and Distributed Systems, vol. 34, no. 3, pp. 968-980, 1 March 2023, doi: 10.1109/TPDS.2023.3236447.
 
 To reproduce the tests of the paper read [here](Docs/reproducibility.md)
 
