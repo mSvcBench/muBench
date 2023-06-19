@@ -4,7 +4,7 @@ metadata:
   name: s0-gateway
 spec:
   selector:
-    istio: ingressgateway # use Istio default gateway implementation
+    istio: ingress # use Istio default gateway implementation, be careful to this label that should match that of istio-ingress
   servers:
   - port:
       number: 80
