@@ -72,7 +72,7 @@ kubectl apply -f jaeger-nodeport.yaml
 ```
 
 ## Kiali Istio Dashboard
-[kiali](https://kiali.io/) can be used as Istio dashboard. To deploy kiali it is enough to deploy the next kiali resources, which include a kiali-nodeport NodePort service on port `30002` use.
+[kiali](https://kiali.io/) can be used as Istio dashboard. To deploy kiali it is enough to deploy the next kiali resources, which include a kiali-nodeport NodePort service on port `30003` use.
 ```zsh
 kubectl apply -f kilai.yaml
 kubectl apply -f kilai-nodeport.yaml
