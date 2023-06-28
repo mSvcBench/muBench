@@ -319,9 +319,9 @@ else:
     for cnt, workload_var in enumerate(workloads):
         for x in range(round):
             print("Round: %d -- workload: %s" % (x+1, workload_var))
-            processed_requests = 0
+            processed_requests.value = 0
             timing_error_requests = 0
-            error_requests = 0
+            error_requests.value = 0
             file_runner(workload_var)
             print("***************************************")
         if cnt != len(workloads) - 1:
