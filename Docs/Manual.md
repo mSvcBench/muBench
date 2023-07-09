@@ -260,10 +260,10 @@ The K8sDeployer uses the `workmodel.json` file and other config files to create 
 | Services (NodePort)  | sdbx              | Services of service-cells of databases, port 80           |
 | Service (NodePort)   | gw-nginx          | Service of NGINX API gateway, port 80, nodeport 31113)    |
 | ConfigMap            | gw-nginx          | ConfigMap for nginx configuration                         |
-| ConfigMap            | internal-services | ConfigMap includig custom functions of internal-services  |
-| ConfigMap            | internal-services | ConfigMap includig workmodel.json                         |
+| ConfigMap            | internal-services | ConfigMap including custom functions of internal-services  |
+| ConfigMap            | internal-services | ConfigMap including workmodel.json                         |
 
-The K8sDeployer takes as input a JSON file, like the following one, which contains information about the path of the `workmodel.json` file (`WorkModelPath`) and custom functions (`InternalServiceFilePath`) to be stored in the related ConfigMaps, and Kubernetes parameters. The Kubernetes parameters are the Docker `image` of the service-cell, the `namespace` of the deployment, as well as the K8s `cluster_domain` and the URL `path` used to trigger the service of service-cells. Between the deployment of a service-cell and the next one, there is a waiting period equal to `sleep` seconds to avoid K8s API server overload. The user can change the name of the output YAML files by specifying the `prefix_yaml_file` and these files will be inserted in the `OutputPath` directory. NGINX gateway needs the name of the K8s DNS service and this value is stored in `dns-resolver` (be careful that some K8s clusters can use `codedns.` instead of the default `kube-dns.`)
+The K8sDeployer takes as input a JSON file, like the following one, which contains information about the path of the `workmodel.json` file (`WorkModelPath`) and custom functions (`InternalServiceFilePath`) to be stored in the related ConfigMaps, and Kubernetes parameters. The Kubernetes parameters are the Docker `image` of the service-cell, the `namespace` of the deployment, as well as the K8s `cluster_domain` and the URL `path` used to trigger the service of service-cells. Between the deployment of a service-cell and the next one, there is a waiting period equal to `sleep` seconds to avoid K8s API server overload. The user can change the name of the output YAML files by specifying the `prefix_yaml_file` and these files will be inserted in the `OutputPath` directory. NGINX gateway needs the name of the K8s DNS service and this value is stored in `dns-resolver` (be careful that some K8s clusters can use `coredns.` instead of the default `kube-dns.`)
 
 ```json
 {
@@ -292,7 +292,7 @@ If the K8sDeployer found YAML files in the YAML folder, it will ask whether the 
 
 Take care of controlling the eventual completion of the deployment/undeployment operation with `kubectl get pods` command.
 
-> *NOTE* :  `K8sParameters` can contain the keys `replicas`, `cpu-requests`, `cpu-limits`, `memory-requests` ,`memory-limits` to enforce these properties for all Pods of the µBench applation, overriding possible values in `workmodel.json `. For instance, `"replicas": 2` implies that every service will have 2 replicas.
+> *NOTE* :  `K8sParameters` can contain the keys `replicas`, `cpu-requests`, `cpu-limits`, `memory-requests` ,`memory-limits` to enforce these properties for all Pods of the µBench application, overriding possible values in `workmodel.json `. For instance, `"replicas": 2` implies that every service will have 2 replicas.
 
 ---
 
@@ -305,7 +305,7 @@ The following figure shows how they can be sequentially used with the K8sDeploye
 
 ### Service Mesh Generator
 
-The ServiceMeshGenerator generates a random *service mesh* of a µBench microservice application. A service mesh is usually defined as the set of external-services called by each service. It is represented as a graph, whose nodes are the services and a link exists between service A and B if service _A_ calls service *B*, i.e., *B* is an external-service of *A*. A link can have a weigth that is the probability of actually performing the call *A*->*B*.
+The ServiceMeshGenerator generates a random *service mesh* of a µBench microservice application. A service mesh is usually defined as the set of external-services called by each service. It is represented as a graph, whose nodes are the services and a link exists between service A and B if service _A_ calls service *B*, i.e., *B* is an external-service of *A*. A link can have a weight that is the probability of actually performing the call *A*->*B*.
 The ServiceMeshGenerator creates a `servicemesh.json` file that includes this topological informations and also other information concerning the strategy used to call the possible external-services, in order to mimic a random traveling of the service-mesh.
 
 #### Service Mesh Topology <!-- omit in toc -->
