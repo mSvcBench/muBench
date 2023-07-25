@@ -4,22 +4,20 @@ RUN apt update
 
 # kubectl
 RUN mkdir /etc/apt/keyrings
-RUN apt install -y ca-certificates curl bash-completion --no-install-recommends
-RUN curl -fsSLo /etc/apt/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
-RUN echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
+RUN apt install -y gpg ca-certificates curl bash-completion apt-transport-https --no-install-recommends
+RUN curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
+RUN echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list
 RUN apt update
-RUN apt install -y kubectl
+RUN apt install -y kubectl --no-install-recommends
 RUN mkdir /root/.kube
 
 # kubectl autocomplete
-RUN apt install -y bash-completion --no-install-recommends 
 RUN echo "source /usr/share/bash-completion/bash_completion" >> .bashrc
 RUN echo 'source <(kubectl completion bash)' >>~/.bashrc
 RUN  echo 'alias k=kubectl' >>~/.bashrc
 RUN  echo 'complete -o default -F __start_kubectl k' >>~/.bashrc
 
 # heml
-RUN apt install -y gpg
 RUN curl https://baltocdn.com/helm/signing.asc | gpg --dearmor > /usr/share/keyrings/helm.gpg
 RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" > /etc/apt/sources.list.d/helm-stable-debian.list
 RUN apt update

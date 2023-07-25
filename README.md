@@ -41,6 +41,7 @@ Copy the `.kube/config ` file you use in your host to access the Kubernetes clus
 kubectl config view --flatten > config
 docker cp config mubench:/root/.kube/config
 ```
+In case update the `server:` key of `config` file with the correct IP address of the master node of the cluster. 
 
 Verify that µBench container can access your cluster, e.g., by using next command from your host
 ```zsh
@@ -66,6 +67,7 @@ root@64ae03d1e5b8:~#
 ``` 
 
 Deploy the µBench demo app with
+
 ```zsh
 cd $HOME/muBench
 python3 Deployers/K8sDeployer/RunK8sDeployer.py -c Configs/K8sParameters.json
