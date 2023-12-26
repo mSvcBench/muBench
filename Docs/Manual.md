@@ -147,7 +147,7 @@ The description of a µBench application, i.e. the set of internal and external 
    },
    "s2": {
       "external_services": [{
-         "seq_len": 1,
+         "seq_len": 100,
          "services": [
             "sdb1"
          ],
@@ -177,7 +177,10 @@ The description of a µBench application, i.e. the set of internal and external 
 
 In this example, the µBench application is made by four services: *s0*, *s1*, *s2*, and *sdb1* (that mimics a database). The internal-service of s0 is the function  *compute_pi* with parameters `range_complexity` (uniform random interval of the number of pigreco digits to generate; the higher this number the higher the CPU stress) and `mean_bandwidth` (average value of an expneg distribution used to generate the number of bytes to return to the caller).
 
-The external-services called by s0 are organized in two *external-service-groups* described by JSON objects contained by an array. The first group contains only the external-service *s1*. The second group contains only the external-service *sdb1*. To mimic random paths on the service mesh, for each group, a dedicated processing thread of the service-cell randomly selects `seq_len` external-services from it and invokes (e.g., HTTP call) them *sequentially*; in the case where the `probability` array contains an external-service selected by the `seq_len` selection, that service is actually called based on its probability. The per-group threads are executed in parallel, one per group. In this way, a µBench emulates sequential and parallel calls of external-services.
+The external services called by s0 are organized into two *external-service-groups* described by JSON objects contained in an array. The first group contains only the external service *s1*. The second group contains only the external service *sdb1*. External services belonging to the same group are called sequentially, while those in different groups are called in parallel. Specifically, upon receiving a request, a different per-group thread is executed for each external-service-group. Each per-group thread randomly selects a number of `seq_len` external-services in its group and invokes them (e.g., an HTTP call) sequentially, according to a given calling `probability`. If `seq_len` is greater than the size of the external-services-group, the involvement of the external-services of the group is controlled exclusively by the calling probabilities.  
+
+In the example considered, the service *s0* surely calls *s1* because seq_len > size of the external-service-group and probability of s1 = 1, and for the same reason it surely calls *sdb1* in parallel, because *s1* and *sdb1* belong to different external-service-groups of *s0*. Consequently, *s1* surely calls *s2* and *s2* surely calls *sdb1*.
+
 Additional information includes the number of parallel processes (`workers`) and `threads` per process used by the service-cell to serve client requests, the `request_method` it uses to call other services (can be `gRPC` or `rest` and, currently, must be equal for all), optional specification of CPU and memory resources needed by service-cell containers, namely `cpu-requests`, `cpu-limits`, `memory-requests`, `memory-limits` (see k8s [documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)), the number of `replicas` of the related POD, the `pod_antiaffinity` (true, false) property to enforce pods spreading on different nodes.
 
 ---
