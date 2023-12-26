@@ -72,7 +72,8 @@ kubectl apply -f jaeger-nodeport.yaml
 ```
 
 ## Kiali Istio Dashboard
-[kiali](https://kiali.io/) can be used as Istio dashboard. To deploy kiali it is enough to deploy the next kiali resources, which include a kiali-nodeport NodePort service on port `30003` download kiali.yaml from [istio main page] (https://istio.io/latest/docs/ops/integrations/kiali) and add the following external_services to the yaml.
+[kiali](https://kiali.io/) can be used as Istio dashboard. To install kiali, download kiali.yaml from [istio main page] (https://istio.io/latest/docs/ops/integrations/kiali) and add the following `external_services` to the yaml to link prometheus and grafana running in the cluster. An example of the resulting yaml file is the [kiali.yaml] (muBench/Monitoring/kubernetes-full-monitoring
+/kiali.yaml) file in this folder. 
 
 ```json
     external_services:
@@ -85,7 +86,7 @@ kubectl apply -f jaeger-nodeport.yaml
         in_cluster_url: 'http://prometheus-grafana.monitoring:80/'
 ```
 
-then use
+then use then next commands that expose kiali as NodePort on port 30003
 
 ```zsh
 kubectl apply -f kilai.yaml
