@@ -4,16 +4,6 @@ kind: Service
 metadata:
   name: kiali-nodeport
   namespace: istio-system
-  labels:
-    helm.sh/chart: kiali-server-1.59.1
-    app: kiali
-    app.kubernetes.io/name: kiali
-    app.kubernetes.io/instance: kiali
-    version: "v1.59.1"
-    app.kubernetes.io/version: "v1.59.1"
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/part-of: "kiali"
-  annotations:
 spec:
   type: NodePort
   ports:
