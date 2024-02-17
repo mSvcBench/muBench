@@ -8,7 +8,8 @@ The tool creates *dummy* microservice applications that can be customized by the
 
 µBench targets researchers and cloud platform developers who lack real microservice applications to benchmark their findings (e.g., new resource control mechanisms, AI-driven orchestration, etc.). Indeed, µBench can create these applications for them. At the same time, µBench can also be used for educational purposes to show advantages and problems of microservice applications to students.
 
-µBench allows users control some properties of the microservice application it creates, such as: - the topology of the service mesh 
+µBench allows users control some properties of the microservice application it creates, such as: 
+- the dependency graph of the microservice application 
 - the behaviors of composing microservices using a portfolio of stress functions (e.g. for CPU, memory, I/O, network) or implementing new ones, 
 - the microservice-to-microservice API (HTTP or gRPC)
 - the CPU and Memory resources assigned to microservices and their number of replicas  
