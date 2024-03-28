@@ -308,10 +308,13 @@ The following figure shows how they can be sequentially used with the K8sDeploye
 
 ### Service Mesh Generator
 
-The ServiceMeshGenerator generates a random *service mesh* of a µBench microservice application. A service mesh is usually defined as the set of external-services called by each service. It is represented as a graph, whose nodes are the services and a link exists between service A and B if service _A_ calls service *B*, i.e., *B* is an external-service of *A*. A link can have a weight that is the probability of actually performing the call *A*->*B*.
-The ServiceMeshGenerator creates a `servicemesh.json` file that includes this topological informations and also other information concerning the strategy used to call the possible external-services, in order to mimic a random traveling of the service-mesh.
+The ServiceMeshGenerator can be used to randomly generate the *dependency graph* among µBench's microservices and the strategies used to span the graph while serving a user request. A dependency graph is the set of external-services called by each service. It is represented as a graph, whose nodes are the services and a link exists between service A and B if service *A* calls service *B*, i.e., *B* is an external-service of *A*. A link can have a weight that is the probability of actually performing the call *A*->*B* while servicn a user request.
+The ServiceMeshGenerator creates a `servicemesh.json` file that includes this graph informations.
 
-#### Service Mesh Topology <!-- omit in toc -->
+We called it "Service Mesh Generator" because the dependency graph can be visualized by service mesh software such as [Istio](https://istio.io). 
+ 
+
+#### Service Mesh Graph <!-- omit in toc -->
 
 Literature [studies](https://researchcommons.waikato.ac.nz/bitstream/handle/10289/13981/EVOKE_CASCON_2020_paper_37_WeakestLink.pdf?sequence=11&isAllowed=y) show that the building of a realistic mesh can be done by using the Barabási-Albert (BA) algorithm, which uses a power-law distribution and results in a topology that follows a preferential-attachment model. For this reason, we chose to model the service mesh as a BA graph.
 If we change the values of the BA model, we are able to generate microservice applications with different mesh topologies. 
