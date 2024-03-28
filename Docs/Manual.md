@@ -252,7 +252,7 @@ Where `sidecar` is the name of the docker image to be used as sidecar and `mongo
 
 µBench exploits an underlying container orchestration platform to deploy the service-cells. The deployment task is done by a per-platform deployment tool that takes as input the `workmodel.json`, and possible platform configuration files, and eventually uses the platform API to carry out the final deployment. Currently, µBench software uses Kubernetes platform only and includes a Kubernetes deployment tool, named K8sDeployer, that must run on a host that has access to a Kubernetes cluster through `kubectl` tool.
 
-### Kubernetes Deployer
+### Execute a µBench application in a Kubernetes cluster
 
 The K8sDeployer uses the `workmodel.json` file and other config files to create the  Kubernetes resources used to run the µBench microservice application. In particular, the K8sDeployer runs the following Kubernetes resources:
 
