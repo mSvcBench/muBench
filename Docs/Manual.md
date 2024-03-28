@@ -309,7 +309,7 @@ The following figure shows how they can be sequentially used with the K8sDeploye
 
 ### Service Mesh Generator
 
-The ServiceMeshGenerator can be used to randomly generate the *dependency graph* among µBench's microservices and the strategies used to span the graph while serving a user request. A dependency graph made of the set of external-services called by each service. It is represented as a graph, whose nodes are the services and a link exists between service *A* and *B* if service *A* calls service *B*, that is, *B* is an external-service of *A*. A link can have a weight that is the probability of actually performing the call *A*->*B* while serving a user request. 
+The ServiceMeshGenerator can be used to randomly generate the *dependency graph* among µBench's microservices and the strategies used to span the graph while serving a user request. A dependency graph is made of the set of external-services called by each service. It is represented as a graph, whose nodes are the services and a link exists between service *A* and *B* if service *A* calls service *B*, that is, *B* is an external-service of *A*. A link can have a weight that is the probability of actually performing the call *A*->*B* while serving a user request. 
 
 The ServiceMeshGenerator creates a `servicemesh.json` file that includes this graph information, which will be eventually included in the workmodel file describing the µBench application.
 
