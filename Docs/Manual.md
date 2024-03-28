@@ -50,7 +50,7 @@ Services communicate with each other using either HTTP REST request/response mec
 ![service-cell-abstraction](service-cell-abstraction.png)
 Each service is implemented by a main software unit that we call *service-cell*. A service-cell is a [Docker container](/ServiceCell/README.md) that contains a Python program executing the internal and external services that the user has chosen for the specific service.
 
-Service-cells are connected by a TCP/IP network and they access a common storage space (Kubernetes ConfigMaps) where they find some files describing the work that each of them has to do. These files are `workmodel.json`, and a set of python files imported by the service-cell that include the definition of all *custom functions* possibly used as internal-service.
+Service-cells are connected by a TCP/IP network and they access a common storage space (Kubernetes ConfigMaps) where they find some files describing the work that each of them has to do. These files are `workmodel.json`, and a set of Python files imported by the service-cell that include the definition of all *custom functions* possibly used as internal-service.
 
 For performance monitoring, service-cells expose a set of metrics to a Prometheus server.
 
@@ -179,28 +179,28 @@ In this example, the µBench application is made by four services: *s0*, *s1*, *
 
 The external-services called by s0 are organized into two *external-service-groups* described by JSON objects contained in an array. The first group contains only the external-service *s1*. The second group contains only the external-service *sdb1*. External-services belonging to the same group are called sequentially, while those in different groups are called in parallel. Specifically, upon receiving a request, a different per-group thread is executed for each external-service-group. Each per-group thread randomly selects a number of `seq_len` external-services in its group and invokes them (e.g., an HTTP call) sequentially, according to a given calling `probability`. If `seq_len` is greater than the size of the external-services-group, the involvement of the external-services of the group is controlled exclusively by the calling probabilities.  
 
-In the considered example, the service *s0* surely calls *s1* because seq_len is greather than size of the external-service-group and probability of s1 = 1, and for the same reason it surely calls *sdb1* in parallel, because *s1* and *sdb1* belong to different external-service-groups of *s0*. Consequently, *s1* surely calls *s2* and *s2* surely calls *sdb1*.
+In the considered example, the service *s0* surely calls *s1* because seq_len is greater than the size of the external-service-group and probability of s1 = 1, and for the same reason it surely calls *sdb1* in parallel, because *s1* and *sdb1* belong to different external-service-groups of *s0*. Consequently, *s1* surely calls *s2* and *s2* surely calls *sdb1*.
 
-This way of involving microservices per request is called *stochastic-driven*. µBench also offer a *trace-driven* approach, see [Benchmark Strategies](#benchmarks-strategies).   
+This way of involving microservices per request is called *stochastic-driven*. µBench also offers a *trace-driven* approach, see [Benchmark Strategies](#benchmarks-strategies).   
 
-Additional information includes the number of parallel processes (`workers`) and `threads` per process used by the service-cell to serve client requests, the `request_method` it uses to call other services (can be `gRPC` or `rest` and, currently, must be equal for all), optional specification of CPU and memory resources needed by service-cell containers, namely `cpu-requests`, `cpu-limits`, `memory-requests`, `memory-limits` (see k8s [documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)), the number of `replicas` of the related POD, the `pod_antiaffinity` (true, false) property to enforce pods spreading on different nodes.
+Additional information includes the number of parallel processes (`workers`) and `threads` per process used by the service-cell to serve client requests, the `request_method` it uses to call other services (can be `gRPC` or `rest`, and, currently, must be equal for all), optional specification of CPU and memory resources needed by service-cell containers, namely `cpu-requests`, `cpu-limits`, `memory-requests`, `memory-limits` (see k8s [documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)), the number of `replicas` of the related POD, the `pod_antiaffinity` (true, false) property to enforce pods spreading on different nodes.
 
 ---
 
 ## Internal-Service functions
 
 An internal-service is a function that users can define as a Python function. The Docker image of the service-cell provides a default function named `compute_pi` that computes a configurable number of decimals of pigreco to keep the CPU busy. 
-To stress other aspects (e.g. memory, storage, etc.), the user can develop his *custom functions* and save them into the subfolder `CustomFunctions`. In this way, µBench supports the continuous integration of new benchmark functions without the need of changing the remaining code.
+To stress other aspects (e.g. memory, storage, etc.), the user can develop his *custom functions* and save them into the subfolder `CustomFunctions`. In this way, µBench supports the continuous integration of new benchmark functions without the need to change the remaining code.
 
 ### How to write your own custom function <!-- omit in toc -->
 
 As **input**, your function receives a dictionary with the parameters specified in the `workmodel.json` file.
 
-As **output**, your function must return a string used as body for the response given back by a service.
+As **output**, your function must return a string used as the body for the response given back by a service.
 
 > Note1: each custom function must have a **unique name**, otherwise conflicts will occur.
-Also, you can specify more than one custom function inside the same python file.
-> Note2: the python libraries (imports) needed to the custom function must be included in the service-cell container. If necessary edit the `requirement.txt` file of `ServiceCell` and rebuild the container. Then, push it to your own repository, and use this new image in `Configs/K8sParameters.json`. 
+Also, you can specify more than one custom function inside the same Python file.
+> Note2: The Python libraries (imports) needed for the custom function must be included in the service-cell container. If necessary edit the `requirement.txt` file of `ServiceCell` and rebuild the container. Then, push it to your own repository, and use this new image in `Configs/K8sParameters.json`. 
 
 ```python
 def custom_function(params):
@@ -293,7 +293,7 @@ Run `RunK8sDeployer.py` from the K8s Master node as follows
 python3 Deployers/K8sDeployer/RunK8sDeployer.py -c Configs/K8sParameters.json
 ```
 
-If the K8sDeployer found YAML files in the YAML folder, it will ask whether the user prefers to undeploy them before proceeding.
+If the K8sDeployer finds YAML files in the YAML folder, it will ask whether the user prefers to undeploy them before proceeding.
 
 Take care of controlling the eventual completion of the deployment/undeployment operation with `kubectl get pods` command.
 
@@ -324,11 +324,11 @@ Literature [studies](https://researchcommons.waikato.ac.nz/bitstream/handle/1028
 The BA algorithm builds the graph topology as follows: at each step, a new service is added as a vertex of a directed tree. This new service is connected with an edge to a single *parent* service already present in the topology. The edge direction is from the parent service to the new *child* service, this means that the parent service includes the new service in its external-services.  
 The parent service is chosen according to a preferred attachment strategy using a *power-law* distribution. Specifically, vertex *i* is chosen as a parent with a (non-normalized) probability equal to *P<sub>i</sub> = d<sub>i</sub><sup>&alpha;</sup> + a*, where *d<sub>i* is the number of services that have already chosen the service *i* as a parent, *&alpha;* is the power-law exponent, and *a* is the zero-appeal parameters i.e., the probability of a service being chosen as a parent when no other service has yet chosen it.
 
-As previusly mentioned, to simulate parallel and sequential calls of external-services, the whole set of external-services of a microservice is organized in *external-service-groups*. The ServiceMeshGenerator creates a configurable number of equal external service groups for each microservice and inserts external-services into these groups according to a water-filling algorithm.
+As previously mentioned, to simulate parallel and sequential calls of external-services, the whole set of external-services of a microservice is organized in external-service-groups. The ServiceMeshGenerator creates a configurable number of equal external service groups for each microservice and inserts external-services into these groups according to a water-filling algorithm.
 
-The ServiceMeshGenerator configures the probability of calling external-services using two different models: a constant model which assigns the same probability to all external-services and a random model that randomly chooses the value of the calling probability in the range 0,1.
+The ServiceMeshGenerator configures the probability of calling external-services using two different models: a constant model that assigns the same probability to all external-services and a random model that randomly chooses the value of the calling probability in the range (0,1).
 
-To simulate the presence of databases in a µBench microservice application, the ServiceMeshGenerator adds to the depencency graph some *database-services* that only execute their internal-service. The other services select one of these databases as external-service with a configurable probability.
+To simulate the presence of databases in a µBench microservice application, the ServiceMeshGenerator adds to the dependency graph some database-services that only execute their internal-service. The other services select one of these databases as external-service with a configurable probability.
 
 #### Execution of the ServicMeshGenrator <!-- omit in toc -->
 
@@ -354,9 +354,9 @@ The ServicMeshGenrator takes as input a JSON configuration file (`ServiceMeshPar
 }
 ```
 
-There are two services (`vertices = 2`), and each service has a single external_service_groups (`external_service_groups=1`). For each group, 100 external-services are sequentially called (`seq_len=100`). When `seq_len` > `vertices` all external-service of a service group are sequentially called. Regarding the weights of the link of the dependency graph, i.e. the calling probabilities, the ServiceMeshGenerator allows using a random (`"model":"random"`) distribution in the range 0-1 for extracting the value of such probabilities or using a constant value for all, as in the example. In any, case these probabilities can be fine-tuned a posteriori by editing the produced `servicemesh.json` file. 
+There are two services (`vertices = 2`), and each service has a single external_service_groups (`external_service_groups=1`). For each group, 100 external-services are sequentially called (`seq_len=100`). When `seq_len` > `vertices` all external-service of a service group are sequentially called. Regarding the weights of the link of the dependency graph, i.e. the calling probabilities, the ServiceMeshGenerator allows using a random (`"model":"random"`) distribution in the range (0,1) for extracting the value of such probabilities or using a constant value for all, as in the example. In any, case these probabilities can be fine-tuned a posteriori by editing the produced `servicemesh.json` file. 
 
-The configuration in the example provides also the presence of two databases, `sdb1` and `sdb2`. `sdb1` is used by a service with a probability 0.79, `sdb2` with a probability 0.01, in the remaining cases the service does not use any database.
+The configuration in the example provides also the presence of two databases, `sdb1` and `sdb2`. `sdb1` is used by a service with a probability of 0.79, `sdb2` with a probability of 0.01, and in the remaining cases the service does not use any database.
 
 The figure below reports a possible service mesh generated with these parameters where `sdb2` has been never chosen by services and therefore not included in the microservice application.
 
@@ -413,9 +413,9 @@ python3 ServiceMeshGenerator/RunServiceMeshGen.py -c Configs/ServiceMeshParamete
 
 #### Examples <!-- omit in toc -->
 
-We illustrate four examples of different service mesh topologies:
+We illustrate four examples of ServiceMeshParameters.json files that can be used to create dependency graphs with different topological properties:
 
-##### An highly-centralized hierarchical architecture with most of the services linked to one service (excluding the db services): <!-- omit in toc -->
+##### An highly centralized hierarchical architecture with most of the services linked to one service (excluding the db services): <!-- omit in toc -->
 
 ```json
 {
