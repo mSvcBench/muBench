@@ -62,7 +62,7 @@ In addition to the service-cell container, a µBench microservice can optionally
 
 ## Work Model
 
-The description of a µBench application, i.e. the set of internal and external services run by service-cells, is contained in a global file named `workmodel.json`, which all service-cells access via a k8s ConfigMap (named `mub-workmodel`). The `workmodel.json` file is made by a key per service as shown below.
+The description of a µBench application, i.e. the set of internal and external-services run by service-cells, is contained in a global file named `workmodel.json`, which all service-cells access via a k8s ConfigMap (named `mub-workmodel`). The `workmodel.json` file is made by a key per service as shown below.
 
 ```json
 {
@@ -312,30 +312,25 @@ The following figure shows how they can be sequentially used with the K8sDeploye
 
 The ServiceMeshGenerator can be used to randomly generate the *dependency graph* among µBench's microservices and the strategies used to span the graph while serving a user request. A dependency graph made of the set of external-services called by each service. It is represented as a graph, whose nodes are the services and a link exists between service *A* and *B* if service *A* calls service *B*, that is, *B* is an external-service of *A*. A link can have a weight that is the probability of actually performing the call *A*->*B* while serving a user request. 
 
-The ServiceMeshGenerator creates a `servicemesh.json` file that includes this graph informations, which will be eventually included in the workmodel file describing the µBench application.
+The ServiceMeshGenerator creates a `servicemesh.json` file that includes this graph information, which will be eventually included in the workmodel file describing the µBench application.
 
 We called it "Service Mesh Generator" because the dependency graph can be visualized by service mesh software such as [Istio](https://istio.io). 
  
 
-#### Dependency Graph <!-- omit in toc -->
+#### Concepts <!-- omit in toc -->
 
 Literature [studies](https://researchcommons.waikato.ac.nz/bitstream/handle/10289/13981/EVOKE_CASCON_2020_paper_37_WeakestLink.pdf?sequence=11&isAllowed=y) show that the building of a realistic dependency graph can be done by using the Barabási-Albert (BA) algorithm, which uses a power-law distribution and results in a topology that follows a preferential-attachment model. For this reason, the ServiceMeshGenerator creates random dependency graphs following the BA model.
 
 The BA algorithm builds the graph topology as follows: at each step, a new service is added as a vertex of a directed tree. This new service is connected with an edge to a single *parent* service already present in the topology. The edge direction is from the parent service to the new *child* service, this means that the parent service includes the new service in its external-services.  
 The parent service is chosen according to a preferred attachment strategy using a *power-law* distribution. Specifically, vertex *i* is chosen as a parent with a (non-normalized) probability equal to *P<sub>i</sub> = d<sub>i</sub><sup>&alpha;</sup> + a*, where *d<sub>i* is the number of services that have already chosen the service *i* as a parent, *&alpha;* is the power-law exponent, and *a* is the zero-appeal parameters i.e., the probability of a service being chosen as a parent when no other service has yet chosen it.
 
-#### Sequential and Parallel Calls of External-Services <!-- omit in toc -->
-As previusly mentioned, to simulate parallel and sequential calls of external-services, the whole set of external-services of a service-cell is organized in *external-service-groups*. The ServiceMeshGenerator creates a configurable number of equal external service groups for each microservice and inserts external-services into these groups according to a water-filling algorithm.
+As previusly mentioned, to simulate parallel and sequential calls of external-services, the whole set of external-services of a microservice is organized in *external-service-groups*. The ServiceMeshGenerator creates a configurable number of equal external service groups for each microservice and inserts external-services into these groups according to a water-filling algorithm.
 
-#### Stochastic Span of the Dependency Graph <!-- omit in toc -->
-
-The ServiceMeshGenerator configures the probability of calling external-services using two different models: a constant model which assign the same probability to all extenal service and a random model that randmly chose the value of the callig probability.
-
-#### Databases <!-- omit in toc -->
+The ServiceMeshGenerator configures the probability of calling external-services using two different models: a constant model which assigns the same probability to all external-services and a random model that randomly chooses the value of the calling probability in the range 0,1.
 
 To simulate the presence of databases in a µBench microservice application, the ServiceMeshGenerator adds to the depencency graph some *database-services* that only execute their internal-service. The other services select one of these databases as external-service with a configurable probability.
 
-#### Execution <!-- omit in toc -->
+#### Execution of the ServicMeshGenrator <!-- omit in toc -->
 
 The ServicMeshGenrator takes as input a JSON configuration file (`ServiceMeshParameters.json`) as the following one:
 
@@ -359,7 +354,7 @@ The ServicMeshGenrator takes as input a JSON configuration file (`ServiceMeshPar
 }
 ```
 
-There are two services (`vertices = 2`), each service has a single `external_service_groups=1`, and for each group  `seq_len=100` external-services are sequentially called (when `seq_len` > `vertices` all external-service of a service group are sequentially called). Regarding the weights of the link of the service-mesh, i.e. the calling probabilities, the ServiceMeshGenerator allows using a random (`"model":"random"`) distribution in the range 0-1 for extracting the value of such probabilities or using a constant value for all, as in the example. In any, case these probabilities can be fine-tuned a posteriori by editing the produced `ß` file. 
+There are two services (`vertices = 2`), and each service has a single external_service_groups (`external_service_groups=1`). For each group, 100 external-services are sequentially called (`seq_len=100`). When `seq_len` > `vertices` all external-service of a service group are sequentially called. Regarding the weights of the link of the dependency graph, i.e. the calling probabilities, the ServiceMeshGenerator allows using a random (`"model":"random"`) distribution in the range 0-1 for extracting the value of such probabilities or using a constant value for all, as in the example. In any, case these probabilities can be fine-tuned a posteriori by editing the produced `servicemesh.json` file. 
 
 The configuration in the example provides also the presence of two databases, `sdb1` and `sdb2`. `sdb1` is used by a service with a probability 0.79, `sdb2` with a probability 0.01, in the remaining cases the service does not use any database.
 
