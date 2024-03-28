@@ -5,8 +5,7 @@
   - [Service-Cell](#service-cell)
   - [Work Model](#work-model)
   - [Internal-Service functions](#internal-service-functions)
-  - [Application Deployment](#application-deployment)
-    - [Kubernetes Deployer](#kubernetes-deployer)
+  - [Run a µBench Application](#run-a-µbench-application)
   - [Toolchain](#toolchain)
     - [Service Mesh Generator](#service-mesh-generator)
     - [Work Model Generator](#work-model-generator)
@@ -244,7 +243,7 @@ Where `sidecar` is the name of the docker image to be used as sidecar and `mongo
 
 ---
 
-## Application Deployment
+## Run a µBench Application
 
 <p align="center">
 <img width="350" src="deployer.png">
