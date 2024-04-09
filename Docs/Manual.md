@@ -6,6 +6,7 @@
   - [Work Model](#work-model)
   - [Internal-Service functions](#internal-service-functions)
   - [Run a µBench Application](#run-a-µbench-application)
+    - [Execute a µBench application in a Kubernetes cluster](#execute-a-µbench-application-in-a-kubernetes-cluster)
   - [Toolchain](#toolchain)
     - [Service Mesh Generator](#service-mesh-generator)
     - [Work Model Generator](#work-model-generator)
@@ -904,9 +905,12 @@ With the following steps, you will deploy on your Kubernetes environment: [Prome
 ## Monitoring and Tracing
 µBench service-cells export some metrics to a Prometheus server running in the cluster. The exported metrics are:
 - *mub_response_size* : size of the request response in bytes;
-- *mub_request_latency_seconds* : request latency including the execution of internal and extrenal services;
-- *mub_internal_processing_latency_seconds* : duration of the execution of the internal-service
-- *mub_external_processing_latency_seconds* :  duration of the execution of the external-service
+- *mub_request_latency_milliseconds* : request latency including the execution of internal and external services;
+- *mub_internal_processing_latency_milliseconds* : duration of the execution of the internal-service
+- *mub_external_processing_latency_milliseconds* :  duration of the execution of the external-service
+- *mub_request_latency_milliseconds_bucket* : histogram of request latency including the execution of internal and external services;
+- *mub_internal_processing_latency_milliseconds_bucket* : histogram of duration of the execution of the internal-service
+- *mub_external_processing_latency_milliseconds_bucket* :  histogram of duration of the execution of the external-service
 
 By using Istio and Jaeger tools the monitoring can be deeper. To install the monitoring framework into the Kubernetes cluster read this [manual](../Monitoring/kubernetes-full-monitoring/README.md).
 

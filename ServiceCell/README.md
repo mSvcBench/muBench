@@ -3,4 +3,4 @@ The software that implements a service-cell is `CellController-mp.py`, which exp
 
 `CellController-mp.py` uses Gunicorn WSGI for implementing the HTTP/REST API. HTTP requests are served by a pool of processes and threads according to the `workers` and `threads` keys in `workmodel.json`. Therefore, a service-cell at most uses a number of CPU cores equal to `workers`. In the case of gPRG, `CellController-mp.py` uses only one core (single worker). So multi-process experiments can only be performed using the REST request method.
 
-In DockeHub, the (amd64) image of the service-cell is  `msvcbench/microservice_v4-screen:latest` . The python code `CellController-mp.py` runs in a GNU `screen` terminal to simplify debbuging. The Dockerfile used to build the image is `Dockefile.debug-mp`. 
+In DockeHub, the (amd64) image of the service-cell is  `msvcbench/microservice_v5-screen:latest` . The python code `CellController-mp.py` runs in a GNU `screen` terminal to simplify debbuging. The Dockerfile used to build the image is `Dockefile.debug-mp`. 

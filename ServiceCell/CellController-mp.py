@@ -13,7 +13,7 @@ from concurrent import futures
 import gunicorn.app.base
 from flask import Flask, Response, json, make_response, request
 import prometheus_client
-from prometheus_client import CollectorRegistry, Summary, multiprocess
+from prometheus_client import CollectorRegistry, Summary, multiprocess, Histogram
 
 from ExternalServiceExecutor import init_REST, init_gRPC, run_external_service
 from InternalServiceExecutor import run_internal_service
@@ -79,15 +79,27 @@ CONTENT_TYPE_LATEST = str('text/plain; version=0.0.4; charset=utf-8')
 RESPONSE_SIZE = Summary('mub_response_size', 'Response size',
                         ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service'], registry=registry
                         )
-INTERNAL_PROCESSING = Summary('mub_internal_processing_latency_seconds', 'Latency of internal service',
+
+INTERNAL_PROCESSING = Summary('mub_internal_processing_latency_milliseconds', 'Latency of internal service',
                            ['zone', 'app_name', 'method', 'endpoint'],registry=registry
                            )
-EXTERNAL_PROCESSING = Summary('mub_external_processing_latency_seconds', 'Latency of external services',
+EXTERNAL_PROCESSING = Summary('mub_external_processing_latency_milliseconds', 'Latency of external services',
                            ['zone', 'app_name', 'method', 'endpoint'], registry=registry
                            )
-REQUEST_PROCESSING = Summary('mub_request_processing_latency_seconds', 'Request latency including external and internal service',
+REQUEST_PROCESSING = Summary('mub_request_processing_latency_milliseconds', 'Request latency including external and internal service',
                            ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service'],registry=registry
                            )
+
+buckets=[0.5, 1, 10, 100 ,1000, 10000, float("inf")] 
+INTERNAL_PROCESSING_BUCKET = Histogram('mub_internal_processing_latency_milliseconds_bucket', 'Latency of internal service',
+                           ['zone', 'app_name', 'method', 'endpoint'],registry=registry,buckets=buckets
+                           )
+EXTERNAL_PROCESSING_BUCKET = Histogram('mub_external_processing_latency_milliseconds_bucket', 'Latency of external services',
+                           ['zone', 'app_name', 'method', 'endpoint'], registry=registry,buckets=buckets
+                           )
+REQUEST_PROCESSING_BUCKET = Histogram('mub_request_processing_latency_milliseconds_bucket', 'Request latency including external and internal service',
+                           ['zone', 'app_name', 'method', 'endpoint', 'from', 'kubernetes_service'],registry=registry,buckets=buckets
+)
 
 
 @app.route(f"{globalDict['work_model'][ID]['path']}", methods=['GET','POST'])
@@ -150,7 +162,8 @@ def start_worker():
         start_local_processing = time.time()
         body = run_internal_service(my_internal_service)
         local_processing_latency = time.time() - start_local_processing
-        INTERNAL_PROCESSING.labels(ZONE, K8S_APP, request.method, request.path).observe(local_processing_latency)
+        INTERNAL_PROCESSING.labels(ZONE, K8S_APP, request.method, request.path).observe(local_processing_latency*1000)
+        INTERNAL_PROCESSING_BUCKET.labels(ZONE, K8S_APP, request.method, request.path).observe(local_processing_latency*1000)
         RESPONSE_SIZE.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr, ID).observe(len(body))
         app.logger.info("len(body): %d" % len(body))
         app.logger.info("############### INTERNAL SERVICE FINISHED! ###############")
@@ -173,8 +186,11 @@ def start_worker():
 
         response = make_response(body)
         response.mimetype = "text/plain"
-        EXTERNAL_PROCESSING.labels(ZONE, K8S_APP, request.method, request.path).observe(time.time() - start_external_request_processing)
-        REQUEST_PROCESSING.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr, ID).observe(time.time() - start_request_processing)
+        EXTERNAL_PROCESSING.labels(ZONE, K8S_APP, request.method, request.path).observe((time.time() - start_external_request_processing)*1000)
+        EXTERNAL_PROCESSING_BUCKET.labels(ZONE, K8S_APP, request.method, request.path).observe((time.time() - start_external_request_processing)*1000)
+        
+        REQUEST_PROCESSING.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr, ID).observe((time.time() - start_request_processing)*1000)
+        REQUEST_PROCESSING_BUCKET.labels(ZONE, K8S_APP, request.method, request.path, request.remote_addr, ID).observe((time.time() - start_request_processing)*1000)
 
         # Add trace context propagation headers to the response
         response.headers.update(jaeger_headers)
@@ -227,7 +243,7 @@ class gRPCThread(Thread, pb2_grpc.MicroServiceServicer):
             start_local_processing = time.time()
             body = run_internal_service(my_work_model["internal_service"])
             local_processing_latency = time.time() - start_local_processing
-            INTERNAL_PROCESSING.labels(ZONE, K8S_APP, "grpc", "grpc").observe(local_processing_latency)
+            INTERNAL_PROCESSING.labels(ZONE, K8S_APP, "grpc", "grpc").observe(local_processing_latency*1000)
             RESPONSE_SIZE.labels(ZONE, K8S_APP, "grpc", "grpc", remote_address, ID).observe(len(body))
             app.logger.info("len(body): %d" % len(body))
             app.logger.info("############### INTERNAL SERVICE FINISHED! ###############")
@@ -246,9 +262,9 @@ class gRPCThread(Thread, pb2_grpc.MicroServiceServicer):
             app.logger.info("############### EXTERNAL SERVICES FINISHED! ###############")
 
             result = {'text': body, 'status_code': True}
-            EXTERNAL_PROCESSING.labels(ZONE, K8S_APP, "grpc", "grpc").observe(time.time() - start_external_request_processing)
+            EXTERNAL_PROCESSING.labels(ZONE, K8S_APP, "grpc", "grpc").observe((time.time() - start_external_request_processing)*1000)
             REQUEST_PROCESSING.labels(ZONE, K8S_APP, "grpc", "grpc", remote_address, ID).observe(
-                time.time() - start_request_processing)
+                (time.time() - start_request_processing)*1000)
             return pb2.MessageResponse(**result)
         except Exception as err:
             app.logger.error("Error: in GetMicroServiceResponse,", err)
