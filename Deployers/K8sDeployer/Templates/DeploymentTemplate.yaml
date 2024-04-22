@@ -28,6 +28,7 @@ spec:
     spec:
       terminationGracePeriodSeconds : 3
       #schedulerName: no-balancing-scheduler
+      schedulerName: {{SCHEDULER_NAME}}
       containers:
         - name: {{SERVICE_NAME}}
           image: {{IMAGE}}

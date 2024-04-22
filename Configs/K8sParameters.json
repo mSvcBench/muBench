@@ -6,7 +6,8 @@
       "cluster_domain": "cluster",
       "path": "/api/v1",
       "sleep": 1,
-      "dns-resolver":"kube-dns.kube-system.svc.cluster.local"
+      "dns-resolver":"kube-dns.kube-system.svc.cluster.local",
+      "scheduler-name": "default"
    },
    "InternalServiceFilePath": "CustomFunctions",
    "OutputPath": "SimulationWorkspace",
