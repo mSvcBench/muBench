@@ -104,20 +104,23 @@ def create_deployment_yaml_files(model, k8s_parameters, nfs, output_path):
         with open(f"{output_path}/yamls/{str(rank_string).zfill(3)}-{k8s_parameters['prefix_yaml_file']}-{service}.yaml", "w") as file:
             file.write(f)
 
-    with open(f"{K8s_YAML_BUILDER_PATH}/Templates/ConfigMapNginxGwTemplate.yaml", "r") as file:
-        f = file.read()
-        f = f.replace("{{NAMESPACE}}", namespace)
-        f = f.replace("{{PATH}}", k8s_parameters["path"])
-        f = f.replace("{{RESOLVER}}", k8s_parameters["dns-resolver"])
+    if k8s_parameters["nginx-gw"] == True:
+        # create nginx gw deployment yaml files
+        with open(f"{K8s_YAML_BUILDER_PATH}/Templates/ConfigMapNginxGwTemplate.yaml", "r") as file:
+            f = file.read()
+            f = f.replace("{{NAMESPACE}}", namespace)
+            f = f.replace("{{PATH}}", k8s_parameters["path"])
+            f = f.replace("{{RESOLVER}}", k8s_parameters["dns-resolver"])
 
-    with open(f"{output_path}/yamls/ConfigMapNginxGw.yaml", "w") as file:
-        file.write(f)
+        with open(f"{output_path}/yamls/ConfigMapNginxGw.yaml", "w") as file:
+            file.write(f)
 
-    with open(f"{K8s_YAML_BUILDER_PATH}/Templates/DeploymentNginxGwTemplate.yaml", "r") as file:
-        f = file.read()
-        f = f.replace("{{NAMESPACE}}", namespace)
+        with open(f"{K8s_YAML_BUILDER_PATH}/Templates/DeploymentNginxGwTemplate.yaml", "r") as file:
+            f = file.read()
+            f = f.replace("{{NAMESPACE}}", namespace)
+            f = f.replace("{{SVCTYPE}}", k8s_parameters["nginx-svc-type"])
 
-    with open(f"{output_path}/yamls/DeploymentNginxGw.yaml", "w") as file:
-        file.write(f)
+        with open(f"{output_path}/yamls/DeploymentNginxGw.yaml", "w") as file:
+            file.write(f)
 
     print("Deployment Created!")

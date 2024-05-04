@@ -115,7 +115,8 @@ if folder_not_exist or len(os.listdir(folder)) == 0:
         K8sYamlDeployer.deploy_configmap(k8s_parameters,K8sYamlDeployer.create_workmodel_configmap_data(k8s_parameters,work_model))
         K8sYamlDeployer.deploy_configmap(k8s_parameters,K8sYamlDeployer.create_internal_service_configmap_data(params))
         # Deploy YAML files
-        K8sYamlDeployer.deploy_nginx_gateway(folder)
+        if k8s_parameters["nginx-gw"]==True:
+            K8sYamlDeployer.deploy_nginx_gateway(folder)
         K8sYamlDeployer.deploy_items(folder, st=k8s_parameters['sleep'])
     else:
         print("...\nOk you do not want to DEPLOY stuff! Bye!")
