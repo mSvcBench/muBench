@@ -10,14 +10,17 @@ SIDECAR_TEMPLATE = "- name: %s-sidecar\n          image: %s"
 NODE_AFFINITY_TEMPLATE = {'affinity': {'nodeAffinity': {'requiredDuringSchedulingIgnoredDuringExecution': {'nodeSelectorTerms': [{'matchExpressions': [{'key': 'kubernetes.io/hostname','operator': 'In','values': ['']}]}]}}}}
 POD_ANTIAFFINITI_TEMPLATE = {'affinity':{'podAntiAffinity':{'requiredDuringSchedulingIgnoredDuringExecution':[{'labelSelector':{'matchExpressions':[{'key':'app','operator':'In','values':['']}]},'topologyKey':'kubernetes.io/hostname'}]}}}
 
-# Add params to work_model json from kubernetes paramenters
+# Override work_model params with those in k8s_parameters
 def customization_work_model(model, k8s_parameters):
     for service in model:
         model[service].update({"url": f"{service}.{k8s_parameters['namespace']}.svc.{k8s_parameters['cluster_domain']}.local"})
         model[service].update({"path": k8s_parameters['path']})
         model[service].update({"image": k8s_parameters['image']})
         model[service].update({"namespace": k8s_parameters['namespace']})
-        model[service].update({"scheduler-name": k8s_parameters['scheduler-name']})
+                    
+        if "scheduler-name" in model[service].keys():
+            # override scheduler-name value of workmodel.json
+            model[service].update({"scheduler-name": k8s_parameters['scheduler-name']})
         if "replicas" in k8s_parameters.keys():
             # override replica value of workmodel.json
             model[service].update({"replicas": k8s_parameters['replicas']})
@@ -38,7 +41,6 @@ def customization_work_model(model, k8s_parameters):
 
 def create_deployment_yaml_files(model, k8s_parameters, nfs, output_path):
     namespace = k8s_parameters['namespace']
-    scheduler_name = k8s_parameters['scheduler-name']
     counter=0
     for service in model:
         counter=counter+1
@@ -47,7 +49,10 @@ def create_deployment_yaml_files(model, k8s_parameters, nfs, output_path):
             f = f.replace("{{SERVICE_NAME}}", service)
             f = f.replace("{{IMAGE}}", model[service]["image"])
             f = f.replace("{{NAMESPACE}}", namespace)
-            f = f.replace("{{SCHEDULER_NAME}}", scheduler_name)
+            if "scheduler-name" in model[service].keys():
+                f = f.replace("{{SCHEDULER_NAME}}", str(model[service]["scheduler-name"]))
+            else:
+                f = f.replace("{{SCHEDULER_NAME}}", "default-scheduler")
             if "sidecar" in model[service].keys():
                 f = f.replace("{{SIDECAR}}", SIDECAR_TEMPLATE % (service, model[service]["sidecar"]))
             else:
@@ -119,7 +124,10 @@ def create_deployment_yaml_files(model, k8s_parameters, nfs, output_path):
     with open(f"{K8s_YAML_BUILDER_PATH}/Templates/DeploymentNginxGwTemplate.yaml", "r") as file:
         f = file.read()
         f = f.replace("{{NAMESPACE}}", namespace)
-        f = f.replace("{{SCHEDULER_NAME}}", scheduler_name)
+        if "scheduler-name" in model[service].keys():
+            f = f.replace("{{SCHEDULER_NAME}}", str(model[service]["scheduler-name"]))
+        else:
+            f = f.replace("{{SCHEDULER_NAME}}", "default-scheduler")
 
     with open(f"{output_path}/yamls/DeploymentNginxGw.yaml", "w") as file:
         file.write(f)
