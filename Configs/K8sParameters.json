@@ -7,7 +7,7 @@
       "path": "/api/v1",
       "sleep": 1,
       "dns-resolver":"kube-dns.kube-system.svc.cluster.local",
-      "scheduler-name": "default"
+      "scheduler-name": "default-scheduler"
    },
    "InternalServiceFilePath": "CustomFunctions",
    "OutputPath": "SimulationWorkspace",
