@@ -43,7 +43,7 @@ metadata:
   name: gw-nginx
   namespace: {{NAMESPACE}}
 spec:
-  type: NodePort
+  type: {{SVCTYPE}}
   ports:
     - port: 80
       protocol: TCP
