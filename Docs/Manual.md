@@ -268,18 +268,21 @@ The K8sDeployer uses the `workmodel.json` file and other config files to create 
 | ConfigMap            | internal-services | ConfigMap including custom functions of internal-services  |
 | ConfigMap            | internal-services | ConfigMap including workmodel.json                         |
 
-The K8sDeployer takes as input a JSON file, like the following one, which contains information about the path of the `workmodel.json` file (`WorkModelPath`) and custom functions (`InternalServiceFilePath`) to be stored in the related ConfigMaps, and Kubernetes parameters. The Kubernetes parameters are the Docker `image` of the service-cell, the `namespace` of the deployment, as well as the K8s `cluster_domain` and the URL `path` used to trigger the service of service-cells. Between the deployment of a service-cell and the next one, there is a waiting period equal to `sleep` seconds to avoid K8s API server overload. The user can change the name of the output YAML files by specifying the `prefix_yaml_file` and these files will be inserted in the `OutputPath` directory. NGINX gateway needs the name of the K8s DNS service and this value is stored in `dns-resolver` (be careful that some K8s clusters can use `coredns.` instead of the default `kube-dns.`)
+The K8sDeployer takes as input a JSON file, like the following one, which contains information about the path of the `workmodel.json` file (`WorkModelPath`) and custom functions (`InternalServiceFilePath`) to be stored in the related ConfigMaps, and Kubernetes parameters. The Kubernetes parameters are the Docker `image` of the service-cell, the `namespace` of the deployment, as well as the K8s `cluster_domain` and the URL `path` used to trigger the service of service-cells. Between the deployment of a service-cell and the next one, there is a waiting period equal to `sleep` seconds to avoid K8s API server overload. The user can change the name of the output YAML files by specifying the `prefix_yaml_file` and these files will be inserted in the `OutputPath` directory. NGINX gateway needs the name of the K8s DNS service and this value is stored in `dns-resolver` (be careful that some K8s clusters can use `coredns.` instead of the default `kube-dns.`). Deployment of NGINX can be avoided changing `nginx-gw` to false. The K8s NGINX service type is those reported in `nginx-svc-type`. It is possible to change the K8s scheduler used for the deployment of the µBench application changing the key `scheduler-name`.
 
 ```json
 {
    "K8sParameters": {
       "prefix_yaml_file":"MicroServiceDeployment",
       "namespace": "default",
-      "image": "msvcbench/microservice_v3-screen:latest",
+      "image": "msvcbench/microservice_v5-screen:latest",
       "cluster_domain": "cluster",
       "path": "/api/v1",
       "dns-resolver":"kube-dns.kube-system.svc.cluster.local",
-      "sleep": 2
+      "sleep": 2,
+      "scheduler-name": "default-scheduler",
+      "nginx-gw": true,
+      "nginx-svc-type": "NodePort"
    },
    "InternalServiceFilePath": "CustomFunctions",
    "OutputPath": "SimulationWorkspace",
