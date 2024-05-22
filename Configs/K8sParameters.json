@@ -9,7 +9,6 @@
       "dns-resolver":"kube-dns.kube-system.svc.cluster.local",
       "nginx-gw": true,
       "nginx-svc-type": "NodePort"
-
    },
    "InternalServiceFilePath": "CustomFunctions",
    "OutputPath": "SimulationWorkspace",
