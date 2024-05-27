@@ -32,7 +32,16 @@ kubectl apply -f jaeger.yaml
 kubectl apply -f jaeger-nodeport.yaml
 
 #Kiali
-kubectl apply -f kiali.yaml
+helm repo add kiali https://kiali.org/helm-charts
+helm repo update
+helm install \
+  --namespace istio-system \
+  --set spec.external_services.prometheus.url=http://prometheus-kube-prometheus-prometheus.monitoring:9090/ \
+  --set spec.external_services.grafana.url=http://prometheus-grafana.monitoring:3000/ \
+  kiali-server \
+  kiali/kiali-server
+echo "Kiali token"
+kubectl -n istio-system create token kiali-service-account
 
 #Kiali NodePort Service (30003)
 kubectl apply -f kiali-nodeport.yaml
