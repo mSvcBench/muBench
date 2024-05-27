@@ -36,8 +36,8 @@ helm repo add kiali https://kiali.org/helm-charts
 helm repo update
 helm install \
   --namespace istio-system \
-  --set spec.external_services.prometheus.url=http://prometheus-kube-prometheus-prometheus.monitoring:9090/ \
-  --set spec.external_services.grafana.url=http://prometheus-grafana.monitoring:3000/ \
+  --set external_services.prometheus.url=http://prometheus-kube-prometheus-prometheus.monitoring:9090/ \
+  --set external_services.grafana.url=http://prometheus-grafana.monitoring:3000/ \
   kiali-server \
   kiali/kiali-server
 echo "Kiali token"
