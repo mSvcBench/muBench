@@ -23,6 +23,8 @@ def create_deployment_config():
         exit(1)
     K8sYamlBuilder.customization_work_model(workmodel, k8s_parameters)
     K8sYamlBuilder.create_deployment_yaml_files(workmodel, k8s_parameters, nfs_conf, builder_module_path)
+    K8sYamlBuilder.create_workmodel_configmap_yaml_file(workmodel, k8s_parameters, nfs_conf, builder_module_path)
+    K8sYamlBuilder.create_internalservice_configmap_yaml_file(k8s_parameters, nfs_conf, output_path, internal_service_functions_file_path)
     created_items = os.listdir(f"{builder_module_path}/yamls")
     print(f"The following files are created: {created_items}")
     print("---")
@@ -111,12 +113,7 @@ if folder_not_exist or len(os.listdir(folder)) == 0:
     if keyboard_input == "y" or keyboard_input == "yes":
         # Create YAML files
         updated_folder_items, work_model = create_deployment_config()   
-        # Create and deploy configmaps for internal service custom function and workmodel.json
-        K8sYamlDeployer.deploy_configmap(k8s_parameters,K8sYamlDeployer.create_workmodel_configmap_data(k8s_parameters,work_model))
-        K8sYamlDeployer.deploy_configmap(k8s_parameters,K8sYamlDeployer.create_internal_service_configmap_data(params))
         # Deploy YAML files
-        if k8s_parameters["nginx-gw"]==True:
-            K8sYamlDeployer.deploy_nginx_gateway(folder)
         K8sYamlDeployer.deploy_items(folder, st=k8s_parameters['sleep'])
     else:
         print("...\nOk you do not want to DEPLOY stuff! Bye!")
@@ -128,9 +125,6 @@ else:
     keyboard_input = input("Do you want to UNDEPLOY yamls of the old application first, delete the files and then start the new applicaiton ? (n) ") or "n"
     if keyboard_input == "y" or keyboard_input == "yes":
         K8sYamlDeployer.undeploy_items(folder)
-        #K8sYamlDeployer.undeploy_nginx_gateway(folder)
-        K8sYamlDeployer.undeploy_configmap("internal-services",k8s_parameters)
-        K8sYamlDeployer.undeploy_configmap("workmodel",k8s_parameters)
         remove_files(folder)
     else:
         print("...\nOk you want to keep the OLD application! Bye!")

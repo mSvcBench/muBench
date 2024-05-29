@@ -1,0 +1,7 @@
+apiVersion: v1
+data:
+  {{DATA}}
+kind: ConfigMap
+metadata:
+  name: internal-services
+  namespace: {{NAMESPACE}}
