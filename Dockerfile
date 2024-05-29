@@ -3,19 +3,16 @@ from python:3.8.16-slim-buster
 RUN apt update
 
 # kubectl
-RUN mkdir /etc/apt/keyrings
 RUN apt install -y gpg ca-certificates curl bash-completion apt-transport-https --no-install-recommends
-RUN curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
-RUN echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list
-RUN apt update
-RUN apt install -y kubectl --no-install-recommends
+RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+RUN install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 RUN mkdir /root/.kube
 
 # kubectl autocomplete
-RUN echo "source /usr/share/bash-completion/bash_completion" >> .bashrc
+RUN echo 'source /etc/bash_completion' >> ~/.bashrc
 RUN echo 'source <(kubectl completion bash)' >>~/.bashrc
-RUN  echo 'alias k=kubectl' >>~/.bashrc
-RUN  echo 'complete -o default -F __start_kubectl k' >>~/.bashrc
+RUN echo 'alias k=kubectl' >>~/.bashrc
+RUN echo 'complete -o default -F __start_kubectl k' >>~/.bashrc
 
 # heml
 RUN curl https://baltocdn.com/helm/signing.asc | gpg --dearmor > /usr/share/keyrings/helm.gpg
@@ -28,6 +25,9 @@ RUN apt install -y apache2-utils --no-install-recommends
 
 # VIM, nano, iproute2, iputils-ping
 RUN apt install -y vim nano iproute2 iputils-ping --no-install-recommends
+
+# clean up
+RUN apt clean
 
 # welcome message
 COPY welcome.sh /etc/profile.d

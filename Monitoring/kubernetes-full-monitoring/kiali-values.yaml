@@ -1,0 +1,10 @@
+auth:
+  strategy: anonymous
+external_services:
+  prometheus:
+    url: http://prometheus-kube-prometheus-prometheus.monitoring:9090
+  grafana:
+    in_cluster_url: http://prometheus-grafana.monitoring:80
+  jaeger:
+    in_cluster_url: http://tracing.istio-system:16685
+      

@@ -1133,8 +1133,6 @@ Service 's0' created.
 ---
 ```
 
-To eventually un-deploy, run again the same command and answer `y`
-
 To see the Pods of the application you can use `kubectl get pods`
 ```zsh
 root@64ae03d1e5b8:~/muBench# kubectl get pods
@@ -1182,7 +1180,11 @@ To observe the service-mesh you can access Kiali dashboard from your browser.
 </p>
 
 > **_NOTE:_**: edit Configs/K8sParameters.json if your Kubernetes dns-resolver service is different from `kube-dns`. For instance in some cluster it is named `coredns`.
-> 
+
+To eventually un-deploy the µBench applicaiton use the following command:
+```zsh
+kubectl delete -f SimulationWorkspace/yamls/
+```
 ### µBench custom applications
 #### Service mesh generation
 

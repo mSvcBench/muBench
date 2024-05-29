@@ -17,10 +17,8 @@ helm repo update
 kubectl create namespace istio-system
 helm install istio-base istio/base -n istio-system
 helm install istiod istio/istiod -n istio-system --wait
-kubectl create namespace istio-ingress
-kubectl label namespace istio-ingress istio-injection=enabled
+helm install istio-ingressgateway istio/gateway -n istio-system
 kubectl label namespace default istio-injection=enabled
-helm install istio-ingress istio/gateway -n istio-ingress
 
 # Istio - Prometeus integration
 kubectl apply -f istio-prometheus-operator.yaml
@@ -35,13 +33,10 @@ kubectl apply -f jaeger-nodeport.yaml
 helm repo add kiali https://kiali.org/helm-charts
 helm repo update
 helm install \
-  --namespace istio-system \
-  --set external_services.prometheus.url=http://prometheus-kube-prometheus-prometheus.monitoring:9090/ \
-  --set external_services.grafana.url=http://prometheus-grafana.monitoring:3000/ \
+  -n istio-system \
+  -f kiali-values.yaml \
   kiali-server \
   kiali/kiali-server
-echo "Kiali token"
-kubectl -n istio-system create token kiali-service-account
 
 #Kiali NodePort Service (30003)
 kubectl apply -f kiali-nodeport.yaml

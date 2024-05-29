@@ -26,7 +26,7 @@ To expose Grafana server as NodePort service on port `30001` use
 kubectl apply -f ./grafana-nodeport.yaml -n monitoring
 ```
 
-Grafana `admin` password can be obtained with
+Grafana `admin` password is `prom-operator` or can be obtained with
 
 ```zsh
 kubectl get secret prometheus-grafana -o jsonpath="{.data.admin-password}" -n monitoring | base64 --decode ; echo
@@ -43,11 +43,8 @@ helm repo update
 kubectl create namespace istio-system
 helm install istio-base istio/base -n istio-system
 helm install istiod istio/istiod -n istio-system --wait
+helm install istio-ingressgateway istio/gateway -n istio-system --wait
 kubectl label namespace default istio-injection=enabled
-
-kubectl create namespace istio-ingress
-kubectl label namespace istio-ingress istio-injection=enabled
-helm install istio-ingress istio/gateway -n istio-ingress --wait
 ```
 
 ## Integration with Prometheus
@@ -72,23 +69,19 @@ kubectl apply -f jaeger-nodeport.yaml
 ```
 
 ## Kiali Istio Dashboard
-[kiali](https://kiali.io/) can be used as Istio dashboard. To install kiali, download kiali.yaml from [istio main page](https://istio.io/latest/docs/ops/integrations/kiali) and add the following `external_services` to the yaml to link prometheus and grafana running in the cluster. An example of the resulting yaml file is the [kiali.yaml](kiali.yaml) file in this folder. 
+[kiali](https://kiali.io/) can be used as Istio dashboard. To install kiali, you can hese helm as follows:
 
-```json
-    external_services:
-      prometheus:
-        # Prometheus service name is "metrics" and is in the "telemetry" namespace
-        url: "http://prometheus-kube-prometheus-prometheus.monitoring:9090/"
-      grafana:
-        enabled: true
-        # Grafana service name is "grafana" and is in the "telemetry" namespace.
-        in_cluster_url: 'http://prometheus-grafana.monitoring:80/'
-```
-
-then use then next commands that expose kiali as NodePort on port 30003
+```zsh 
+helm repo add kiali https://kiali.org/helm-charts
+helm repo update
+helm install \
+  -f kiali-values.yaml \
+  kiali-server \
+  kiali/kiali-server
+``` 
+then use the next commands that expose kiali as NodePort on port 30003
 
 ```zsh
-kubectl apply -f kilai.yaml
 kubectl apply -f kilai-nodeport.yaml
 ```
 
