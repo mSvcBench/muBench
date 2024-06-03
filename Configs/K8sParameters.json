@@ -11,7 +11,8 @@
       "sleep": 0,
       "dns-resolver":"kube-dns.kube-system.svc.cluster.local",
       "nginx-gw": true,
-      "nginx-svc-type": "NodePort"
+      "nginx-svc-type": "NodePort",
+      "no-deploy": false
    },
    "InternalServiceFilePath": "CustomFunctions",
    "OutputPath": "SimulationWorkspace",

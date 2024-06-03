@@ -77,7 +77,8 @@ try:
     k8s_parameters = params["K8sParameters"]    
     nfs_conf=dict()
     internal_service_functions_file_path = params['InternalServiceFilePath']
-    workmodel_path = params['WorkModelPath'] 
+    workmodel_path = params['WorkModelPath']
+    no_deploy = k8s_parameters['no-deploy']
 
     if "OutputPath" in params.keys() and len(params["OutputPath"]) > 0:
         output_path = params["OutputPath"]
@@ -114,7 +115,8 @@ if folder_not_exist or len(os.listdir(folder)) == 0:
         # Create YAML files
         updated_folder_items, work_model = create_deployment_config()   
         # Deploy YAML files
-        K8sYamlDeployer.deploy_items(folder, st=k8s_parameters['sleep'])
+        if not no_deploy:
+            K8sYamlDeployer.deploy_items(folder, st=k8s_parameters['sleep'])
     else:
         print("...\nOk you do not want to DEPLOY stuff! Bye!")
 else:
