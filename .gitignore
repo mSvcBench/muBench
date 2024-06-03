@@ -1,6 +1,10 @@
 # Visual Studio Code
 .vscode/
 
+# Locally generated files
+SimulationWorkspace/
+myConfigs/
+
 # mac osx Finder
 .DS_Store
 .idea/
