@@ -1,0 +1,35 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: s0-gateway
+spec:
+  selector:
+    istio: ingress # use Istio default gateway implementation, be careful to this label that should match that of istio-ingress
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: s0
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - s0-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /s0
+    rewrite:
+      uri: "/api/v1"
+    route:
+    - destination:
+        port:
+          number: 80
+        host: s0
