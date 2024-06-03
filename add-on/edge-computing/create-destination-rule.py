@@ -49,12 +49,12 @@ def create_dest_rule(yaml_file_in, yaml_file_out):
                     yaml.dump(destrule, file,default_flow_style=False)
 
 # Example usage:
-# python3 add-on/edge-computing/create-affinity-yamls.py --in 'SimulationWorkspace/yamls' --out 'add-on/edge-computing/dest-rule-yamls' 
+# python3 add-on/edge-computing/create-destination-rule.py --in 'SimulationWorkspace/yamls' --out 'SimulationWorkspace/dest-rule-yamls' 
 
 def main():
     parser = argparse.ArgumentParser(description='Create destination rules enabling istio locality load balancing for Kubernetes services')
     parser.add_argument('--in', type=str, help='Path of the input YAML files',action='store', dest='yaml_file_in_path',default='SimulationWorkspace/yamls')
-    parser.add_argument('--out', type=str, help='Path of the output YAML files',action='store', dest='yaml_file_out_path',default='add-on/edge-computing/dest-rule-yamls')
+    parser.add_argument('--out', type=str, help='Path of the output YAML files',action='store', dest='yaml_file_out_path',default='SimulationWorkspace/dest-rule-yamls')
     
     args = parser.parse_args()
     
@@ -64,7 +64,7 @@ def main():
 
     for filename in os.listdir(yaml_file_in_path):
         if filename.endswith(".yaml"):
-            yaml_file_out = os.path.join(yaml_file_out_path, 'dest_rule-'+filename)
+            yaml_file_out = os.path.join(yaml_file_out_path, filename)
             yaml_file_in = os.path.join(yaml_file_in_path, filename)
             create_dest_rule(yaml_file_in, yaml_file_out)
             print(f"Created dest rule yaml file: {yaml_file_out}")

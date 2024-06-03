@@ -60,12 +60,12 @@ def list_of_strings(arg):
     return arg.split(',')
 
 # Example usage:
-# python3 add-on/edge-computing/create-affinity-yamls.py --in 'SimulationWorkspace/yamls' --out 'add-on/edge-computing/affinity-yamls' --region 'us-west1' --zone 'us-west1-a'  --subzone 'us-west1-a-a'
-# python3 add-on/edge-computing/create-affinity-yamls.py --in 'SimulationWorkspace/yamls' --out 'add-on/edge-computing/affinity-yamls' --zone cloud,edge1
+# python3 add-on/edge-computing/create-affinity-yamls.py --in 'SimulationWorkspace/yamls' --out 'SimulationWorkspace/affinity-yamls' --region 'us-west1' --zone 'us-west1-a'  --subzone 'us-west1-a-a'
+# python3 add-on/edge-computing/create-affinity-yamls.py --in 'SimulationWorkspace/yamls' --out 'SimulationWorkspace/affinity-yamls' --zone cloud,edge1
 def main():
     parser = argparse.ArgumentParser(description='Add node affinity spec for zone, region and sub-zone to Kubernetes deployments')
     parser.add_argument('--in', type=str, help='Path of the input YAML files',action='store', dest='yaml_file_in_path',default='SimulationWorkspace/yamls')
-    parser.add_argument('--out', type=str, help='Path of the output YAML files',action='store', dest='yaml_file_out_path',default='add-on/edge-computing/affinity-yamls')
+    parser.add_argument('--out', type=str, help='Path of the output YAML files',action='store', dest='yaml_file_out_path',default='SimulationWorkspace/affinity-yamls')
     parser.add_argument('--regions', type=list_of_strings, help='list of region values',action='store', dest='regions',default=['no-region-specified'])
     parser.add_argument('--zones', type=list_of_strings, help='list of zone values',action='store', dest='zones',default=['no-zone-specified'])
     parser.add_argument('--subzones', type=list_of_strings, help='list of sub-zone values',action='store', dest='subzones',default=['no-subzone-specified'])
