@@ -53,8 +53,8 @@ def add_affinity_spec(yaml_file_in, yaml_file_out, region, zone, subzone ):
                     partial_yaml['spec']['template']['spec']['affinity'] = affinity
                     partial_yaml['metadata']['name'] = partial_yaml['metadata']['name'] + suffix
     
-                with open(yaml_file_out, 'w') as file:
-                    yaml.dump_all(complete_yaml, file,default_flow_style=False)
+    with open(yaml_file_out, 'w') as file:
+        yaml.dump_all(complete_yaml, file,default_flow_style=False)
 
 def list_of_strings(arg):
     return arg.split(',')
