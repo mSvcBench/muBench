@@ -2,36 +2,14 @@ import yaml
 import os
 import argparse
 
-def create_dest_rule(yaml_file_in, yaml_file_out):
+def create_dest_rule(yaml_file_in, yaml_file_out, dest_rule_template):
     # Function to add node affinity spec for topology.kubernetes.io to a Kubernetes deployment YAML file
     # yaml_file_in: input YAML file 
     # yaml_file_out: output YAML file, whose file contains the affinity spec
     # host: host value
 
-    destrule_template = {
-        'apiVersion': 'networking.istio.io/v1alpha3',
-        'kind': 'DestinationRule',
-        'metadata':{
-        },
-        'spec':{
-            'trafficPolicy':{
-                'connectionPool':{
-                    'tcp':{
-                        'maxConnections': 1000
-                    },
-                    'http':{
-                        'http2MaxRequests': 1000,
-                        'maxRequestsPerConnection': 10
-                    },
-                },
-                'outlierDetection':{
-                    'consecutiveErrors': 7,
-                    'interval': '30s',
-                    'baseEjectionTime': '30s'
-                }
-            }
-        }
-    }
+    with open(dest_rule_template, 'r') as template_file:
+        destrule_template = yaml.safe_load(template_file)
 
     with open(yaml_file_in, 'r') as file:
         complete_yaml = list(yaml.safe_load_all(file))
@@ -49,12 +27,13 @@ def create_dest_rule(yaml_file_in, yaml_file_out):
                     yaml.dump(destrule, file,default_flow_style=False)
 
 # Example usage:
-# python3 add-on/edge-computing/create-destination-rule.py --in 'SimulationWorkspace/yamls' --out 'SimulationWorkspace/dest-rule-yamls' 
+# python3 add-on/edge-computing/create-destination-rule.py --in 'SimulationWorkspace/yamls' --out 'SimulationWorkspace/dest-rule-yamls' --template 'add-on/edge-computing/destination-rule-template.yaml' 
 
 def main():
     parser = argparse.ArgumentParser(description='Create destination rules enabling istio locality load balancing for Kubernetes services')
     parser.add_argument('--in', type=str, help='Path of the input YAML files',action='store', dest='yaml_file_in_path',default='SimulationWorkspace/yamls')
     parser.add_argument('--out', type=str, help='Path of the output YAML files',action='store', dest='yaml_file_out_path',default='SimulationWorkspace/dest-rule-yamls')
+    parser.add_argument('--template', type=str, help='Path of the Destination Rule YAML file template',action='store', dest='dest_rule_template',default='add-on/edge-computing/destination-rule-template.yaml')
     
     args = parser.parse_args()
     
@@ -66,7 +45,7 @@ def main():
         if filename.endswith(".yaml"):
             yaml_file_out = os.path.join(yaml_file_out_path, filename)
             yaml_file_in = os.path.join(yaml_file_in_path, filename)
-            create_dest_rule(yaml_file_in, yaml_file_out)
+            create_dest_rule(yaml_file_in, yaml_file_out,dest_rule_template=args.dest_rule_template)
             print(f"Created dest rule yaml file: {yaml_file_out}")
 
 if __name__ == "__main__":
