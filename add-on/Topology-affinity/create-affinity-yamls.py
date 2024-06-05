@@ -60,8 +60,8 @@ def list_of_strings(arg):
     return arg.split(',')
 
 # Example usage:
-# python3 add-on/edge-computing/create-affinity-yamls.py --in 'SimulationWorkspace/yamls' --out 'SimulationWorkspace/affinity-yamls' --region 'us-west1' --zone 'us-west1-a'  --subzone 'us-west1-a-a'
-# python3 add-on/edge-computing/create-affinity-yamls.py --in 'SimulationWorkspace/yamls' --out 'SimulationWorkspace/affinity-yamls' --zone cloud,edge1
+# python3 Add-on/Topology-affinity/create-affinity-yamls.py --in 'SimulationWorkspace/yamls' --out 'SimulationWorkspace/affinity-yamls' --region 'us-west1' --zone 'us-west1-a'  --subzone 'us-west1-a-a'
+# python3 Add-on/Topology-affinity/create-affinity-yamls.py --in 'SimulationWorkspace/yamls' --out 'SimulationWorkspace/affinity-yamls' --zone cloud,edge1
 def main():
     parser = argparse.ArgumentParser(description='Add node affinity spec for zone, region and sub-zone to Kubernetes deployments')
     parser.add_argument('--in', type=str, help='Path of the input YAML files',action='store', dest='yaml_file_in_path',default='SimulationWorkspace/yamls')
