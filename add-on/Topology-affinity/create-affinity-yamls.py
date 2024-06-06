@@ -42,6 +42,7 @@ def add_affinity_spec(yaml_file_in, yaml_file_out, region, zone, subzone ):
         })
         suffix=suffix+'-'+subzone
 
+    created=False
     with open(yaml_file_in, 'r') as file:
         complete_yaml = list(yaml.safe_load_all(file))
     for partial_yaml in complete_yaml:
@@ -52,9 +53,15 @@ def add_affinity_spec(yaml_file_in, yaml_file_out, region, zone, subzone ):
                 if suffix != '':
                     partial_yaml['spec']['template']['spec']['affinity'] = affinity
                     partial_yaml['metadata']['name'] = partial_yaml['metadata']['name'] + suffix
+                    created = created or True
     
     with open(yaml_file_out, 'w') as file:
         yaml.dump_all(complete_yaml, file,default_flow_style=False)
+    if created:
+        print(f"Created affinity yaml file: {yaml_file_out}")
+    else:
+        print(f"Copyed yaml file: {yaml_file_out}")
+        
 
 def list_of_strings(arg):
     return arg.split(',')
@@ -94,7 +101,6 @@ def main():
                     for subzone in subzone_values:
                         yaml_file_out = os.path.join(yaml_file_out_path+'/'+region+'/'+zone+'/'+subzone, filename)
                         add_affinity_spec(yaml_file_in, yaml_file_out, region, zone, subzone)
-                        print(f"Created affinity yaml file: {yaml_file_out}")
 
 if __name__ == "__main__":
     main()

@@ -20,6 +20,7 @@ def create_hpa(yaml_file_in, yaml_file_out, hpa_template_file):
                     hpa['metadata']['namespace'] = partial_yaml['metadata']['namespace']
                 with open(yaml_file_out, 'w') as file:
                     yaml.dump(hpa, file, default_flow_style=False)
+                    print(f"Created HPA yaml file: {yaml_file_out}")
 
 # Example usage:
 # python3 Add-on/HPA/create-hpa.py --in 'SimulationWorkspace/yamls' --out 'SimulationWorkspace/hpa' --template 'Add-on/HPA/hpa-template.yaml' 
@@ -27,21 +28,22 @@ def create_hpa(yaml_file_in, yaml_file_out, hpa_template_file):
 def main():
     parser = argparse.ArgumentParser(description='Create destination rules enabling istio locality load balancing for Kubernetes services')
     parser.add_argument('--in', type=str, help='Path of the input YAML files',action='store', dest='yaml_file_in_path',default='SimulationWorkspace/yamls')
-    parser.add_argument('--out', type=str, help='Path of the output YAML files',action='store', dest='yaml_file_out_path',default='SimulationWorkspace/dest-rule-yamls')
+    parser.add_argument('--out', type=str, help='Path of the output YAML files',action='store', dest='yaml_file_out_path',default='not-defined')
     parser.add_argument('--template', type=str, help='Path of the HPA YAML file template',action='store', dest='hpa_template_file',default='Add-on/HPA/hpa-template.yaml')
     
     args = parser.parse_args()
     
     yaml_file_in_path = args.yaml_file_in_path
     yaml_file_out_path = args.yaml_file_out_path
+    if yaml_file_out_path == 'not-defined':
+        yaml_file_out_path = yaml_file_in_path
     os.makedirs(yaml_file_out_path, exist_ok=True)
 
     for filename in os.listdir(yaml_file_in_path):
         if filename.endswith(".yaml"):
-            yaml_file_out = os.path.join(yaml_file_out_path, filename)
+            yaml_file_out = os.path.join(yaml_file_out_path, 'hpa-'+filename)
             yaml_file_in = os.path.join(yaml_file_in_path, filename)
             create_hpa(yaml_file_in, yaml_file_out,hpa_template_file=args.hpa_template_file)
-            print(f"Created dest rule yaml file: {yaml_file_out}")
 
 if __name__ == "__main__":
     main()
