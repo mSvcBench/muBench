@@ -1,6 +1,6 @@
 function mb_trace_stats = create_app_traces_for_mbench(app_traces,dir_name,parallel)
 % app_trace{i} traces concerning the i-th app
-% for each app on app_traces, create a directory with JSON files of traces and a service_mesh.json that can be used by µBench
+% for each app on app_traces, create a directory with JSON files of traces and a service_graph.json that can be used by µBench
 % entry_service_id: dm microservice id called by the user, this value is specified below
 % parallel = 1 means that a microservice carryout parallels calls to downstream microservices 
 % mb_trace_stats{i} is a struct containing statistics (only length) of the traces of the i-th app 
@@ -20,7 +20,7 @@ for t=2:length(app_traces)
     
     tracesidx = unique(app_trace.traceid);
     
-    % create a dummy service_mesh.json file to be used with workmodel generator
+    % create a dummy service_graph.json file to be used with workmodel generator
     % and traces
     js = "{";
     for i = 1:length(names_map)
@@ -34,7 +34,7 @@ for t=2:length(app_traces)
     end
     js = js + "}";
     js = prettyjson(js);
-    fid = fopen(dir_name+"/"+app_trace_dir+"/service_mesh.json",'w');
+    fid = fopen(dir_name+"/"+app_trace_dir+"/service_graph.json",'w');
     fprintf(fid,"%s",js);
     fclose(fid);
     

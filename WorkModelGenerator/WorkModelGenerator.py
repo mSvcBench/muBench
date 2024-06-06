@@ -22,7 +22,7 @@ def select_internal_service(internal_services):
         prev_interval += round(internal_services[k]["probability"]/p_total, 10)
 
 
-def get_work_model(service_mesh, workmodel_params):
+def get_work_model(service_graph, workmodel_params):
     work_model = dict()
     
     if "override" in workmodel_params.keys():
@@ -70,8 +70,8 @@ def get_work_model(service_mesh, workmodel_params):
         # in case internal services for databases wer not specified, those for plain service are used
         internal_services_db = internal_services
     try:
-        for vertex in service_mesh.keys():
-            work_model[f"{vertex}"] = {'external_services':service_mesh.get(vertex)['external_services']}
+        for vertex in service_graph.keys():
+            work_model[f"{vertex}"] = {'external_services':service_graph.get(vertex)['external_services']}
             
             if vertex.startswith(databases_prefix):
                 selected_internal_service = select_internal_service(internal_services_db)

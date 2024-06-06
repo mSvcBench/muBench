@@ -1,5 +1,5 @@
 {
-   "ServiceMeshParameters": {
+   "ServiceGraphParameters": {
       "vertices": 2,
       "external_service_groups": 1,
       "power": 0.05,
@@ -13,5 +13,5 @@
       }
    },
    "OutputPath": "SimulationWorkspace",
-   "OutputFile": "servicemesh.json"
+   "OutputFile": "servicegraph.json"
 }

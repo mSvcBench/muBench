@@ -8,7 +8,7 @@ This document describes how to reproduce the results of the paper
 
 A. Detti, L. Funari, L. Petrucci are with the Dep. Electronic Engineering of the University of Rome Tor Vergata
 
-The paper presents µBench and some performance evaluations aimed at comparing the advantages and disadvantages of microservice architectures versus monolithic ones, and analyzing the performance impact of key architectural choices, such as service mesh topology and the use of replication. For this analysis, µBench has been used to generate several microservice applications with different properties, and two of them are derived from a real cloud dataset.
+The paper presents µBench and some performance evaluations aimed at comparing the advantages and disadvantages of microservice architectures versus monolithic ones, and analyzing the performance impact of key architectural choices, such as service graph/mesh topology and the use of replication. For this analysis, µBench has been used to generate several microservice applications with different properties, and two of them are derived from a real cloud dataset.
 
 > Artifact Dependencies and Requirements
 
@@ -17,8 +17,8 @@ The measurements of the paper have been made using a Kubernetes cluster with 10 
 > Artifact Installation and Deployment Process
  
 µBench software has been deployed in the Kubernetes master-node of the cluster as described in the [manual](Manual.md/#µbench-in-the-host). The related workmodel files of the considered applications are in:
-- the folder `examples` for what concerns Fig. 6 and Topology C and D of Figs. 7. 
-- the zipfile `examples/Alibaba/traces-mbench.zip` for Topologies A, B of Fig. 7,8,9. Once unzipped, Topology A and B files are in `traces-mbench/seq/app18 ` and `traces-mbench/seq/app22`, respectively. These folders contain also the traces used to load the application.
+- the folder `examples` for what concerns Fig. 6 and Graph C and D of Figs. 7. 
+- the zipfile `examples/Alibaba/traces-mbench.zip` for Topologies A, B of Fig. 7,8,9. Once unzipped, Graph A and B files are in `traces-mbench/seq/app18 ` and `traces-mbench/seq/app22`, respectively. These folders contain also the traces used to load the application.
 
 > Reproducibility of Experiments
 

@@ -8,5 +8,5 @@ echo "----------------------------------------------------------------"
 echo "----------------------------------------------------------------"
 echo "----------------------------------------------------------------"
 
-docker build -f Dockerfile-mp.debug -t msvcbench/microservice_v5-screen:latest .
-docker push msvcbench/microservice_v5-screen:latest
+docker build -f Dockerfile-mp.debug -t msvcbench/microservice_v6-screen:latest .
+docker push msvcbench/microservice_v6-screen:latest

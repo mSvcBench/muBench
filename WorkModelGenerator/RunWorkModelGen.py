@@ -32,9 +32,9 @@ try:
     with open(parameters_file_path) as f:
         params = json.load(f)
     workmodel_parameters = params["WorkModelParameters"]
-    servicemesh_file_path = workmodel_parameters["ServiceMeshFilePath"]["value"]
-    with open(servicemesh_file_path) as f:
-        servicemesh = json.load(f)
+    servicegraph_file_path = workmodel_parameters["ServiceGraphFilePath"]["value"]
+    with open(servicegraph_file_path) as f:
+        servicegraph = json.load(f)
     if "OutputPath" in workmodel_parameters.keys() and len(workmodel_parameters["OutputPath"]["value"]) > 0:
         output_path = workmodel_parameters["OutputPath"]["value"]
         if output_path.endswith("/"):
@@ -51,7 +51,7 @@ except Exception as err:
     print("ERROR: in creation of workmodel,", err)
     exit(1)
 
-workmodel = get_work_model(servicemesh, workmodel_parameters)
+workmodel = get_work_model(servicegraph, workmodel_parameters)
 pprint(workmodel)
 
 # keyboard_input = input("Save work model on file? (y)") or "y"

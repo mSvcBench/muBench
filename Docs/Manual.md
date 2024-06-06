@@ -8,7 +8,7 @@
   - [Run a µBench Application](#run-a-µbench-application)
     - [Execute a µBench application in a Kubernetes cluster](#execute-a-µbench-application-in-a-kubernetes-cluster)
   - [Toolchain](#toolchain)
-    - [Service Mesh Generator](#service-mesh-generator)
+    - [Service Graph Generator](#service-graph-generator)
     - [Work Model Generator](#work-model-generator)
     - [Autopilots](#autopilots)
   - [Benchmarks strategies](#benchmarks-strategies)
@@ -26,7 +26,7 @@
     - [Install and access the monitoring framework](#install-and-access-the-monitoring-framework)
     - [My first µBench application](#my-first-µbench-application)
     - [µBench custom applications](#µbench-custom-applications)
-      - [Service mesh generation](#service-mesh-generation)
+      - [Service graph generation](#service-graph-generation)
       - [Work model generation](#work-model-generation)
       - [Execution on Kubernetes](#execution-on-kubernetes)
 
@@ -88,7 +88,7 @@ The description of a µBench application, i.e. the set of internal and external-
       ],
       "internal_service": {
          "compute_pi": {
-            "mean_bandwidth": 10,
+            "mean_response_size": 10,
             "range_complexity": [
                50,
                100
@@ -107,7 +107,7 @@ The description of a µBench application, i.e. the set of internal and external-
       "external_services": [],
       "internal_service": {
          "compute_pi": {
-            "mean_bandwidth": 1,
+            "mean_response_size": 1,
             "range_complexity": [
                1,
                10
@@ -134,7 +134,7 @@ The description of a µBench application, i.e. the set of internal and external-
       }],
       "internal_service": {
          "colosseum": {
-            "mean_bandwidth": 10
+            "mean_response_size": 10
          }
       },
       "request_method": "rest",
@@ -157,7 +157,7 @@ The description of a µBench application, i.e. the set of internal and external-
       }],
       "internal_service": {
          "compute_pi": {
-            "mean_bandwidth": 15,
+            "mean_response_size": 15,
             "range_complexity": [
                10,
                20
@@ -175,7 +175,7 @@ The description of a µBench application, i.e. the set of internal and external-
 }
 ```
 
-In this example, the µBench application is made by four services: *s0*, *s1*, *s2*, and *sdb1* (that mimics a database). The internal-service of s0 is the function  *compute_pi* with parameters `range_complexity` (uniform random interval of the number of pigreco digits to generate; the higher this number the higher the CPU stress) and `mean_bandwidth` (average value of an expneg distribution used to generate the number of bytes to return to the caller).
+In this example, the µBench application is made by four services: *s0*, *s1*, *s2*, and *sdb1* (that mimics a database). The internal-service of s0 is the function  *compute_pi* with parameters `range_complexity` (uniform random interval of the number of pigreco digits to generate; the higher this number the higher the CPU stress) and `mean_response_size` (average value of an expneg distribution used to generate the number of bytes to return to the caller).
 
 The external-services called by s0 are organized into two *external-service-groups* described by JSON objects contained in an array. The first group contains only the external-service *s1*. The second group contains only the external-service *sdb1*. External-services belonging to the same group are called sequentially, while those in different groups are called in parallel. Specifically, upon receiving a request, a different per-group thread is executed for each external-service-group. Each per-group thread randomly selects a number of `seq_len` external-services in its group and invokes them (e.g., an HTTP call) sequentially, according to a given calling `probability`. If `seq_len` is greater than the size of the external-services-group, the involvement of the external-services of the group is controlled exclusively by the calling probabilities.  
 
@@ -215,12 +215,12 @@ def custom_function(params):
 
 ### compute_pi <!-- omit in toc -->
 
-The built-in function `compute_pi` computes an `N` number of decimals of the *π*, where `N` is an integer, randomly chosen in an interval [`X`,`Y`] for each execution. The larger the interval, the greater the complexity and the stress on the CPU. After the computation, the `compute_pi` function returns a dummy string made of `B` kBytes, where `B` is a sample of an exponential random variable whose average is the `mean_bandwidth` parameter.
+The built-in function `compute_pi` computes an `N` number of decimals of the *π*, where `N` is an integer, randomly chosen in an interval [`X`,`Y`] for each execution. The larger the interval, the greater the complexity and the stress on the CPU. After the computation, the `compute_pi` function returns a dummy string made of `B` kBytes, where `B` is a sample of an exponential random variable whose average is the `mean_response_size` parameter.
 
 So the input parameters of `compute_pi` are:
 
 - `"range_complexity": [X, Y]`  
-- `"average_bandwidth": value`
+- `"mean_response_size": value`
 
 Some custom functions are already available in the `CustomFunction` folder that contains also related [Readme](CustomFunctions/README.md) documentation. 
 
@@ -250,7 +250,7 @@ Where `sidecar` is the name of the docker image to be used as sidecar and `mongo
 <img width="350" src="deployer.png">
 </p>
 
-µBench exploits an underlying container orchestration platform to deploy the service-cells. The deployment task is done by a per-platform deployment tool that takes as input the `workmodel.json`, and possible platform configuration files, and eventually uses the platform API to carry out the final deployment. Currently, µBench software uses Kubernetes platform only and includes a Kubernetes deployment tool, named K8sDeployer, that must run on a host that has access to a Kubernetes cluster through `kubectl` tool.
+µBench exploits an underlying container orchestration platform to deploy the service-cells forming a µBench application. The deployment task is done by a per-platform deployment tool that takes as input the `workmodel.json`, and possible platform configuration files, and eventually uses the platform API to carry out the final deployment. Currently, µBench software uses Kubernetes platform only and includes a Kubernetes deployment tool, named K8sDeployer, that must run on a host that has access to a Kubernetes cluster through `kubectl` tool.
 
 ### Execute a µBench application in a Kubernetes cluster
 
@@ -270,7 +270,7 @@ The K8sDeployer uses the `workmodel.json` file and other config files to create 
 
 The K8sDeployer takes as input a JSON file, like the following one, which contains information about the path of the `workmodel.json` file (`WorkModelPath`) and custom functions (`InternalServiceFilePath`) to be stored in the related ConfigMaps, and Kubernetes parameters. The Kubernetes parameters are the Docker `image` of the service-cell, the `namespace` of the deployment, as well as the K8s `cluster_domain` and the URL `path` used to trigger the service of service-cells. Between the deployment of a service-cell and the next one, there is a waiting period equal to `sleep` seconds to avoid K8s API server overload. 
 The user can change the name of the output YAML files of µBench microservices by specifying the `prefix_yaml_file`. NGINX gateway needs the name of the K8s DNS service and this value is stored in `dns-resolver` (be careful that some K8s clusters can use `coredns` instead of the default `kube-dns`). Deployment of NGINX can be avoided changing `nginx-gw` to false. The K8s NGINX service type is those reported in `nginx-svc-type`. It is possible to change the K8s scheduler used for the deployment of the µBench application changing the key `scheduler-name`.
-Using this information, K8sDeployer generates YAML files for running the µBench app, puts them in the `OutputPath\yaml` folder, and then applies them, unless `no-apply` is true. To move the µBench application to another cluster, simply transport these YAML files. Similarly, these YAML files can be used to remove the µBench application from the cluster, but not the generated namespace. 
+Using this information, K8sDeployer generates YAML files for running the µBench app, puts them in the `OutputPath/yaml` folder, and then applies them on Kubernetes, unless `no-apply` is true. To move the µBench application to another cluster, simply transport these YAML files. Similarly, these YAML files can be used to remove the µBench application from the cluster, with the exclusion of the generated namespace that should be manually removed. 
 
 ```json
 {
@@ -309,40 +309,39 @@ Take care of controlling the eventual completion of the deployment/undeployment 
 
 ## Toolchain
 
-To simulate large microservice applications, µBench provides a toolchain made by two software, *ServiceMeshGenerator* and *WorkLoadGenerator*, that support the creation of complex `workmodel.json` files by using random distributions whose parameters can be configured by the user.
+To simulate large microservice applications, µBench provides a toolchain made by two software, *ServiceGraphGenerator* and *WorkModelGenerator*, that support the creation of complex `workmodel.json` files by using random distributions whose parameters can be configured by the user.
 The following figure shows how they can be sequentially used with the K8sDeployer to have a µBench application running on a Kubernetes cluster.
 
 ![toolchain](toolchain.png)
 
-### Service Mesh Generator
+### Service Graph Generator
 
-The ServiceMeshGenerator can be used to randomly generate the *dependency graph* among µBench's microservices and the strategies used to span the graph while serving a user request. A dependency graph is made of the set of external-services called by each service. It is represented as a graph, whose nodes are the services and a link exists between service *A* and *B* if service *A* calls service *B*, that is, *B* is an external-service of *A*. A link can have a weight that is the probability of actually performing the call *A*->*B* while serving a user request. 
+The ServiceGraphGenerator can be used to randomly generate the *dependency graph* among µBench's microservices and the strategies used to span the graph while serving a user request. The nodes of the graph are the microservices and a link exists between service *A* and *B* if service *A* calls service *B*, that is, *B* is an external-service of *A*. A link can have a weight that is the probability of actually performing the call *A*->*B* while serving a user request.
 
-The ServiceMeshGenerator creates a `servicemesh.json` file that includes this graph information, which will be eventually included in the workmodel file describing the µBench application.
+The ServiceGraphGenerator creates a `servicegraph.json` file that includes this graph information, which will be eventually included in the `workmodel.json` file describing the µBench application.
 
-We called it "Service Mesh Generator" because the dependency graph can be visualized by service mesh software such as [Istio](https://istio.io). 
- 
+
 
 #### Concepts <!-- omit in toc -->
 
-Literature [studies](https://researchcommons.waikato.ac.nz/bitstream/handle/10289/13981/EVOKE_CASCON_2020_paper_37_WeakestLink.pdf?sequence=11&isAllowed=y) show that the building of a realistic dependency graph can be done by using the Barabási-Albert (BA) algorithm, which uses a power-law distribution and results in a topology that follows a preferential-attachment model. For this reason, the ServiceMeshGenerator creates random dependency graphs following the BA model.
+Literature [studies](https://researchcommons.waikato.ac.nz/bitstream/handle/10289/13981/EVOKE_CASCON_2020_paper_37_WeakestLink.pdf?sequence=11&isAllowed=y) show that the building of a realistic dependency graph can be done by using the Barabási-Albert (BA) algorithm, which uses a power-law distribution and results in a topology that follows a preferential-attachment model. For this reason, the ServiceGraphGenerator creates random dependency graphs following the BA model.
 
 The BA algorithm builds the graph topology as follows: at each step, a new service is added as a vertex of a directed tree. This new service is connected with an edge to a single *parent* service already present in the topology. The edge direction is from the parent service to the new *child* service, this means that the parent service includes the new service in its external-services.  
 The parent service is chosen according to a preferred attachment strategy using a *power-law* distribution. Specifically, vertex *i* is chosen as a parent with a (non-normalized) probability equal to *P<sub>i</sub> = d<sub>i</sub><sup>&alpha;</sup> + a*, where *d<sub>i* is the number of services that have already chosen the service *i* as a parent, *&alpha;* is the power-law exponent, and *a* is the zero-appeal parameters i.e., the probability of a service being chosen as a parent when no other service has yet chosen it.
 
-As previously mentioned, to simulate parallel and sequential calls of external-services, the whole set of external-services of a microservice is organized in external-service-groups. The ServiceMeshGenerator creates a configurable number of equal external service groups for each microservice and inserts external-services into these groups according to a water-filling algorithm.
+As previously mentioned, to simulate parallel and sequential calls of external-services, the whole set of external-services of a microservice is organized in external-service-groups. The ServiceGraphGenerator creates a configurable number of equal external service groups for each microservice and inserts external-services into these groups according to a water-filling algorithm.
 
-The ServiceMeshGenerator configures the probability of calling external-services using two different models: a constant model that assigns the same probability to all external-services and a random model that randomly chooses the value of the calling probability in the range (0,1).
+The ServiceGraphGenerator configures the probability of calling external-services using two different models: a constant model that assigns the same probability to all external-services and a random model that randomly chooses the value of the calling probability in the range (0,1).
 
-To simulate the presence of databases in a µBench microservice application, the ServiceMeshGenerator adds to the dependency graph some database-services that only execute their internal-service. The other services select one of these databases as external-service with a configurable probability.
+To simulate the presence of databases in a µBench microservice application, the ServiceGraphGenerator adds to the dependency graph some database-services that only execute their internal-service. The other services select one of these databases as external-service with a configurable probability.
 
-#### Execution of the ServicMeshGenrator <!-- omit in toc -->
+#### Execution of the ServicGraphGenrator <!-- omit in toc -->
 
-The ServicMeshGenrator takes as input a JSON configuration file (`ServiceMeshParameters.json`) as the following one:
+The ServicGraphGenrator takes as input a JSON configuration file (`ServiceGraphParameters.json`) as the following one:
 
 ```json
 {
-   "ServiceMeshParameters": {
+   "ServiceGraphParameters": {
       "vertices": 2,
       "external_service_groups": 1,
       "power": 0.05,
@@ -356,23 +355,23 @@ The ServicMeshGenrator takes as input a JSON configuration file (`ServiceMeshPar
       }
    },
    "OutputPath": "SimulationWorkspace",
-   "OutputFile": "servicemesh.json"
+   "OutputFile": "servicegraph.json"
 }
 ```
 
-There are two services (`vertices = 2`), and each service has a single external_service_groups (`external_service_groups=1`). For each group, 100 external-services are sequentially called (`seq_len=100`). When `seq_len` > `vertices` all external-service of a service group are sequentially called. Regarding the weights of the link of the dependency graph, i.e. the calling probabilities, the ServiceMeshGenerator allows using a random (`"model":"random"`) distribution in the range (0,1) for extracting the value of such probabilities or using a constant value for all, as in the example. In any, case these probabilities can be fine-tuned a posteriori by editing the produced `servicemesh.json` file. 
+There are two services (`vertices = 2`), and each service has a single external_service_groups (`external_service_groups=1`). For each group, 100 external-services are sequentially called (`seq_len=100`). When `seq_len` > `vertices` all external-service of a service group are sequentially called. Regarding the weights of the link of the dependency graph, i.e. the calling probabilities, the ServiceGraphGenerator allows using a random (`"model":"random"`) distribution in the range (0,1) for extracting the value of such probabilities or using a constant value for all, as in the example. In any, case these probabilities can be fine-tuned a posteriori by editing the produced `servicegraph.json` file. 
 
 The configuration in the example provides also the presence of two databases, `sdb1` and `sdb2`. `sdb1` is used by a service with a probability of 0.79, `sdb2` with a probability of 0.01, and in the remaining cases the service does not use any database.
 
-The figure below reports a possible service mesh generated with these parameters where `sdb2` has been never chosen by services and therefore not included in the microservice application.
+The figure below reports a possible service graph generated with these parameters where `sdb2` has been never chosen by services and therefore not included in the microservice application.
 
 <p align="center">
-<img width="270" src="../Docs/servicemesh-demo.png">
+<img width="270" src="../Docs/servicegraph-demo.png">
 </p>
 
-The ServiceMeshGenerator generates and saves to the `OutputPath` directory two files: the `servicemesh.json` and the `servicemesh.png` for easier visualization of the generated service mesh, like the one shown before. The name of these files can be changed with the key `OutputFile`.
+The ServiceGraphGenerator generates and saves to the `OutputPath` directory two files: the `servicegraph.json` and the `servicegraph.png` for easier visualization of the generated service graph, like the one shown before. The name of these files can be changed with the key `OutputFile`.
 
-This is an example of the `servicemesh.json` file generated by the ServiceMeshGenerator. The related mesh is shown in the above figure. We note that this is a part of the `workmodel.json` file previously presented. The other part will be created by the WorkModelGenerator.
+This is an example of the `servicegraph.json` file generated by the ServiceGraphGenerator. The related service graph is shown in the above figure. We note that this is a part of the `workmodel.json` file previously presented. The other part will be created by the WorkModelGenerator.
 
 ```json
 {
@@ -411,21 +410,21 @@ This is an example of the `servicemesh.json` file generated by the ServiceMeshGe
 }
 ```
 
-To run `ServiceMeshGenerator` execute
+To run `ServiceGraphGenerator` execute
 
 ```zsh
-python3 ServiceMeshGenerator/RunServiceMeshGen.py -c Configs/ServiceMeshParameters.json
+python3 ServiceGraphGenerator/RunServiceGraphGen.py -c Configs/ServiceGraphParameters.json
 ```
 
 #### Examples <!-- omit in toc -->
 
-We illustrate four examples of ServiceMeshParameters.json files that can be used to create dependency graphs with different topological properties:
+We illustrate four examples of ServiceGraphParameters.json files that can be used to create dependency graphs with different topological properties:
 
 ##### An highly centralized hierarchical architecture with most of the services linked to one service (excluding the db services): <!-- omit in toc -->
 
 ```json
 {
-   "ServiceMeshParameters":{
+   "ServiceGraphParameters":{
       "external_service_groups":1,
       "seq_len":1,
       "service_probability": {"model":"const", "params":{"value":1}},
@@ -439,19 +438,19 @@ We illustrate four examples of ServiceMeshParameters.json files that can be used
       }
    },
    "OutputPath": "SimulationWorkspace",
-   "OutputFile": "servicemesh.json"
+   "OutputFile": "servicegraph.json"
 }
 ```
 
 <p align="center">
-<img width="400" src="../Docs/service_mesh_example_1.png">
+<img width="400" src="../Docs/service_graph_example_1.png">
 </p>
 
 ##### An application that relies on a common logging service <!-- omit in toc -->
 
 ```json
 {
-   "ServiceMeshParameters":{
+   "ServiceGraphParameters":{
       "external_service_groups":1,
       "seq_len":1,
       "service_probability": {"model":"const", "params":{"value":1}},
@@ -465,19 +464,19 @@ We illustrate four examples of ServiceMeshParameters.json files that can be used
       }
    },
    "OutputPath": "SimulationWorkspace",
-   "OutputFile": "servicemesh.json"
+   "OutputFile": "servicegraph.json"
 }
 ```
 
 <p align="center">
-<img width="400" src="../Docs/service_mesh_example_2.png">
+<img width="400" src="../Docs/service_graph_example_2.png">
 </p>
 
 ##### An application with several auxiliary services: <!-- omit in toc -->
 
 ```json
 {
-   "ServiceMeshParameters":{
+   "ServiceGraphParameters":{
       "external_service_groups":1,
       "seq_len":1,
       "service_probability": {"model":"const", "params":{"value":1}},
@@ -491,19 +490,19 @@ We illustrate four examples of ServiceMeshParameters.json files that can be used
       }
    },
    "OutputPath": "SimulationWorkspace",
-   "OutputFile": "servicemesh.json"
+   "OutputFile": "servicegraph.json"
 }
 ```
 
 <p align="center">
-<img width="400" src="../Docs/service_mesh_example_3.png">
+<img width="400" src="../Docs/service_graph_example_3.png">
 </p>
 
 ##### An application organized in the conventional multi-tier fashion: <!-- omit in toc -->
 
 ```json
 {
-   "ServiceMeshParameters":{
+   "ServiceGraphParameters":{
       "external_service_groups":1,
       "seq_len":1,
       "service_probability": {"model":"const", "params":{"value":1}},
@@ -517,17 +516,17 @@ We illustrate four examples of ServiceMeshParameters.json files that can be used
       }
    },
    "OutputPath": "SimulationWorkspace",
-   "OutputFile": "servicemesh.json"
+   "OutputFile": "servicegraph.json"
 }
 ```
 
 <p align="center">
-<img width="400" src="../Docs/service_mesh_example_4.png">
+<img width="400" src="../Docs/service_graph_example_4.png">
 </p>
 
 ### Work Model Generator
 
-The WorkModelGenerator generates the `workmodel.json` describing internal and external-services of service-cells and that is used by deployers to eventually run the microservice application. For the configuration of external-services, the WorkModelGenerator imports those specified in a `servicemesh.json` file manually edited or automatically generated by the ServiceMeshGenerator. For the selection of functions to be associated with internal-services of service-cells, the WorkModelGenerator singles out these functions at random and according to configurable probabilities. 
+The WorkModelGenerator generates the `workmodel.json` describing internal and external-services of service-cells and that is used by deployers to eventually run the microservice application. For the configuration of external-services, the WorkModelGenerator imports those specified in a `servicegraph.json` file manually edited or automatically generated by the ServiceGraphGenerator. For the selection of functions to be associated with internal-services of service-cells, the WorkModelGenerator singles out these functions at random and according to configurable probabilities. 
 The [examples](/examples/) directory contains some examples of workmodels that can be used for testing purposes.
 
 The WorkModelGenerator takes as input a configuration file (`WorkModelParameters.json`) as the following one
@@ -542,7 +541,7 @@ The WorkModelGenerator takes as input a configuration file (`WorkModelParameters
             "recipient": "service",
             "probability":0,
             "parameters": {
-               "mean_bandwidth":10,
+               "mean_response_size":10,
                "range_complexity":[50, 100]
             },
             "workers":4,
@@ -574,7 +573,7 @@ The WorkModelGenerator takes as input a configuration file (`WorkModelParameters
                "cpu_stress": {"run":false,"range_complexity": [100, 100], "thread_pool_size": 1, "trials": 1},
                "memory_stress":{"run":false, "memory_size": 10000, "memory_io": 1000},
                "disk_stress":{"run":true,"tmp_file_name":  "mubtestfile.txt", "disk_write_block_count": 1000, "disk_write_block_size": 1024},
-               "mean_bandwidth": 11
+               "mean_response_size": 11
             },
             "workers":4,
             "threads":16,
@@ -593,7 +592,7 @@ The WorkModelGenerator takes as input a configuration file (`WorkModelParameters
                "memory_stress":{"run":false, "memory_size": 10000, "memory_io": 1000},
                "disk_stress":{"run":false,"tmp_file_name":  "mubtestfile.txt", "disk_write_block_count": 1000, "disk_write_block_size": 1024},
                "sleep_stress":{"run":false, "sleep_time":  0.01},
-               "mean_bandwidth": 11
+               "mean_response_size": 11
             },
             "workers":4,
             "threads":16,
@@ -617,9 +616,9 @@ The WorkModelGenerator takes as input a configuration file (`WorkModelParameters
             "s0": {"function_id": "f1"}
          }
       },
-      "ServiceMeshFilePath": {
+      "ServiceGraphFilePath": {
          "type": "metadata", 
-         "value":"SimulationWorkspace/servicemesh.json"
+         "value":"SimulationWorkspace/servicegraph.json"
       },
       "OutputPath": {
          "type":"metadata",
@@ -629,9 +628,9 @@ The WorkModelGenerator takes as input a configuration file (`WorkModelParameters
 }
 ```
 
-This file includes a set of *function-flavor* that can be assigned to service-cells with a given probability to implement their internal-service. Many *function-flavors* (`f0`, `f1`, `f2`,`f3`) can use the same python base-function (e.g. `loader` is used by `f2` and `f3` ) but with different parameters. Each function-flavor is represented as JSON object with a unique ID key (`f0`, `f1`, `f2`, `f3`) and whose values are: the `parameters` taken as input by the function, e.g., the `compute_pi` function uses `mean_bandwidth` and `range_complexity`; the `recipient` of the function-flavor (`database` or plain `service`);  the `name` of the base-function to be executed; the `probability` to be associated to a service-cell; the optional keys `workers` and `threads` that are the number of processes and threads per process used by service-cells that run the function-flavor to serve client requests; the optional key `replicas` for choosing the number of replicas of service-cells that run the function-flavor; the optional keys  `cpu-requests`,`cpu-limits`,`memory-requests`,`memory-limits` to control the cpu/memory resources associated to the service-cells running the function-flavor (see k8s [documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/))
+This file includes a set of *function-flavor* that can be assigned to service-cells with a given probability to implement their internal-service. Many *function-flavors* (`f0`, `f1`, `f2`,`f3`) can use the same python base-function (e.g. `loader` is used by `f2` and `f3` ) but with different parameters. Each function-flavor is represented as JSON object with a unique ID key (`f0`, `f1`, `f2`, `f3`) and whose values are: the `parameters` taken as input by the function, e.g., the `compute_pi` function uses `mean_response_size` and `range_complexity`; the `recipient` of the function-flavor (`database` or plain `service`);  the `name` of the base-function to be executed; the `probability` to be associated to a service-cell; the optional keys `workers` and `threads` that are the number of processes and threads per process used by service-cells that run the function-flavor to serve client requests; the optional key `replicas` for choosing the number of replicas of service-cells that run the function-flavor; the optional keys  `cpu-requests`,`cpu-limits`,`memory-requests`,`memory-limits` to control the cpu/memory resources associated to the service-cells running the function-flavor (see k8s [documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/))
 
-The description of external-services is imported through a `servicemesh.json` file located in `ServiceMeshFilePath` metadata that can be manually made or automatically generated by the ServiceMeshGenerator. 
+The description of external-services is imported through a `servicegraph.json` file located in `ServiceGraphFilePath` metadata that can be manually made or automatically generated by the ServiceGraphGenerator. 
 
 The method used to carry out external-service calls is specified in `request_method` metadata ("rest" or "gRPC"). Prefix to identify databases is in `databases_prefix` metadata.
 
@@ -647,7 +646,7 @@ python3 WorkModelGenerator/RunWorkModelGen.py -c Configs/WorkModelParameters.jso
 
 ### Autopilots
 
-Autopilots are sequential executors of the toolchain. An autopilot sequentially runs the `ServiceMeshGenerator`, the `WorkModelGenerator`, and the `Deployer`.
+Autopilots are sequential executors of the toolchain. An autopilot sequentially runs the `ServiceGraphGenerator`, the `WorkModelGenerator`, and the `Deployer`.
 
 #### K8sAutopilot <!-- omit in toc -->
 
@@ -655,10 +654,10 @@ Currently, the `Autopilots` folder contains an Autopilot tool for Kubernetes in 
 
 ```json
 {
-   "RunServiceMeshGeneratorFilePath": "ServiceMeshGenerator/RunServiceMeshGen.py",
+   "RunServiceGraphGeneratorFilePath": "ServiceGraphGenerator/RunServiceGraphGen.py",
    "RunWorkModelGeneratorFilePath": "WorkModelGenerator/RunWorkModelGen.py",
    "RunK8sDeployerFilePath": "Deployers/K8sDeployer/RunK8sDeployer.py",
-   "ServiceMeshParametersFilePath": "Configs/ServiceMeshParameters.json",
+   "ServiceGraphParametersFilePath": "Configs/ServiceGraphParameters.json",
    "WorkModelParametersFilePath": "Configs/WorkModelParameters.json",
    "K8sParametersFilePath": "Configs/K8sParameters.json"
 }
@@ -731,19 +730,19 @@ muBench/
 
 ```
 Each folder contains 29 applications, each one with a set of traces. The differences between the traces in two folders is that traces in the `par` directory execute downstream requests in parallel, whereas the traces in the `seq` directory execute requests in sequence. 
-In each app folder, you will find the `service_mesh.json` file that represents the app's service mesh and its traces. To benchmark an app, the following steps must be performed:
-- Generate a `workmodel.json` file with the WorkModelGenerator by providing as input the `service_mesh.json` file of the app you intend to test. 
+In each app folder, you will find a `service_graph.json` file that represents the app's service graph and its traces. To benchmark an app, the following steps must be performed:
+- Generate a `workmodel.json` file with the WorkModelGenerator by providing as input the `service_graph.json` file of the app you intend to test. 
 - Deploy the application with K8sDeployer by providing as input the `workmodel.json` file created in the previous step.
 - Send traces to the application
 In what follows, we provide an example for app no. 3
 
 #### Generate Workmodel <!-- omit in toc -->
-To generate the `workmodel.json` file you can use the WorkModelGenerator. It is necessary to edit the parameter `ServiceMeshFilePath` inside the `WorkModelParameters.json` with the correct path of the selected app service_mesh, e.g.
+To generate the `workmodel.json` file you can use the WorkModelGenerator. It is necessary to edit the parameter `ServiceGraphFilePath` inside the `WorkModelParameters.json` with the correct path of the selected app service_graph, e.g.
 
 ```json
-      "ServiceMeshFilePath": {
+      "ServiceGraphFilePath": {
          "type": "metadata", 
-         "value":"examples/Alibaba/traces-mbench/seq/app3/service_mesh.json"
+         "value":"examples/Alibaba/traces-mbench/seq/app3/service_graph.json"
       },
      "OutputPath": {
          "type":"metadata",
@@ -809,8 +808,8 @@ The Runner takes as input a `RunnerParameters.json` file as the following one.
    },
    "OutputPath": "SimulationWorkspace",
    "AfterWorkloadFunction": {
-    "file_path": "Function",
-    "function_name": "get_prometheus_stats"
+      "file_path": "Function",
+      "function_name": "get_prometheus_stats"
    }
 }
 ```
@@ -1175,7 +1174,7 @@ You can access Grafana and Jaeger dashboards from your browser to monitor your a
 <img width="100%" src="../Monitoring/kubernetes-full-monitoring/muBenchMonitors.png">
 </p>
 
-To observe the service-mesh you can access Kiali dashboard from your browser.
+To observe the service-graph you can access Kiali dashboard from your browser.
 <p align="center">
 <img width="70%" src="../Monitoring/kubernetes-full-monitoring/kiali.png">
 </p>
@@ -1187,19 +1186,19 @@ To eventually un-deploy the µBench applicaiton use the following command:
 kubectl delete -f SimulationWorkspace/yamls/
 ```
 ### µBench custom applications
-#### Service mesh generation
+#### Service graph generation
 
-To customize the application, the first task is to generate your [service mesh](#service-mesh-generator) and obtain two files `servicemesh.json` and `servicemesh.png` in the `SimulationWorkspace` directory. The .png is a picture of the generated mesh. You can specify your service mesh parameters by, e.g., editing `Configs/ServiceMeshParameters.json` and running  
+To customize the application, the first task is to generate your [service graph](#service-graph-generator) and obtain two files `servicegraph.json` and `servicegraph.png` in the `SimulationWorkspace` directory. The .png is a picture of the generated graph. You can specify your service graph parameters by, e.g., editing `Configs/ServiceGraphParameters.json` and running  
 
 ```zsh
 cd $HOME/muBench
-python3 ServiceMeshGenerator/RunServiceMeshGen.py -c Configs/ServiceMeshParameters.json
+python3 ServiceGraphGenerator/RunServiceGraphGen.py -c Configs/ServiceGraphParameters.json
 ```
 
 > Note: if you have problems with cairo library this may help on Ubuntu: `sudo apt-get install libpangocairo-1.0-0`
   
 #### Work model generation
-Once the service mesh has been created, you have to create your [work model](#work-model) that describes the internal-service performed by each service of the mesh. You can specify your workmodel parameters by, e.g., editing `Configs/WorkModelParameters.json` and running the following command that produces a `workmodel.json` file in `SimulationWorkspace` directory that will be eventually used to deploy your µBench app in the Kubernetes cluster.
+Once the service graph has been created, you have to create your [work model](#work-model) that describes the internal-service performed by each service of the graph. You can specify your workmodel parameters by, e.g., editing `Configs/WorkModelParameters.json` and running the following command that produces a `workmodel.json` file in `SimulationWorkspace` directory that will be eventually used to deploy your µBench app in the Kubernetes cluster.
 
 ```zsh
 cd $HOME/muBench
@@ -1243,7 +1242,7 @@ sdb1         NodePort    10.102.58.96   <none>        80:32240/TCP,51313:31011/T
 
 ```
 
-> Note that steps the creation of service mesh and of the workmodel and the eventual deployment of Kubernetes can be performed all at once by using the [Kubernetes Autopilot](#k8sautopilot)
+> Note that steps the creation of service graph and of the workmodel and the eventual deployment of Kubernetes can be performed all at once by using the [Kubernetes Autopilot](#k8sautopilot)
 
 ### Test service response <!-- omit in toc -->
 

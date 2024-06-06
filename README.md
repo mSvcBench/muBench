@@ -26,7 +26,7 @@ You can learn how to use µBench to create and monitor your application by readi
 
   
 ## Quick Start
-For a complete install guide, head over to the [manual](Docs/Manual.md#installation-and-getting-started). Instead, for a quick hands-on with µBench the following commands will deploy a microservice application composed of 10 services with a star topology service mesh. Clients send requests to s0 and s0 sequentially calls all other services before sending the result to clients. Each service equally stresses the CPU. 
+For a complete install guide, head over to the [manual](Docs/Manual.md#installation-and-getting-started). Instead, for a quick hands-on with µBench the following commands will deploy a microservice application composed of 10 services with a star topology service graph. Clients send requests to s0 and s0 sequentially calls all other services before sending the result to clients. Each service equally stresses the CPU. 
 
 We assume that on your host, you have Docker and have access to a Kubernetes cluster with `kubectl` tool. If you need to configure a Kubernetes cluster (e.g., with Minikube) or for other configurations read the [manual](Docs/Manual.md#installation-and-getting-started).
 

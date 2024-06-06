@@ -33,7 +33,7 @@
           "run": false,
           "sleep_time": 0.01
         },
-        "mean_bandwidth": 100,
+        "mean_response_size": 100,
         "function_id": "f1"
       }
     },
@@ -43,7 +43,7 @@
     "cpu-requests": "500m",
     "url": "s0.default.svc.cluster.local",
     "path": "/api/v1",
-    "image": "msvcbench/microservice_v3-screen:1.0",
+    "image": "msvcbench/microservice_v6-screen:1.0",
     "namespace": "default"
   },
   "s1": {
@@ -80,7 +80,7 @@
           "run": false,
           "sleep_time": 0.01
         },
-        "mean_bandwidth": 100,
+        "mean_response_size": 100,
         "function_id": "f1"
       }
     },
@@ -90,7 +90,7 @@
     "cpu-requests": "500m",
     "url": "s1.default.svc.cluster.local",
     "path": "/api/v1",
-    "image": "msvcbench/microservice_v3-screen:1.0",
+    "image": "msvcbench/microservice_v6-screen:1.0",
     "namespace": "default"
   },
   "s2": {
@@ -127,7 +127,7 @@
           "run": false,
           "sleep_time": 0.01
         },
-        "mean_bandwidth": 100,
+        "mean_response_size": 100,
         "function_id": "f1"
       }
     },
@@ -137,7 +137,7 @@
     "cpu-requests": "500m",
     "url": "s2.default.svc.cluster.local",
     "path": "/api/v1",
-    "image": "msvcbench/microservice_v3-screen:1.0",
+    "image": "msvcbench/microservice_v6-screen:1.0",
     "namespace": "default"
   },
   "s3": {
@@ -174,7 +174,7 @@
           "run": false,
           "sleep_time": 0.01
         },
-        "mean_bandwidth": 100,
+        "mean_response_size": 100,
         "function_id": "f1"
       }
     },
@@ -184,7 +184,7 @@
     "cpu-requests": "500m",
     "url": "s3.default.svc.cluster.local",
     "path": "/api/v1",
-    "image": "msvcbench/microservice_v3-screen:1.0",
+    "image": "msvcbench/microservice_v6-screen:1.0",
     "namespace": "default"
   },
   "s4": {
@@ -221,7 +221,7 @@
           "run": false,
           "sleep_time": 0.01
         },
-        "mean_bandwidth": 100,
+        "mean_response_size": 100,
         "function_id": "f1"
       }
     },
@@ -231,7 +231,7 @@
     "cpu-requests": "500m",
     "url": "s4.default.svc.cluster.local",
     "path": "/api/v1",
-    "image": "msvcbench/microservice_v3-screen:1.0",
+    "image": "msvcbench/microservice_v6-screen:1.0",
     "namespace": "default"
   }
 }

@@ -10,7 +10,7 @@ Function that returns a simple asci art of Colosseum
 
 ## ComputePI
 
-This *single-thread* internal function (included in the service-cell code) stresses the CPU by computing `D` decimal points of pi, where `D` is a random integer in `range_complexity` (e.g. 50,100). The return is a string whose length is a sample of an exp neg random variable with mean `mean_bandwidth` kBytes  
+This *single-thread* internal function (included in the service-cell code) stresses the CPU by computing `D` decimal points of pi, where `D` is a random integer in `range_complexity` (e.g. 50,100). The return is a string whose length is a sample of an exp neg random variable with mean `mean_response_size` kBytes  
 
 *Function name*: `compute_pi`
 
@@ -19,13 +19,13 @@ This *single-thread* internal function (included in the service-cell code) stres
 ```json
 {
     "range_complexity": [50, 100], 
-    "mean_bandwidth": 10
+    "mean_response_size": 10
 }
 ```
 
 ## Loader
 
-This *multi-thread* internal function sequentially load the CPU, the memory, the disk and then sleep for a bit. Finally, it returns a string whose length is a sample of an exp neg random variable with mean `mean_bandwidth` kBytes.
+This *multi-thread* internal function sequentially load the CPU, the memory, the disk and then sleep for a bit. Finally, it returns a string whose length is a sample of an exp neg random variable with mean `mean_response_size` kBytes.
 
 The CPU stress is performed (if `run`=true) by running `thread_pool_size` parallel jobs. Each job computes `D` decimal points of pi, where `D` is a random integer in `range_complexity` (e.g. 50,100). The computation is repeated sequentially `trials` times per job.
 
@@ -59,5 +59,5 @@ The sleep stress is performed (if `run`=true) by sleeping for `sleep_time` secon
             "run":true,
             "sleep_time":  0.01
         }
-        "mean_bandwidth": 11}
+        "mean_response_size": 11}
 ```

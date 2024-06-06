@@ -115,7 +115,7 @@ def start_worker():
         
         # default behaviour
         my_work_model = globalDict['work_model'][ID]
-        my_service_mesh = my_work_model['external_services'] 
+        my_service_graph = my_work_model['external_services'] 
         my_internal_service = my_work_model['internal_service']
 
         # update internal service behaviour
@@ -143,19 +143,19 @@ def start_worker():
         if len(trace)>0:
         # trace-driven request
             n_groups = len(trace[ID])
-            my_service_mesh = list()
+            my_service_graph = list()
             for i in range(0,n_groups):
                 group = trace[ID][i]
                 group_dict = dict()
                 group_dict['seq_len'] = len(group)
                 group_dict['services'] = list(group.keys())
-                my_service_mesh.append(group_dict)
+                my_service_graph.append(group_dict)
         else:
             # update external service behaviour
             if behaviour_id != 'default' and "alternative_behaviors" in my_work_model.keys():
                 if behaviour_id in my_work_model['alternative_behaviors'].keys():
                     if "external_services" in my_work_model['alternative_behaviors'][behaviour_id].keys():
-                        my_service_mesh = my_work_model['alternative_behaviors'][behaviour_id]['external_services']
+                        my_service_graph = my_work_model['alternative_behaviors'][behaviour_id]['external_services']
 
         # Execute the internal service
         app.logger.info("*************** INTERNAL SERVICE STARTED ***************")
@@ -172,11 +172,11 @@ def start_worker():
         start_external_request_processing = time.time()
         app.logger.info("*************** EXTERNAL SERVICES STARTED ***************")
         
-        if len(my_service_mesh) > 0:
+        if len(my_service_graph) > 0:
             if len(trace)>0:
-                service_error_dict = run_external_service(my_service_mesh,globalDict['work_model'],query_string,trace[ID],app, jaeger_headers)
+                service_error_dict = run_external_service(my_service_graph,globalDict['work_model'],query_string,trace[ID],app, jaeger_headers)
             else:
-                service_error_dict = run_external_service(my_service_mesh,globalDict['work_model'],query_string,dict(),app, jaeger_headers)
+                service_error_dict = run_external_service(my_service_graph,globalDict['work_model'],query_string,dict(),app, jaeger_headers)
             if len(service_error_dict):
                 app.logger.error(service_error_dict)
                 app.logger.error("Error in request external services")
@@ -251,8 +251,8 @@ class gRPCThread(Thread, pb2_grpc.MicroServiceServicer):
             # Execute the external services
             app.logger.info("*************** EXTERNAL SERVICES STARTED ***************")
             start_external_request_processing = time.time()
-            if len(my_service_mesh) > 0:
-                service_error_dict = run_external_service(my_service_mesh, globalDict['work_model'])
+            if len(my_service_graph) > 0:
+                service_error_dict = run_external_service(my_service_graph, globalDict['work_model'])
                 if len(service_error_dict):
                     app.logger.error(service_error_dict)
                     app.logger.error("Error in request external services")
@@ -289,8 +289,8 @@ if __name__ == '__main__':
         HttpServer(app, options_gunicorn).run()
     elif request_method == "grpc":
         my_work_model = globalDict['work_model'][ID]
-        my_service_mesh = my_work_model['external_services']
-        init_gRPC(my_service_mesh, globalDict['work_model'], gRPC_port,app)
+        my_service_graph = my_work_model['external_services']
+        init_gRPC(my_service_graph, globalDict['work_model'], gRPC_port,app)
         # Start the gRPC server
         grpc_thread = gRPCThread()
         grpc_thread.run()

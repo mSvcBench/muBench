@@ -20,12 +20,12 @@
             "args": ["-c", "Configs/K8sAutopilotConf.json"]
         },
         {
-            "name": "ServiceMeshGen",
+            "name": "ServiceGraphGen",
             "type": "python",
             "request": "launch",
-            "program": "ServiceMeshGenerator/RunServiceMeshGen.py",
+            "program": "ServiceGraphGenerator/RunServiceGraphGen.py",
             "console": "integratedTerminal",
-            "args": ["-c", "Configs/ServiceMeshParameters.json"]
+            "args": ["-c", "Configs/ServiceGraphParameters.json"]
         },
         {
             "name": "WorkModelGenerator",

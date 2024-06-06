@@ -18,12 +18,12 @@ def init_REST(app):
     global request_function
     request_function = request_REST
 
-def init_gRPC(my_service_mesh, workmodel, server_port, app):
+def init_gRPC(my_service_graph, workmodel, server_port, app):
     app.logger.info("Init gRPC function")
     global service_stub, request_function
     request_function = request_gRPC
 
-    for group in my_service_mesh:
+    for group in my_service_graph:
         for service in group["services"]:
             host = f'{workmodel[service]["url"]}'
             # instantiate a channel

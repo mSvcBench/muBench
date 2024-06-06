@@ -52,7 +52,7 @@
           "run": false,
           "sleep_time": 0.01
         },
-        "mean_bandwidth": 11,
+        "mean_response_size": 11,
         "function_id": "f2"
       }
     },
@@ -89,7 +89,7 @@
           "run": false,
           "sleep_time": 0.01
         },
-        "mean_bandwidth": 11,
+        "mean_response_size": 11,
         "function_id": "f2"
       }
     },
@@ -126,7 +126,7 @@
           "run": false,
           "sleep_time": 0.01
         },
-        "mean_bandwidth": 11,
+        "mean_response_size": 11,
         "function_id": "f2"
       }
     },
@@ -163,7 +163,7 @@
           "run": false,
           "sleep_time": 0.01
         },
-        "mean_bandwidth": 11,
+        "mean_response_size": 11,
         "function_id": "f2"
       }
     },
@@ -200,7 +200,7 @@
           "run": false,
           "sleep_time": 0.01
         },
-        "mean_bandwidth": 11,
+        "mean_response_size": 11,
         "function_id": "f2"
       }
     },
@@ -237,7 +237,7 @@
           "run": false,
           "sleep_time": 0.01
         },
-        "mean_bandwidth": 11,
+        "mean_response_size": 11,
         "function_id": "f2"
       }
     },
@@ -274,7 +274,7 @@
           "run": false,
           "sleep_time": 0.01
         },
-        "mean_bandwidth": 11,
+        "mean_response_size": 11,
         "function_id": "f2"
       }
     },
@@ -311,7 +311,7 @@
           "run": false,
           "sleep_time": 0.01
         },
-        "mean_bandwidth": 11,
+        "mean_response_size": 11,
         "function_id": "f2"
       }
     },
@@ -348,7 +348,7 @@
           "run": false,
           "sleep_time": 0.01
         },
-        "mean_bandwidth": 11,
+        "mean_response_size": 11,
         "function_id": "f2"
       }
     },
@@ -385,7 +385,7 @@
           "run": false,
           "sleep_time": 0.01
         },
-        "mean_bandwidth": 11,
+        "mean_response_size": 11,
         "function_id": "f2"
       }
     },
@@ -422,7 +422,7 @@
           "run": false,
           "sleep_time": 0.01
         },
-        "mean_bandwidth": 11,
+        "mean_response_size": 11,
         "function_id": "f2"
       }
     },
@@ -459,7 +459,7 @@
           "run": false,
           "sleep_time": 0.01
         },
-        "mean_bandwidth": 11,
+        "mean_response_size": 11,
         "function_id": "f2"
       }
     },
@@ -496,7 +496,7 @@
           "run": false,
           "sleep_time": 0.01
         },
-        "mean_bandwidth": 11,
+        "mean_response_size": 11,
         "function_id": "f2"
       }
     },
@@ -533,7 +533,7 @@
           "run": false,
           "sleep_time": 0.01
         },
-        "mean_bandwidth": 11,
+        "mean_response_size": 11,
         "function_id": "f2"
       }
     },
@@ -570,7 +570,7 @@
           "run": false,
           "sleep_time": 0.01
         },
-        "mean_bandwidth": 11,
+        "mean_response_size": 11,
         "function_id": "f2"
       }
     },
@@ -607,7 +607,7 @@
           "run": false,
           "sleep_time": 0.01
         },
-        "mean_bandwidth": 11,
+        "mean_response_size": 11,
         "function_id": "f2"
       }
     },
@@ -644,7 +644,7 @@
           "run": false,
           "sleep_time": 0.01
         },
-        "mean_bandwidth": 11,
+        "mean_response_size": 11,
         "function_id": "f2"
       }
     },
@@ -681,7 +681,7 @@
           "run": false,
           "sleep_time": 0.01
         },
-        "mean_bandwidth": 11,
+        "mean_response_size": 11,
         "function_id": "f2"
       }
     },
@@ -718,7 +718,7 @@
           "run": false,
           "sleep_time": 0.01
         },
-        "mean_bandwidth": 11,
+        "mean_response_size": 11,
         "function_id": "f2"
       }
     },
@@ -755,7 +755,7 @@
           "run": false,
           "sleep_time": 0.01
         },
-        "mean_bandwidth": 11,
+        "mean_response_size": 11,
         "function_id": "f2"
       }
     },

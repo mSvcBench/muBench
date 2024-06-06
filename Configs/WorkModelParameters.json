@@ -7,7 +7,7 @@
             "recipient": "service",
             "probability":0,
             "parameters": {
-               "mean_bandwidth":10,
+               "mean_response_size":10,
                "range_complexity":[50, 100]
             },
             "workers":4,
@@ -40,7 +40,7 @@
                "memory_stress":{"run":false, "memory_size": 10000, "memory_io": 1000},
                "disk_stress":{"run":true,"tmp_file_name":  "mubtestfile.txt", "disk_write_block_count": 1000, "disk_write_block_size": 1024},
                "sleep_stress":{"run":false, "sleep_time":  0.01},
-               "mean_bandwidth": 11
+               "mean_response_size": 11
             },
             "workers":4,
             "threads":16,
@@ -59,7 +59,7 @@
                "memory_stress":{"run":false, "memory_size": 10000, "memory_io": 1000},
                "disk_stress":{"run":false,"tmp_file_name":  "mubtestfile.txt", "disk_write_block_count": 1000, "disk_write_block_size": 1024},
                "sleep_stress":{"run":false, "sleep_time":  0.01},
-               "mean_bandwidth": 11
+               "mean_response_size": 11
             },
             "workers":4,
             "threads":16,
@@ -83,13 +83,17 @@
             "s0": {"function_id": "f1"}
          }
       },
-      "ServiceMeshFilePath": {
+      "ServiceGraphFilePath": {
          "type": "metadata", 
-         "value":"SimulationWorkspace/servicemesh.json"
+         "value":"SimulationWorkspace/servicegraph.json"
       },
       "OutputPath": {
          "type":"metadata",
          "value":"SimulationWorkspace"
+      },
+      "OutputFile": {
+         "type":"metadata",
+         "value":"workmodel.json"
       }
    }
 }

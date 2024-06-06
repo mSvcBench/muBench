@@ -27,9 +27,9 @@ try:
     with open(parameters_file_path) as f:
         params = json.load(f)
 
-    ##### ServiceMesh Params
-    mesh_run = params['RunServiceMeshGeneratorFilePath']
-    mesh_parameters = params['ServiceMeshParametersFilePath']
+    ##### ServiceGraph Params
+    graph_run = params['RunServiceGraphGeneratorFilePath']
+    graph_parameters = params['ServiceGraphParametersFilePath']
     ##### WorkModel Params
     workmodel_run = params['RunWorkModelGeneratorFilePath']
     workmodel_parameters = params['WorkModelParametersFilePath']
@@ -41,7 +41,7 @@ except Exception as err:
     print("ERROR: in config file,", err)
     exit(1)
 
-os.system('python3 '+f'{mesh_run} -c {mesh_parameters}')
+os.system('python3 '+f'{graph_run} -c {graph_parameters}')
 os.system('python3 '+f'{workmodel_run} -c {workmodel_parameters}')
 os.system('python3 '+f'{k8s_run} -c {k8s_parameters}')
 
