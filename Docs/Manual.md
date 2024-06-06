@@ -269,7 +269,7 @@ The K8sDeployer uses the `workmodel.json` file and other config files to create 
 | ConfigMap            | workmodel         | ConfigMap including workmodel.json                         |
 
 The K8sDeployer takes as input a JSON file, like the following one, which contains information about the path of the `workmodel.json` file (`WorkModelPath`) and custom functions (`InternalServiceFilePath`) to be stored in the related ConfigMaps, and Kubernetes parameters. The Kubernetes parameters are the Docker `image` of the service-cell, the `namespace` of the deployment, as well as the K8s `cluster_domain` and the URL `path` used to trigger the service of service-cells. Between the deployment of a service-cell and the next one, there is a waiting period equal to `sleep` seconds to avoid K8s API server overload. 
-The user can change the name of the output YAML files of µBench microservices by specifying the `prefix_yaml_file`. NGINX gateway needs the name of the K8s DNS service and this value is stored in `dns-resolver` (be careful that some K8s clusters can use `coredns` instead of the default `kube-dns`). Deployment of NGINX can be avoided changing `nginx-gw` to false. The K8s NGINX service type is those reported in `nginx-svc-type`. It is possible to change the K8s scheduler used for the deployment of the µBench application changing the key `scheduler-name`.
+The user can change the name of the output YAML files of µBench microservices by specifying the `prefix_yaml_file`. NGINX gateway needs the name of the K8s DNS service and this value is stored in `dns-resolver` (be careful that some K8s clusters can use `coredns` instead of the default `kube-dns`). Deployment of NGINX can be avoided by changing `nginx-gw` to false. The K8s NGINX service type is those reported in `nginx-svc-type`. It is possible to change the K8s scheduler used for the deployment of the µBench application by changing the key `scheduler-name`.
 Using this information, K8sDeployer generates YAML files for running the µBench app, puts them in the `OutputPath/yaml` folder, and then applies them on Kubernetes, unless `no-apply` is true. To move the µBench application to another cluster, simply transport these YAML files. Similarly, these YAML files can be used to remove the µBench application from the cluster, with the exclusion of the generated namespace that should be manually removed. 
 
 ```json
@@ -337,7 +337,7 @@ To simulate the presence of databases in a µBench microservice application, the
 
 #### Execution of the ServicGraphGenrator <!-- omit in toc -->
 
-The ServicGraphGenrator takes as input a JSON configuration file (`ServiceGraphParameters.json`) as the following one:
+The ServicGraphGenrator takes as input a JSON configuration file (`ServiceGraphParameters.json`) as the following:
 
 ```json
 {
@@ -361,7 +361,7 @@ The ServicGraphGenrator takes as input a JSON configuration file (`ServiceGraphP
 
 There are two services (`vertices = 2`), and each service has a single external_service_groups (`external_service_groups=1`). For each group, 100 external-services are sequentially called (`seq_len=100`). When `seq_len` > `vertices` all external-service of a service group are sequentially called. Regarding the weights of the link of the dependency graph, i.e. the calling probabilities, the ServiceGraphGenerator allows using a random (`"model":"random"`) distribution in the range (0,1) for extracting the value of such probabilities or using a constant value for all, as in the example. In any, case these probabilities can be fine-tuned a posteriori by editing the produced `servicegraph.json` file. 
 
-The configuration in the example provides also the presence of two databases, `sdb1` and `sdb2`. `sdb1` is used by a service with a probability of 0.79, `sdb2` with a probability of 0.01, and in the remaining cases the service does not use any database.
+The configuration in the example provides also the presence of two databases, `sdb1` and `sdb2`. `sdb1` is used by a service with a probability of 0.79, `sdb2` with a probability of 0.01, and in the remaining cases, the service does not use any database.
 
 The figure below reports a possible service graph generated with these parameters where `sdb2` has been never chosen by services and therefore not included in the microservice application.
 
@@ -628,7 +628,13 @@ The WorkModelGenerator takes as input a configuration file (`WorkModelParameters
 }
 ```
 
-This file includes a set of *function-flavor* that can be assigned to service-cells with a given probability to implement their internal-service. Many *function-flavors* (`f0`, `f1`, `f2`,`f3`) can use the same python base-function (e.g. `loader` is used by `f2` and `f3` ) but with different parameters. Each function-flavor is represented as JSON object with a unique ID key (`f0`, `f1`, `f2`, `f3`) and whose values are: the `parameters` taken as input by the function, e.g., the `compute_pi` function uses `mean_response_size` and `range_complexity`; the `recipient` of the function-flavor (`database` or plain `service`);  the `name` of the base-function to be executed; the `probability` to be associated to a service-cell; the optional keys `workers` and `threads` that are the number of processes and threads per process used by service-cells that run the function-flavor to serve client requests; the optional key `replicas` for choosing the number of replicas of service-cells that run the function-flavor; the optional keys  `cpu-requests`,`cpu-limits`,`memory-requests`,`memory-limits` to control the cpu/memory resources associated to the service-cells running the function-flavor (see k8s [documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/))
+This file includes a set of *function-flavor* that are possible internal-service functions. For each service-cell, a function-flavour will be used as internal-service according to a configurable flavor probability. 
+
+Many *function-flavors* (`f0`, `f1`, `f2`,`f3`) can use the same python base-function (e.g. `loader` is used by `f2` and `f3` ) but with different parameters. 
+
+Each function-flavor is represented as JSON object with a unique ID key (`f0`, `f1`, `f2`, `f3`) and whose values are: the `parameters` taken as input by the function, e.g., the `compute_pi` function uses `mean_response_size` and `range_complexity`. 
+
+Other keys are the `recipient` of the function-flavor (`database` or plain `service`);  the `name` of the base-function to be executed; the `probability` to be associated to a service-cell; the optional keys `workers` and `threads` that are the number of processes and threads per process used by service-cells that run the function-flavor to serve client requests; the optional key `replicas` for choosing the number of replicas of service-cells that run the function-flavor; the optional keys  `cpu-requests`,`cpu-limits`,`memory-requests`,`memory-limits` to control the cpu/memory resources associated to the service-cells running the function-flavor (see k8s [documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/))
 
 The description of external-services is imported through a `servicegraph.json` file located in `ServiceGraphFilePath` metadata that can be manually made or automatically generated by the ServiceGraphGenerator. 
 

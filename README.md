@@ -6,9 +6,9 @@
 **µBench** is a tool for benchmarking cloud/edge computing platforms that run microservice applications.
 The tool creates *dummy* microservice applications that can be customized by the user and run on [Kubernetes](https://kubernetes.io).
 
-µBench targets researchers and cloud platform developers who lack real microservice applications to benchmark their findings (e.g., new resource control mechanisms, AI-driven orchestration, etc.). Indeed, µBench can create these applications for them. At the same time, µBench can also be used for educational purposes to show advantages and problems of microservice applications to students.
+µBench targets researchers and cloud platform developers who lack real microservice applications to benchmark their findings (e.g., new resource control mechanisms, AI-driven orchestration, etc.). Indeed, µBench can create these applications for them. At the same time, µBench can also be used for educational purposes to show the advantages and problems of microservice applications to students.
 
-µBench allows users control some properties of the microservice application it creates, such as: 
+µBench allows users to control some properties of the microservice application it creates, such as: 
 - the dependency graph of the microservice application 
 - the behaviors of composing microservices using a portfolio of stress functions (e.g. for CPU, memory, I/O, network) or implementing new ones, 
 - the microservice-to-microservice API (HTTP or gRPC)
@@ -28,7 +28,7 @@ You can learn how to use µBench to create and monitor your application by readi
 ## Quick Start
 For a complete install guide, head over to the [manual](Docs/Manual.md#installation-and-getting-started). Instead, for a quick hands-on with µBench the following commands will deploy a microservice application composed of 10 services with a star topology service graph. Clients send requests to s0 and s0 sequentially calls all other services before sending the result to clients. Each service equally stresses the CPU. 
 
-We assume that on your host, you have Docker and have access to a Kubernetes cluster with `kubectl` tool. If you need to configure a Kubernetes cluster (e.g., with Minikube) or for other configurations read the [manual](Docs/Manual.md#installation-and-getting-started).
+We assume that on your host, you have Docker and access to a Kubernetes cluster with `kubectl` tool. If you need to configure a Kubernetes cluster (e.g., with Minikube) or for other configurations read the [manual](Docs/Manual.md#installation-and-getting-started).
 
 We will use the Docker µBench container that contains all the necessary software.
 
@@ -42,9 +42,7 @@ Copy the `.kube/config ` file you use in your host to access the Kubernetes clus
 kubectl config view --flatten > config
 docker cp config mubench:/root/.kube/config
 ```
-In case update the `server:` key of `config` file with the correct IP address of the master node of the cluster. 
-
-Verify that µBench container can access your cluster, e.g., by using next command from your host
+In case update the `server:` key of `config` file with the correct IP address of the master node of the cluster. Verify that the µBench container can access your cluster, e.g., by using the next command from your host
 ```zsh
 docker exec mubench kubectl get nodes
 ``` 
@@ -54,7 +52,7 @@ Enter the µBench container with:
 docker exec -it mubench bash
 ``` 
 
-Now your terminal should be in the µBench container from which you will run next commands
+Now your terminal should be in the µBench container from which you will run the next commands
 ```zsh
 
 ╱╱╱╭━━╮╱╱╱╱╱╱╱╱╱╭╮
@@ -99,7 +97,7 @@ Test the correct execution of the application with
 ```zsh
 curl http://<MASTER_IP>:31113/s0
 ```
-where `MASTER_IP` is the IP address of the master-node of the Kubernetes cluster.
+where `MASTER_IP` is the IP address of the master node of the Kubernetes cluster.
 If you receive back a sequence of random letters, it means that your first µBench app is running :-). 
 
 Read the [manual](Docs/Manual.md) to create and monitor your benchmark apps.
@@ -107,12 +105,17 @@ Read the [manual](Docs/Manual.md) to create and monitor your benchmark apps.
 > **_NOTE:_**: edit Configs/K8sParameters.json if your Kubernetes dns-resolver service is different from `kube-dns`. For instance, for some clusters it is named `coredns`. Otherwise, nginx pod gets error status.
 
 ## Cite Us
-The description of µBench and some use-cases has been published in IEEE Transactions on Parallel and Distributed Systems. If you use the µBench please cite the following publication:
+The description of µBench and some use cases have been published in IEEE Transactions on Parallel and Distributed Systems. If you use the µBench please cite the following publication:
 
 >A. Detti, L. Funari and L. Petrucci, "μBench: An Open-Source Factory of Benchmark Microservice Applications," in IEEE Transactions on Parallel and Distributed Systems, vol. 34, no. 3, pp. 968-980, 1 March 2023, doi: 10.1109/TPDS.2023.3236447.
 
 To reproduce the tests of the paper read [here](Docs/reproducibility.md)
 
+
+##  Critical changes from previous versions
+> **ServiceMeshGenerator replaced by ServiceGraphGenerator**. In previous version of µBench we used the term *service mesh* to denote the dependency graph between microservices, whereas in the current version of the software we have replaced this term with *service graph* since today the term service mesh denotes tools such as Istio. Therefore, many jeyworks and file names are changed. Eg. `ServiceMeshGenerator` is now `ServiceGraphGenerator`, `ServiceMeshParameters.json` is now `ServiceGraphParameters.json`, etc.
+ 
+> **mean_bandwidth replaced by mean_response_size**. In previous version of µBench we used the JSON key `mean_bandwidth` to indicate the mean response size of `pi` and `loader` internal functions. Now the key has been changed in `mean_response_size`.
 
 
 ## Acknowledge
