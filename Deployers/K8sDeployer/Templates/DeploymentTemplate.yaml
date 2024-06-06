@@ -77,24 +77,4 @@ spec:
             name: workmodel
         - name: microservice-internal-services
           configMap:
-            name: internal-services        
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{SERVICE_NAME}}
-  namespace: {{NAMESPACE}}
-  labels:
-    app: {{SERVICE_NAME}}
-spec:
-  type: NodePort
-  ports:
-  - port: 80
-    targetPort: 8080
-    nodePort:
-    name: http-mubserviceport
-  - port: 51313
-    targetPort: 51313
-    name: grpc-mubserviceport
-  selector:
-    app: {{SERVICE_NAME}}
+            name: internal-services

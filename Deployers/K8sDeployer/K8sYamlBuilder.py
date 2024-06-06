@@ -39,11 +39,13 @@ def customization_work_model(workmodel, k8s_parameters):
     print("Work Model Updated!")
 
 
-def create_deployment_yaml_files(workmodel, k8s_parameters, nfs, output_path):
+def create_deployment_service_yaml_files(workmodel, k8s_parameters, nfs, output_path):
     namespace = k8s_parameters['namespace']
     counter=0
     for service in workmodel:
         counter=counter+1
+
+        # Create Deployment yamls
         with open(f"{K8s_YAML_BUILDER_PATH}/Templates/DeploymentTemplate.yaml", "r") as file:
             f = file.read()
             f = f.replace("{{SERVICE_NAME}}", service)
@@ -109,7 +111,15 @@ def create_deployment_yaml_files(workmodel, k8s_parameters, nfs, output_path):
             os.makedirs(f"{output_path}/yamls")
         
         # rank used to sort the deployment so as more demanding PODs are deployed first
-        with open(f"{output_path}/yamls/{str(rank_string).zfill(3)}-{k8s_parameters['prefix_yaml_file']}-{service}.yaml", "w") as file:
+        with open(f"{output_path}/yamls/{str(rank_string).zfill(3)}-{k8s_parameters['prefix_yaml_file']}-Deployment-{service}.yaml", "w") as file:
+            file.write(f)
+        
+        # Create Service yamls
+        with open(f"{K8s_YAML_BUILDER_PATH}/Templates/ServiceTemplate.yaml", "r") as file:
+            f = file.read()
+            f = f.replace("{{SERVICE_NAME}}", service)
+            f = f.replace("{{NAMESPACE}}", namespace)
+        with open(f"{output_path}/yamls/{str(rank_string).zfill(3)}-{k8s_parameters['prefix_yaml_file']}-Service-{service}.yaml", "w") as file:
             file.write(f)
 
     if k8s_parameters["nginx-gw"] == True:

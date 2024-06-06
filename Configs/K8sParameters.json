@@ -1,6 +1,6 @@
 {
    "K8sParameters": {
-      "prefix_yaml_file":"MicroService",
+      "prefix_yaml_file":"mubench",
       "namespace": "default",
       "image": "msvcbench/microservice_v5-screen:latest",
       "cluster_domain": "cluster",
