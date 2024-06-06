@@ -14,7 +14,7 @@ def create_dest_rule(yaml_file_in, yaml_file_out, destrule_template_file):
     with open(yaml_file_in, 'r') as file:
         complete_yaml = list(yaml.safe_load_all(file))
     for partial_yaml in complete_yaml:
-        if partial_yaml["kind"] == "Deployment":
+        if partial_yaml["kind"] == "Service":
             if 'metadata' not in partial_yaml or 'name' not in partial_yaml['metadata']:
                 raise ValueError('Invalid Kubernetes Deployment YAML')
             else:
