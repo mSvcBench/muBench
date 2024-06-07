@@ -32,9 +32,7 @@ try:
     with open(parameters_file_path) as f:
         params = json.load(f)
     workmodel_parameters = params["WorkModelParameters"]
-    servicegraph_file_path = workmodel_parameters["ServiceGraphFilePath"]["value"]
-    with open(servicegraph_file_path) as f:
-        servicegraph = json.load(f)
+
     if "OutputPath" in workmodel_parameters.keys() and len(workmodel_parameters["OutputPath"]["value"]) > 0:
         output_path = workmodel_parameters["OutputPath"]["value"]
         if output_path.endswith("/"):
@@ -47,6 +45,18 @@ try:
         output_file = workmodel_parameters["OutputFile"]["value"]
     else:
         output_file = "workmodel.json"
+    
+    if "ServiceMeshFilePath" in workmodel_parameters.keys():
+        # backward compatibility
+        servicegraph_file_path = workmodel_parameters["ServiceMeshFilePath"]["value"]
+    elif "ServiceGraphFilePath" in workmodel_parameters.keys():
+        servicegraph_file_path = workmodel_parameters["ServiceGraphFilePath"]["value"]
+    else:
+        servicegraph_file_path = f"{output_path}/servicegraph.json"
+    
+    with open(servicegraph_file_path) as f:
+        servicegraph = json.load(f)
+
 except Exception as err:
     print("ERROR: in creation of workmodel,", err)
     exit(1)

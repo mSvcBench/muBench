@@ -39,7 +39,11 @@ parameters_file_path = args.parameters_file
 try:
     with open(parameters_file_path) as f:
         params = json.load(f)
-    graph_parameters = params['ServiceGraphParameters']
+    if "ServiceMeshParameters" in params.keys():
+        # backward compatibility
+        graph_parameters = params['ServiceMeshParameters']
+    else:
+        graph_parameters = params['ServiceGraphParameters']
     if "OutputPath" in params.keys() and len(params["OutputPath"]) > 0:
         output_path = params["OutputPath"]
         if output_path.endswith("/"):
