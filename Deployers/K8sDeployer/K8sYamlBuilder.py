@@ -111,7 +111,7 @@ def create_deployment_service_yaml_files(workmodel, k8s_parameters, nfs, output_
             os.makedirs(f"{output_path}/yamls")
         
         # rank used to sort the deployment so as more demanding PODs are deployed first
-        with open(f"{output_path}/yamls/{str(rank_string).zfill(3)}-{k8s_parameters['prefix_yaml_file']}-Deployment-{service}.yaml", "w") as file:
+        with open(f"{output_path}/yamls/{k8s_parameters['prefix_yaml_file']}-{str(rank_string).zfill(3)}-Deployment-{service}.yaml", "w") as file:
             file.write(f)
         
         # Create Service yamls
@@ -119,7 +119,7 @@ def create_deployment_service_yaml_files(workmodel, k8s_parameters, nfs, output_
             f = file.read()
             f = f.replace("{{SERVICE_NAME}}", service)
             f = f.replace("{{NAMESPACE}}", namespace)
-        with open(f"{output_path}/yamls/{str(rank_string).zfill(3)}-{k8s_parameters['prefix_yaml_file']}-Service-{service}.yaml", "w") as file:
+        with open(f"{output_path}/yamls/{k8s_parameters['prefix_yaml_file']}-{str(rank_string).zfill(3)}-Service-{service}.yaml", "w") as file:
             file.write(f)
 
     if k8s_parameters["nginx-gw"] == True:
@@ -130,7 +130,7 @@ def create_deployment_service_yaml_files(workmodel, k8s_parameters, nfs, output_
             f = f.replace("{{PATH}}", k8s_parameters["path"])
             f = f.replace("{{RESOLVER}}", k8s_parameters["dns-resolver"])
 
-        with open(f"{output_path}/yamls/ConfigMapNginxGw.yaml", "w") as file:
+        with open(f"{output_path}/yamls/{k8s_parameters['prefix_yaml_file']}-ConfigMapNginxGw.yaml", "w") as file:
             file.write(f)
 
         with open(f"{K8s_YAML_BUILDER_PATH}/Templates/DeploymentNginxGwTemplate.yaml", "r") as file:
@@ -142,7 +142,7 @@ def create_deployment_service_yaml_files(workmodel, k8s_parameters, nfs, output_
             else:
                 f = f.replace("{{SCHEDULER_NAME}}", "default-scheduler")
             
-        with open(f"{output_path}/yamls/DeploymentNginxGw.yaml", "w") as file:
+        with open(f"{output_path}/yamls/{k8s_parameters['prefix_yaml_file']}-DeploymentNginxGw.yaml", "w") as file:
             file.write(f)
     print("Deployments and Services Created!")
 
@@ -154,7 +154,7 @@ def create_workmodel_configmap_yaml_file(workmodel, k8s_parameters, nfs, output_
         j = json.dumps(workmodel,indent=2)
         j = '    '.join(j.splitlines(True))
         f = f.replace("{{WORKMODEL}}", j)
-    with open(f"{output_path}/yamls/ConfigMapWorkmodel.yaml", "w") as file:
+    with open(f"{output_path}/yamls/{k8s_parameters['prefix_yaml_file']}-ConfigMapWorkmodel.yaml", "w") as file:
         file.write(f)
     print("Workmodel Configmap Created!")
 
@@ -175,6 +175,6 @@ def create_internalservice_configmap_yaml_file(k8s_parameters, nfs, output_path,
         j = json.dumps(data_dict,indent=2)
         j = '  '.join(j.splitlines(True))
         f = f.replace("{{DATA}}", j)
-    with open(f"{output_path}/yamls/ConfigMapInternalServices.yaml", "w") as file:
+    with open(f"{output_path}/yamls/{k8s_parameters['prefix_yaml_file']}-ConfigMapInternalServices.yaml", "w") as file:
         file.write(f)
     print("Internal-Services Configmap Created!")

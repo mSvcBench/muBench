@@ -299,7 +299,7 @@ Run `RunK8sDeployer.py` from the K8s Master node as follows
 python3 Deployers/K8sDeployer/RunK8sDeployer.py -c Configs/K8sParameters.json
 ```
 
-If the K8sDeployer finds YAML files in the YAML folder, it will ask whether the user prefers to undeploy them before proceeding.
+If the K8sDeployer finds YAML files in the YAML folder, it will ask whether the user prefers to undeploy them before proceeding. The undeploy operation iremove all files YAML files and, if `no-apply` is false, remove also the related Kubernetes resources.
 
 Take care of controlling the eventual completion of the deployment/undeployment operation with `kubectl get pods` command.
 

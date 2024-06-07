@@ -40,6 +40,9 @@ class ThreadReturnedValue:
 def compute_pi(params):
     default_params = {"range_complexity": [50, 100], "mean_response_size": 10} 
     params = jsonmerge.merge(default_params,params)
+    if "mean_bandwidth" in params:
+        # for backward compatibility
+        params["mean_response_size"] = params["mean_bandwidth"]
 
     cpu_load = random.randint(params["range_complexity"][0], params["range_complexity"][1])
     pi_greco = list()

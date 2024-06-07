@@ -126,7 +126,8 @@ else:
     print(f"Folder is not empty: {folder}.")
     keyboard_input = input("Do you want to UNDEPLOY yamls of the old application first, delete the files and then start the new applicaiton ? (n) ") or "n"
     if keyboard_input == "y" or keyboard_input == "yes":
-        K8sYamlDeployer.undeploy_items(folder)
+        if not no_apply:
+            K8sYamlDeployer.undeploy_items(folder)
         remove_files(folder)
     else:
         print("...\nOk you want to keep the OLD application! Bye!")

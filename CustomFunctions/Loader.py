@@ -6,6 +6,7 @@ import jsonmerge
 import string
 
 params_processed = False
+params = dict()
 
 def cpu_loader_job(params):
     cpu_load = random.randint(params["range_complexity"][0], params["range_complexity"][1])
@@ -100,8 +101,8 @@ def sleep_loader(params):
     # print("--------> Sleep stop")
     return
 
-def loader(params):
-    global params_processed
+def loader(input_params):
+    global params_processed, params
 
     if not params_processed:
         default_params = {
@@ -111,9 +112,11 @@ def loader(params):
             "sleep_stress":{"run":True,"sleep_time": 0.01},
             "mean_response_size": 11}
 
-        params = jsonmerge.merge(default_params,params)
-        params_processed = True
-        
+        params = jsonmerge.merge(default_params,input_params)
+        if "mean_bandwidth" in params:
+            # for backward compatibility
+            params["mean_response_size"] = params["mean_bandwidth"]
+        params_processed = True    
     if params['cpu_stress']['run']: 
         cpu_loader(params['cpu_stress'])
     if params['memory_stress']['run']:
