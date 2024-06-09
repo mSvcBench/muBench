@@ -18,8 +18,8 @@ The measurements of the paper have been made using a Kubernetes cluster with 10 
  
 µBench software has been deployed in the Kubernetes master-node of the cluster as described in the [manual](Manual.md/#µbench-in-the-host). The related workmodel files of the considered applications are in:
 - the folder `examples` for what concerns Fig. 6 and Graph C and D of Figs. 7. 
-- the zipfile `examples/Alibaba/traces-mbench.zip` for Topologies A, B of Fig. 7,8,9. Once unzipped, Graph A and B files are in `traces-mbench/seq/app18 ` and `traces-mbench/seq/app22`, respectively. These folders contain also the traces used to load the application.
+- the zipfile `examples/Alibaba/traces-mbench.zip` for Topologies A, B of Fig. 7,8,9. Once unzipped, Graph A and B files are in `traces-mbench/seq/app18 ` and `traces-mbench/seq/app22`, respectively. These folders contain also the traces used to load the application and the `workmodel.json` file we used to deploy them.
 
 > Reproducibility of Experiments
 
-For all tests, we used [Apache Jmeter](https://jmeter.apache.org/) to load the application either. The `.jmx` used by jmeter are in the `examples/jmeter` folder.
+For all tests, we used [Apache Jmeter](https://jmeter.apache.org/) to load the application either. The `.jmx` files used by jmeter are in the `examples/jmeter` folder.

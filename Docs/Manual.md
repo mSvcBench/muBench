@@ -14,6 +14,7 @@
   - [Benchmarks strategies](#benchmarks-strategies)
     - [Stochastic-driven benchmarks](#stochastic-driven-benchmarks)
     - [Trace-driven benchmarks](#trace-driven-benchmarks)
+      - [Alibaba-derived traces](#alibaba-derived-traces)
   - [Benchmarks tools](#benchmarks-tools)
   - [Monitoring and Tracing](#monitoring-and-tracing)
   - [Installation and Getting Started](#installation-and-getting-started)
@@ -48,15 +49,15 @@ Services communicate with each other using either HTTP REST request/response mec
 ## Service-Cell
 
 ![service-cell-abstraction](service-cell-abstraction.png)
-Each service is implemented by a main software unit that we call *service-cell*. A service-cell is a [Docker container](/ServiceCell/README.md) that contains a Python program executing the internal and external services that the user has chosen for the specific service.
+Each service is implemented by a main software unit that we call *service-cell*. A service-cell is a [Docker container](/ServiceCell/README.md) that contains a Python program executing the internal and external services that the user has chosen for the specific service. After the execution of internal and external services, it returns a amount of dummy kBytes.
 
-Service-cells are connected by a TCP/IP network and they access a common storage space (Kubernetes ConfigMaps) where they find some files describing the work that each of them has to do. These files are `workmodel.json`, and a set of Python files imported by the service-cell that include the definition of all *custom functions* possibly used as internal-service.
+When a service-cell is executed, it has an identifier (e.g., *Sx*) collected from environment variables. It imports the Python files with the code of the *custom functions* (custom internal-services) possibly defined by the user. Then, it reads the `workmodel.json` file to figure out based on its identifier which internal and external services it should execute when serving a request. As described later, the `workmodel.json` file is a kind of "DNA" of a µBench application that describes for each service what local job (internal-service) it must do and what other downstream services it must call (external-services) before sending back a response.
 
-For performance monitoring, service-cells expose a set of metrics to a Prometheus server.
+The `workmodel.json` file and the portfolio of Python files with the code of the *custom functions* are imported by the service-cell through specific Kubernetes ConfigMaps.
 
-We have single-process and multi-process different implementations of the service-cell, see [here](../ServiceCell/README.md). 
+For performance monitoring, a service-cell exposes a set of [metrics](#monitoring-and-tracing) to a Prometheus server.
 
-In addition to the service-cell container, a µBench microservice can optionally include a sidecar container executing real software (e.g., a database) used by the internal service. 
+Optionally, a µBench service (i.e. a POD) can be associated with a sidecar container that runs a real software, e.g. a database, that interacts with the main container of the service-cell. This way, µBench can be used to evaluate the performance of real software in a microservice architecture.
 
 ---
 
@@ -311,6 +312,8 @@ Take care of controlling the eventual completion of the deployment/undeployment 
 
 To simulate large microservice applications, µBench provides a toolchain made by two software, *ServiceGraphGenerator* and *WorkModelGenerator*, that support the creation of complex `workmodel.json` files by using random distributions whose parameters can be configured by the user.
 The following figure shows how they can be sequentially used with the K8sDeployer to have a µBench application running on a Kubernetes cluster.
+
+In short, the ServiceGraphGenerator creates a random dependency graph among microservices by using the Barabási-Albert (BA) algorithm. The WorkModelGenerator assigns each microservice a job, i.e., an internal-function, and an amount of resources (CPU limit, MEMs/requirements, replicas, etc.). All this information is included in the `workmodel.json` file that is used by K8sDeployer to deploy the µBench application on a Kubernetes cluster.
 
 ![toolchain](toolchain.png)
 
@@ -715,8 +718,10 @@ To change the sequence of calls from sequential to parallel the JSON trace shoul
 ```
 In this case, microservice `s0` has two groups of external-services consisting of microservices `s24` and `s28` that are called in parallel. In turn, `s28` has two groups of external-services consisting of the microservices `s6` and `s20`. Consequently, the sequence of the called microservices is: `s0`-->`s24,s28`, then `s28`-->`s6,s20`.
 
-In the `examples` directory, there is the `Alibaba` folder with a collection of applications obtained from processing the real Alibaba [traces](#https://link.alibaba.com/tracce), in the same directory we find the Matlab scripts used for the processing of the traces.
-To use these applications, first, we need to unzip the [trace-mbench.zip](#examples/Alibaba/trace-mbench.zip) file inside the `examples/Alibaba` directory. As result of this operation, we obtain the `trace-mbench` directory within two folders: `par` and `seq`. 
+#### Alibaba-derived traces
+
+In the `examples` directory, there is the `Alibaba` folder with a collection of applications obtained from processing the real Alibaba [traces](https://github.com/alibaba/clusterdata/tree/master/cluster-trace-microservices-v2021), in the same directory we can find the Matlab scripts used for the processing of the traces.
+To use these applications, first, we need to unzip the [trace-mbench.zip](#examples/Alibaba/trace-mbench.zip) file inside the `examples/Alibaba` directory. As a result of this operation, we obtain the `trace-mbench` directory within two folders: `par` and `seq`. 
 
 
 ```zsh
@@ -735,50 +740,71 @@ muBench/
 │  │  │  │  ├─ ...
 
 ```
-Each folder contains 29 applications, each one with a set of traces. The differences between the traces in two folders is that traces in the `par` directory execute downstream requests in parallel, whereas the traces in the `seq` directory execute requests in sequence. 
-In each app folder, you will find a `service_graph.json` file that represents the app's service graph and its traces. To benchmark an app, the following steps must be performed:
-- Generate a `workmodel.json` file with the WorkModelGenerator by providing as input the `service_graph.json` file of the app you intend to test. 
-- Deploy the application with K8sDeployer by providing as input the `workmodel.json` file created in the previous step.
-- Send traces to the application
-In what follows, we provide an example for app no. 3
+Each folder contains 29 applications, each one with a set of traces. The difference between the traces in the two folders is that traces in the `par` directory execute downstream requests in parallel, whereas the traces in the `seq` directory execute requests in sequence. 
+In each app folder, you will find a `service_graph.json` file that represents the app's service graph and its traces. The `service_graph.json` does not contain any external services, because the sequence of external services to be called is specified by the trace sent via HTTP POST. 
 
-#### Generate Workmodel <!-- omit in toc -->
-To generate the `workmodel.json` file you can use the WorkModelGenerator. It is necessary to edit the parameter `ServiceGraphFilePath` inside the `WorkModelParameters.json` with the correct path of the selected app service_graph, e.g.
+To benchmark an app generated from Alibaba trace, the following steps must be performed:
 
-```json
-      "ServiceGraphFilePath": {
-         "type": "metadata", 
-         "value":"examples/Alibaba/traces-mbench/seq/app3/service_graph.json"
-      },
-     "OutputPath": {
-         "type":"metadata",
-         "value":"examples/Alibaba/traces-mbench/seq/app3"
+- Create a `Config/WorkModelParameters.json` file that contains the `service_graph.json` file of the application you intend to test. As for the remaining information in the `WorkModelParameters.json` file, we were unable to derive it from Alibaba's traces, so the user must make his or her own choices. For example, a possible `WorkModelParameters.json` file for sequential application No. 18 is as follows. In this case, all microservices stress the CPU through the [loader](#CustomFunctions/README.md) function, the average size of responses is 11 kBytes, and Kubernetes' requests and CPU limits are set to 250m.
+
+   ```json
+   {
+      "WorkModelParameters":{
+         "f2": {
+            "type":"function",
+            "value": {
+               "name": "loader",
+               "recipient": "service",
+               "probability":1,
+               "parameters": {
+                  "cpu_stress": {"run":true,"range_complexity": [100, 100], "thread_pool_size": 1, "trials": 1},
+                  "memory_stress":{"run":false, "memory_size": 10000, "memory_io": 1000},
+                  "disk_stress":{"run":false,"tmp_file_name":  "mubtestfile.txt", "disk_write_block_count": 1000, "disk_write_block_size": 1024},
+                  "mean_response_size": 11
+               },
+               "workers":8,
+               "threads":128,
+               "cpu-requests": "250m",
+               "cpu-limits": "250m"
+            }
+         },
+         "request_method":{
+            "type": "metadata",
+            "value":"rest"
+         },
+         "databases_prefix": {
+            "type":"metadata",
+            "value": "sdb"
+         },
+         "override": {},
+         "ServiceGraphFilePath": {
+            "type": "metadata", 
+            "value":"Examples/Alibaba/traces-mbench/seq/app18/service_graph.json"
+         },
+         "OutputPath": {
+            "type":"metadata",
+            "value":"SimulationWorkspace"
+         }
       }
-```
-Run the WorkModelGenerator
+   }
+   ```
+- Generate the `workmodel.json` file with the `WorkModelGenerator` by running the following command:
 
-```zsh
-python3 WorkModelGenerator/RunWorkModelGen.py -c Configs/WorkModelParameters.json
-```
+   ```zsh
+   python3 WorkModelGenerator/RunWorkModelGen.py -c Configs/WorkModelParameters.json
+   ```
 
-#### Kubernetes Deployment <!-- omit in toc -->
-Before running K8sDeployer, to deploy the application, you need to edit the `K8sParameters.json` file to specify the correct path of the working model created in the previous step.
-```json
-   "InternalServiceFilePath": "CustomFunctions",
-   "OutputPath": "SimulationWorkspace/",
-   "WorkModelPath": "examples/Alibaba/traces-mbench/seq/app3/workmodel.json",
-```
-Run the K8sDeployer
+- Deploy the application with `K8sDeployer` by providing as input the `workmodel.json` file created in the previous step ad by using the following command. If necessary update properly the `Configs/K8sParameters.json`
 
-```zsh
-python3 Deployers/K8sDeployer/RunK8sDeployer.py -c Configs/K8sParameters.json
-```
+   ```zsh
+   python3 Deployers/K8sDeployer/RunK8sDeployer.py -c Configs/K8sParameters.json
+   ```
 
-#### Send Traces <!-- omit in toc -->
-To send a trace you need to do an HTTP POST request to the NGINX API gateway with the trace JSON file as the body, you can use Curl.
-```zsh
-curl -X POST -H "Content-Type: application/json" http://<access-gateway-ip>:31113/s0 -d @examples/Alibaba/traces-mbench/seq/app3/trace00001.json
-```
+- To send a trace-driven request, we can send an HTTP POST to the NGINX access gateway with the JSON file of the trace as the body. For example, we can use the bash command `curl` to send the first trace of sequential application n. 18.
+  
+   ```zsh
+   curl -X POST -H "Content-Type: application/json" http://<access-gateway-ip>:31113/s0 -d @examples/Alibaba/traces-mbench/seq/app18/trace00001.json
+   ```
 
 ## Benchmarks tools 
 
