@@ -2,7 +2,7 @@
 
 `create-affinity-yamls` is a utility that generates YAML configuration files of Kubernetes deployments that have affinity rules based on the `topology.kubernetes.io/{region,zone,sub-zone}` label of the nodes. 
 The software takes as parameters an input directory where there are YAML files without affinity, an output directory where new YAML files with affinity rules will be placed, and the `region`, `zone` and `sub-zone` values to be used in the affinity rules. 
-For each combination of `region`, `zone` and `sub-zone` values, the software creates a subdirectory of the output directory that includes the input YAML files whose Deployments have the affinity rules. The names of these deployments are changed into the original name plus the string "-`region`", "-`zone`" and "-`sub-zone`" values.
+For each combination of `region`, `zone` and `sub-zone` values, the software creates a subdirectory of the output directory that includes the input YAML files whose Deployments have the affinity rules. The names of these deployments are changed into the original name plus the string "-`region`", "-`zone`" and "-`sub-zone`" values. A new `app-t` label equal to the original app one is added to the template labels and matchLabels selector of the Deployment.
 
 Examples:
 

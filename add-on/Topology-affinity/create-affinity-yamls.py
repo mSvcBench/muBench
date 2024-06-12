@@ -53,6 +53,8 @@ def add_affinity_spec(yaml_file_in, yaml_file_out, region, zone, subzone ):
                 if suffix != '':
                     partial_yaml['spec']['template']['spec']['affinity'] = affinity
                     partial_yaml['metadata']['name'] = partial_yaml['metadata']['name'] + suffix
+                    partial_yaml['spec']['selector']['matchLabels']['app-t'] = partial_yaml['spec']['selector']['matchLabels']['app'] + suffix
+                    partial_yaml['spec']['template']['metadata']['labels']['app-t'] = partial_yaml['spec']['selector']['matchLabels']['app'] + suffix
                     created = created or True
     
     with open(yaml_file_out, 'w') as file:
