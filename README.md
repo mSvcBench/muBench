@@ -20,6 +20,8 @@ The tool creates *dummy* microservice applications that can be customized by the
 <img width="100%" src="Monitoring/kubernetes-full-monitoring/muBenchMonitors.png">
 </p>
 
+A poster dipicting main µBench features is available [here](Docs/poster-restart.pdf)
+
 ## µBench Manual
 You can learn how to use µBench to create and monitor your application by reading the **[µBench manual](Docs/Manual.md)**.
 
@@ -110,7 +112,6 @@ The description of µBench and some use cases have been published in IEEE Transa
 >A. Detti, L. Funari and L. Petrucci, "μBench: An Open-Source Factory of Benchmark Microservice Applications," in IEEE Transactions on Parallel and Distributed Systems, vol. 34, no. 3, pp. 968-980, 1 March 2023, doi: 10.1109/TPDS.2023.3236447.
 
 To reproduce the tests of the paper read [here](Docs/reproducibility.md)
-
 
 ##  Critical changes from previous versions
 > **ServiceMeshGenerator replaced by ServiceGraphGenerator**. In previous version of µBench we used the term *service mesh* to denote the dependency graph between microservices, whereas in the current version of the software we have replaced this term with *service graph* since today the term service mesh denotes tools such as Istio. Therefore, many jeyworks and file names are changed. Eg. `ServiceMeshGenerator` is now `ServiceGraphGenerator`, `ServiceMeshParameters.json` is now `ServiceGraphParameters.json`, etc.
