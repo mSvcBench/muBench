@@ -20,7 +20,7 @@ The tool creates *dummy* microservice applications that can be customized by the
 <img width="100%" src="Monitoring/kubernetes-full-monitoring/muBenchMonitors.png">
 </p>
 
-A poster dipicting main µBench features is available [here](Docs/mubench-poster.pdf)
+A poster outlining the main features of µBench is available [here](Docs/mubench-poster.pdf)
 
 ## µBench Manual
 You can learn how to use µBench to create and monitor your application by reading the **[µBench manual](Docs/Manual.md)**.
