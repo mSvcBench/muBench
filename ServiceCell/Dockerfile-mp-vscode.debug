@@ -1,7 +1,7 @@
-FROM python:slim
+FROM python:3.8-slim-buster
 
-RUN apt update
-RUN apt -y install vim iproute2 curl screen
+RUN apt-get update
+RUN apt-get -y install vim iproute2 curl screen
 RUN rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt /app/
@@ -23,4 +23,3 @@ COPY CellController-mp.py ExternalServiceExecutor.py InternalServiceExecutor.py 
 mub_pb2_grpc.py gunicorn.conf.py start-mp-vscode.sh ./
 
 CMD [ "/bin/bash", "/app/start-mp-vscode.sh"]
-

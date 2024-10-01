@@ -62,14 +62,22 @@ def read_config_files():
             if service==ID:
                 res[service]=workmodel[service]
             else:
-                res[service]={"url":workmodel[service]["url"],"path":workmodel[service]["path"]}
+                res[service]={"url":workmodel[service]["url"],
+                              "path":workmodel[service]["path"],
+                              "request_protocol":workmodel[service]["request_protocol"],
+                              "request_method":workmodel[service]["request_method"],
+                              }
+                if "request_parameters" in workmodel[service].keys():
+                    res[service]["request_parameters"]=workmodel[service]["request_parameters"]
     return res
 globalDict['work_model'] = read_config_files()    # must be shared among processes for hot update
 
-if "request_method" in globalDict['work_model'][ID].keys():
-    request_method = globalDict['work_model'][ID]["request_method"].lower()
+# globalDict = {'work_model': {'s0': {'url': 's0.mubench-dev.svc.cluster.local', 'path': '/api/v1'}, 's1': {'external_services': [{'seq_len': 100, 'services': ['s3'], 'probabilities': {'s3': 0.0}}], 'internal_service': {'colosseum': {}}, 'request_protocol': 'http', 'request_method': 'POST', 'request_parameters': {'post_type': 'const', 'body_size': 100}, 'workers': 1, 'threads': 1, 'cpu-limits': '1000m', 'cpu-requests': '1000m', 'url': 's1.mubench-dev.svc.cluster.local', 'path': '/api/v1', 'image': 'msvcbench/microservice_v6-screen:latest', 'namespace': 'mubench-dev'}, 's2': {'url': 's2.mubench-dev.svc.cluster.local', 'path': '/api/v1'}, 's3': {'url': 's3.mubench-dev.svc.cluster.local', 'path': '/api/v1'}}}
+
+if "request_protocol" in globalDict['work_model'][ID].keys():
+    request_protocol = globalDict['work_model'][ID]["request_protocol"].lower()
 else:
-    request_method = "rest"
+    request_protocol = "http"
 
 ########################### PROMETHEUS METRICS
 registry = CollectorRegistry()
@@ -134,12 +142,19 @@ def start_worker():
         # if POST check the presence of a trace
         trace=dict()
         if request.method == 'POST':
-            trace = request.json
-            # sanity_check
-            assert len(trace.keys())==1, 'bad trace format'
-            assert ID == list(trace)[0].split(traceEscapeString)[0], "bad trace format, ID"
-            trace[ID] = trace[list(trace)[0]] # We insert 1 more key "s0": [value] 
-            
+            # we use 'tracedriven' as default value because it is the first one
+            request_type = request.headers.get('request-type', 'tracedriven').lower()
+            # Check if the POST request is an trace-driven request or an IoT request
+            if request_type == 'tracedriven':
+                trace = request.json
+                # sanity_check
+                assert len(trace.keys())==1, 'bad trace format'
+                assert ID == list(trace)[0].split(traceEscapeString)[0], "bad trace format, ID"
+                trace[ID] = trace[list(trace)[0]] # We insert 1 more key "s0": [value] 
+            elif request_type == 'iot':
+                app.logger.info("IoT request")
+
+
         if len(trace)>0:
         # trace-driven request
             n_groups = len(trace[ID])
@@ -233,7 +248,7 @@ class gRPCThread(Thread, pb2_grpc.MicroServiceServicer):
     def GetMicroServiceResponse(self, req, context):
         try:
             start_request_processing = time.time()
-            app.logger.info.info('Request Received')
+            app.logger.info('Request Received')
             message = req.message
             remote_address = context.peer().split(":")[1]
             app.logger.info(f'I am service: {ID} and I received this message: --> "{message}"')
@@ -277,7 +292,8 @@ class gRPCThread(Thread, pb2_grpc.MicroServiceServicer):
         self.server.start()
 
 if __name__ == '__main__':
-    if request_method == "rest":
+    if request_protocol == "http":
+        request_method = globalDict['work_model'][ID].get("request_protocol", "get").lower()
         init_REST(app)
         # Start Gunicorn HTTP REST Server (multi-process)
         options_gunicorn = {
@@ -287,7 +303,7 @@ if __name__ == '__main__':
             'threads':TN
         }
         HttpServer(app, options_gunicorn).run()
-    elif request_method == "grpc":
+    elif request_protocol == "grpc":
         my_work_model = globalDict['work_model'][ID]
         my_service_graph = my_work_model['external_services']
         init_gRPC(my_service_graph, globalDict['work_model'], gRPC_port,app)
