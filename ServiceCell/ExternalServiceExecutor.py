@@ -32,12 +32,37 @@ def init_gRPC(my_service_graph, workmodel, server_port, app):
             # bind the client and the server
             service_stub[service] = pb2_grpc.MicroServiceStub(channel)
 
+def build_post_request_body(params):
+    try:
+        if params["post_type"] == "const":
+            response_body = 'V' * (1000 * params["body_size"]) # Response in kB
+            return response_body
+        elif params["post_type"] == "exp":
+            bandwidth_load = random.expovariate(1 / params["body_size"])
+            num_chars = int(max(1, 1000 * bandwidth_load))  # Response in kB
+            response_body = 'F' * num_chars
+            return response_body
+    except Exception as err:
+        raise Exception(f"Error in 'build_post_request_body' {err}")
+
 def request_REST(service,id,work_model,s,trace,query_string, app, jaeger_context):
     try:
         service_no_escape = service.split("__")[0]
+        # TODO Se nel workmodel il service che sto interrogando si aspetta una POST,
+        # devo aggiungere l'header per il request-type: iot e fare una POST
         if len(trace)==0 and len(query_string)==0:
-            # default 
-            return s.get(f'http://{work_model[service_no_escape]["url"]}{work_model[service_no_escape]["path"]}', headers=jaeger_context)
+            # default
+            request_method = work_model[service_no_escape].get("request_method", "").lower()
+            if request_method == "post":
+                request_parameters = work_model[service_no_escape]["request_parameters"]
+                request_body = build_post_request_body(request_parameters)
+                headers = {'Content-type': 'application/json', 'Accept': 'text/plain', 'request-type': 'iot'}
+                headers.update(jaeger_context)
+                json_payload = json.dumps(request_body)
+                return s.post(f'http://{work_model[service_no_escape]["url"]}{work_model[service_no_escape]["path"]}',data=json_payload,headers=headers)
+            
+            else:
+                return s.get(f'http://{work_model[service_no_escape]["url"]}{work_model[service_no_escape]["path"]}', headers=jaeger_context)
         elif len(trace)>0:
             # trace-driven request
             headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}

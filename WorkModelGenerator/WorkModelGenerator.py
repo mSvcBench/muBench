@@ -30,7 +30,21 @@ def get_work_model(service_graph, workmodel_params):
     else:
         override = dict()
     
-    request_method = workmodel_params["request_method"]["value"]
+    # Check if the global request_protocol is present, if yes it's override all the functions request_protocol
+    exist_global_request_protocol = False
+    if "request_protocol" in workmodel_params.keys():
+        request_protocol = workmodel_params["request_protocol"]["value"]
+        exist_global_request_protocol = True
+        # print(f"Request Protocol: {request_protocol}")
+        request_method = workmodel_params["request_protocol"].get("method", "get").lower()
+        # print(f"Request Method: {request_method}")
+        
+        request_parameters = workmodel_params["request_protocol"].get("parameters", None)
+        if request_method == "post" and not request_parameters:
+            raise Exception("ERROR: 'parameters' not found in  'request_protocol' in workModelParameters")        
+
+    # print(f"exist_global_request_protocol: {exist_global_request_protocol}")
+    
     databases_prefix = workmodel_params["databases_prefix"]["value"]
 
     internal_services = dict()
@@ -40,9 +54,35 @@ def get_work_model(service_graph, workmodel_params):
         w=workmodel_params[k]
         if w["type"]!="function":
             continue
-        tmp_dict=dict() # string to be inserted as internal service in workmodel.json if this function is chosen 
+
+        tmp_dict = dict() # string to be inserted as internal service in workmodel.json if this function is chosen
+        if not exist_global_request_protocol:
+            print("No global request protocol")
+            if "request_protocol" in w["value"]:
+                request_protocol = w["value"]["request_protocol"]
+                    
+                request_method = w["value"].get("request_method", "get").lower()
+                # TODO is request_parameters mandatory? if yes add a check
+                request_parameters = w["value"].get("request_parameters", None)
+                print("--------- request_parameters: ", request_parameters)
+                if request_method == "post":
+                    if not request_parameters:
+                        raise Exception("ERROR: request_parameters not found in workModelParameters")
+            else:
+                request_protocol = "http"
+                request_method = "get"
+
+        
         tmp_dict.update({"internal_service": {w["value"]["name"]: w["value"]["parameters"]}})
-        tmp_dict.update({"request_method": request_method})
+        tmp_dict.update({"request_protocol": request_protocol})
+        if request_protocol == "http":
+            tmp_dict.update({"request_method": request_method})
+            
+            if request_method == "post":
+                tmp_dict.update({"request_parameters": request_parameters})
+
+
+        # print(f"tmp_dict------- {tmp_dict} ************\n")
         if "workers" in w["value"]:
             tmp_dict.update({"workers": w["value"]["workers"]})
         if "threads" in w["value"]:
