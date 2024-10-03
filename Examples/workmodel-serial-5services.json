@@ -37,7 +37,8 @@
         "function_id": "f1"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 8,
     "threads": 128,
     "cpu-requests": "500m",
@@ -84,7 +85,8 @@
         "function_id": "f1"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 8,
     "threads": 128,
     "cpu-requests": "500m",
@@ -131,7 +133,8 @@
         "function_id": "f1"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 8,
     "threads": 128,
     "cpu-requests": "500m",
@@ -178,7 +181,8 @@
         "function_id": "f1"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 8,
     "threads": 128,
     "cpu-requests": "500m",
@@ -225,7 +229,8 @@
         "function_id": "f1"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 8,
     "threads": 128,
     "cpu-requests": "500m",

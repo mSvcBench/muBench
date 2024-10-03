@@ -60,7 +60,8 @@
         "function_id": "f1"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 16,
     "url": "s0.default.svc.cluster.local",
@@ -106,7 +107,8 @@
         "function_id": "f1"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 16,
     "url": "s1.default.svc.cluster.local",
@@ -152,7 +154,8 @@
         "function_id": "f1"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 16,
     "url": "s2.default.svc.cluster.local",
@@ -198,7 +201,8 @@
         "function_id": "f1"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 16,
     "url": "s3.default.svc.cluster.local",
@@ -244,7 +248,8 @@
         "function_id": "f1"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 16,
     "url": "s4.default.svc.cluster.local",
@@ -290,7 +295,8 @@
         "function_id": "f1"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 16,
     "url": "s1.default.svc.cluster.local",
@@ -336,7 +342,8 @@
         "function_id": "f1"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 16,
     "url": "s1.default.svc.cluster.local",
@@ -382,7 +389,8 @@
         "function_id": "f1"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 16,
     "url": "s2.default.svc.cluster.local",

@@ -53,7 +53,8 @@
         "function_id": "f2"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 8,
     "threads": 128,
     "cpu-requests": "100m"
@@ -90,7 +91,8 @@
         "function_id": "f2"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 8,
     "threads": 128,
     "cpu-requests": "100m"
@@ -127,7 +129,8 @@
         "function_id": "f2"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 8,
     "threads": 128,
     "cpu-requests": "100m"
@@ -164,7 +167,8 @@
         "function_id": "f2"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 8,
     "threads": 128,
     "cpu-requests": "100m"
@@ -201,7 +205,8 @@
         "function_id": "f2"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 8,
     "threads": 128,
     "cpu-requests": "100m"
@@ -238,7 +243,8 @@
         "function_id": "f2"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 8,
     "threads": 128,
     "cpu-requests": "100m"
@@ -275,7 +281,8 @@
         "function_id": "f2"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 8,
     "threads": 128,
     "cpu-requests": "100m"
@@ -312,7 +319,8 @@
         "function_id": "f2"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 8,
     "threads": 128,
     "cpu-requests": "100m"
@@ -349,7 +357,8 @@
         "function_id": "f2"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 8,
     "threads": 128,
     "cpu-requests": "100m"
@@ -386,7 +395,8 @@
         "function_id": "f2"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 8,
     "threads": 128,
     "cpu-requests": "100m"
@@ -423,7 +433,8 @@
         "function_id": "f2"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 8,
     "threads": 128,
     "cpu-requests": "100m"
@@ -460,7 +471,8 @@
         "function_id": "f2"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 8,
     "threads": 128,
     "cpu-requests": "100m"
@@ -497,7 +509,8 @@
         "function_id": "f2"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 8,
     "threads": 128,
     "cpu-requests": "100m"
@@ -534,7 +547,8 @@
         "function_id": "f2"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 8,
     "threads": 128,
     "cpu-requests": "100m"
@@ -580,7 +594,8 @@
         "function_id": "f2"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 8,
     "threads": 128,
     "cpu-requests": "100m"
@@ -617,7 +632,8 @@
         "function_id": "f2"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 8,
     "threads": 128,
     "cpu-requests": "100m"
@@ -654,7 +670,8 @@
         "function_id": "f2"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 8,
     "threads": 128,
     "cpu-requests": "100m"
@@ -691,7 +708,8 @@
         "function_id": "f2"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 8,
     "threads": 128,
     "cpu-requests": "100m"
@@ -728,7 +746,8 @@
         "function_id": "f2"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 8,
     "threads": 128,
     "cpu-requests": "100m"
@@ -765,7 +784,8 @@
         "function_id": "f2"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 8,
     "threads": 128,
     "cpu-requests": "100m"
