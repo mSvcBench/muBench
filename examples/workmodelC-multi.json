@@ -48,7 +48,8 @@
         "function_id": "f4"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 128
   },
@@ -100,7 +101,8 @@
         "function_id": "f3"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 128
   },
@@ -136,7 +138,8 @@
         "function_id": "f3"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 128
   },
@@ -183,7 +186,8 @@
         "function_id": "f4"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 128
   },
@@ -219,7 +223,8 @@
         "function_id": "f4"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 128
   },
@@ -265,7 +270,8 @@
         "function_id": "f4"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 128
   },
@@ -313,7 +319,8 @@
         "function_id": "f3"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 128
   },
@@ -359,7 +366,8 @@
         "function_id": "f4"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 128
   },
@@ -395,7 +403,8 @@
         "function_id": "f2"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 8,
     "threads": 128
   },
@@ -441,7 +450,8 @@
         "function_id": "f3"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 128
   },
@@ -477,7 +487,8 @@
         "function_id": "f4"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 128
   },
@@ -513,7 +524,8 @@
         "function_id": "f4"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 128
   },
@@ -549,7 +561,8 @@
         "function_id": "f2"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 128
   },
@@ -585,7 +598,8 @@
         "function_id": "f2"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 128
   },
@@ -621,7 +635,8 @@
         "function_id": "f4"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 128
   },
@@ -667,7 +682,8 @@
         "function_id": "f4"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 128
   },
@@ -703,7 +719,8 @@
         "function_id": "f2"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 128
   },
@@ -739,7 +756,8 @@
         "function_id": "f4"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 128
   },
@@ -775,7 +793,8 @@
         "function_id": "f4"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 128
   },
@@ -811,7 +830,8 @@
         "function_id": "f4"
       }
     },
-    "request_method": "rest",
+    "request_protocol": "http",
+    "request_method": "get",
     "workers": 4,
     "threads": 128
   }
