@@ -82,6 +82,6 @@ helm install \
 then use the next commands that expose kiali as NodePort on port 30003
 
 ```zsh
-kubectl apply -f kilai-nodeport.yaml
+kubectl apply -f kiali-nodeport.yaml
 ```
 
