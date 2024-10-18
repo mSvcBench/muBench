@@ -267,7 +267,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "(sum by (destination_service_name) (rate(istio_request_duration_milliseconds_sum{namespace=~\"istio-ingress|$ns\",destination_service_name=~\"s[0-9]*\",reporter=\"source\",response_code=\"200\"}[$delta]))) / (sum by (destination_service_name) (rate(istio_requests_total{namespace=~\"istio-ingress|$ns\",destination_service_name=~\"s[0-9]*\",reporter=\"source\",response_code=\"200\"}[$delta])))",
+          "expr": "(sum by (destination_service_name) (rate(istio_request_duration_milliseconds_sum{namespace=~\"$ns\",destination_service_name=~\"s[0-9]*\",reporter=\"source\",response_code=\"200\"}[$delta]))) / (sum by (destination_service_name) (rate(istio_requests_total{namespace=~\"$ns\",destination_service_name=~\"s[0-9]*\",reporter=\"source\",response_code=\"200\"}[$delta])))",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -497,7 +497,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.95, sum by (destination_app,le) (rate(istio_request_duration_milliseconds_bucket{namespace=\"$ns\"}[$delta])))",
+          "expr": "histogram_quantile(0.90, sum by (destination_app,le) (rate(istio_request_duration_milliseconds_bucket{namespace=~\"$ns\",reporter=\"source\"}[$delta])))",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -580,7 +580,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum by (container) (rate(container_cpu_usage_seconds_total{namespace=\"$ns\",pod=~\"s[0-9].*\",container!=\"istio-proxy\",container!=\"\"}[2m]))",
+          "expr": "sum by (container) (rate(container_cpu_usage_seconds_total{namespace=~\"$ns\",pod=~\"s[0-9].*\",container!=\"istio-proxy\",container!=\"\"}[2m]))",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -652,7 +652,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum by (container) (sum by (container) (container_memory_usage_bytes{namespace=\"$ns\",pod=~\"s[0-9].*\",container!=\"istio-proxy\",container!=\"\"}))",
+          "expr": "sum by (container) (sum by (container) (container_memory_usage_bytes{namespace=~\"$ns\",pod=~\"s[0-9].*\",container!=\"istio-proxy\",container!=\"\"}))",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -724,7 +724,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum by (container) (rate(container_blkio_device_usage_total{namespace=\"$ns\",pod=~\"s[0-9].*\",container!=\"istio-proxy\",container!=\"\"}[$delta]))",
+          "expr": "sum by (container) (rate(container_blkio_device_usage_total{namespace=~\"$ns\",pod=~\"s[0-9].*\",container!=\"istio-proxy\",container!=\"\"}[$delta]))",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -797,7 +797,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum by (deployment) (kube_deployment_status_replicas{namespace=\"$ns\",deployment=~\"s[0-9].*\",container!=\"istio-proxy\",container!=\"\"})",
+          "expr": "sum by (deployment) (kube_deployment_status_replicas{namespace=~\"$ns\",deployment=~\"s[0-9].*\",container!=\"istio-proxy\",container!=\"\"})",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -1113,7 +1113,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum by (destination_service_name) (rate(istio_response_bytes_count{destination_service_name=~\"s[0-9*]\",reporter=\"destination\",response_code=\"200\"}[$delta])) / scalar(sum by (destination_service_name) (rate(istio_response_bytes_count{destination_service_name=~\"s[0*]\",reporter=\"destination\",response_code=\"200\"}[$delta])))",
+          "expr": "sum by (destination_service_name) (rate(istio_response_bytes_count{destination_service_name=~\"s[0-9*]\",reporter=\"destination\",response_code=\"200\",namespace=~\"$ns\"}[$delta])) / scalar(sum by (destination_service_name) (rate(istio_response_bytes_count{destination_service_name=~\"s[0*]\",reporter=\"destination\",response_code=\"200\", namespace=~\"$ns\"}[$delta])))",
           "instant": false,
           "legendFormat": "{{label_name}}",
           "range": true,
@@ -1140,7 +1140,7 @@
         "description": "namespace",
         "hide": 2,
         "name": "ns",
-        "query": "edge",
+        "query": "istio-ingress|default",
         "skipUrlSync": false,
         "type": "constant"
       }
@@ -1154,6 +1154,6 @@
   "timezone": "",
   "title": "mubench-istio",
   "uid": "caea3eea-9349-461f-b7c0-2f863a15b08f",
-  "version": 18,
+  "version": 21,
   "weekStart": ""
 }
