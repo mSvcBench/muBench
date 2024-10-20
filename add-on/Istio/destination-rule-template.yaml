@@ -3,6 +3,8 @@ kind: DestinationRule
 metadata: {}
 spec:
   trafficPolicy:
+    loadBalancer:
+      simple: LEAST_REQUEST
     outlierDetection:
       consecutive5xxErrors: 7
       interval: 30s
