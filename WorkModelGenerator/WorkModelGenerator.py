@@ -29,26 +29,42 @@ def get_work_model(service_graph, workmodel_params):
         override = workmodel_params["override"]["value"]
     else:
         override = dict()
+        
+    #      "request_global_spec": {
+    #      "type": "metadata",
+    #      "request_protocol":"http",
+    #      "request_method": "post",
+    #      "request_parameters": {
+    #         "request_dist": "const",
+    #         "request_size": 100,
+    #         # Questo è la dimensione della risposta
+    #         "response_dist": "const",
+    #         "response_size": 100
+    #      }
+    #   },
     
     # Check if the global request_protocol is present, if yes it's override all the functions request_protocol
-    exist_global_request_protocol = False
-    if "request_protocol" in workmodel_params.keys():
-        request_protocol = workmodel_params["request_protocol"]["value"]
-        exist_global_request_protocol = True
+    exist_global_request_spec = False
+    # if "request_protocol" in workmodel_params.keys():
+    if "request_global_spec" in workmodel_params.keys():
+        request_protocol = workmodel_params["request_global_spec"]["request_protocol"]
+        exist_global_request_spec = True
         # print(f"Request Protocol: {request_protocol}")
-        request_method = workmodel_params["request_protocol"].get("method", "get").lower()
+        request_method = workmodel_params["request_global_spec"].get("request_method", "get").lower()
         # print(f"Request Method: {request_method}")
         
-        request_parameters = workmodel_params["request_protocol"].get("parameters", None)
-        if request_method == "post" and not request_parameters:
-            raise Exception("ERROR: 'parameters' not found in  'request_protocol' in workModelParameters")        
+        request_parameters = workmodel_params["request_global_spec"].get("request_parameters", None)
+        # if request_method == "post" and not request_parameters:
+        if not request_parameters:
+            raise Exception("ERROR: 'request_parameters' not found in  'request_global_spec' in workModelParameters")        
 
-    # print(f"exist_global_request_protocol: {exist_global_request_protocol}")
-    
+    print(f"exist_global_request_protocol: {exist_global_request_spec}")
+
     databases_prefix = workmodel_params["databases_prefix"]["value"]
 
     internal_services = dict()
     internal_services_db = dict()
+
 
     for k in workmodel_params.keys():
         w=workmodel_params[k]
@@ -56,21 +72,61 @@ def get_work_model(service_graph, workmodel_params):
             continue
 
         tmp_dict = dict() # string to be inserted as internal service in workmodel.json if this function is chosen
-        if not exist_global_request_protocol:
-            print("No global request protocol")
-            if "request_protocol" in w["value"]:
-                request_protocol = w["value"]["request_protocol"]
-                    
-                request_method = w["value"].get("request_method", "get").lower()
-                # TODO is request_parameters mandatory? if yes add a check
-                request_parameters = w["value"].get("request_parameters", None)
-                print("--------- request_parameters: ", request_parameters)
-                if request_method == "post":
+        # check if the function has a request protocol, if not use the global one
+        if not exist_global_request_spec:
+            print("No global request spec")
+            
+            # check if the function has a request_spec, if not use the default values (http, get)
+            if "request_spec" in w["value"]:
+                if "request_protocol" in w["value"]["request_spec"]:
+                    request_protocol = w["value"]["request_spec"]["request_protocol"]
+                    request_method = w["value"]["request_spec"].get("request_method", "get").lower()
+                    request_parameters = w["value"]["request_spec"].get("request_parameters", None)
+                    print("--------- request_parameters: ", request_parameters)
+                    # if request_method == "post":
                     if not request_parameters:
-                        raise Exception("ERROR: request_parameters not found in workModelParameters")
+                        raise Exception(f"ERROR: request_parameters not found in function '{k}' workModelParameters")
+                # NO request_protocol in the function, use the default values
+                else:
+                    request_protocol = "http"
+                    request_method = "get"
+                    
+                    # Check if the function has 'parameters' and 'mean_response_size' is present, in this case use it
+                    # otherwise use the default value
+                    if "parameters" in w["value"]:
+                        if "mean_response_size" in w["value"]["parameters"]:
+                            request_parameters = {"response_dist": "const", "response_size": w["value"]["parameters"]["mean_response_size"]}
+                        else:
+                            request_parameters = {"response_dist": "const", "response_size": 42}
+                    else:   
+                        request_parameters = {"response_dist": "const", "response_size": 42}
+            # NO request_spec in the function, use the default values
             else:
+                # check backward compatibility, search for "mean_response_size" in the functions "parameters"
                 request_protocol = "http"
                 request_method = "get"
+                    # Check if the function has 'parameters' and 'mean_response_size' is present, in this case use it
+                    # otherwise use the default value
+                if "parameters" in w["value"]:
+                    if "mean_response_size" in w["value"]["parameters"]:
+                        request_parameters = {"response_dist": "const", "response_size": w["value"]["parameters"]["mean_response_size"]}
+                    else:
+                        request_parameters = {"response_dist": "const", "response_size": 42}
+                else:   
+                    request_parameters = {"response_dist": "const", "response_size": 42}
+                
+            #     request_protocol = w["value"]["request_protocol"]
+                    
+            #     request_method = w["value"].get("request_method", "get").lower()
+            #     # TODO is request_parameters mandatory? if yes add a check
+            #     request_parameters = w["value"].get("request_parameters", None)
+            #     print("--------- request_parameters: ", request_parameters)
+            #     if request_method == "post":
+            #         if not request_parameters:
+            #             raise Exception("ERROR: request_parameters not found in workModelParameters")
+            # else:
+            #     request_protocol = "http"
+            #     request_method = "get"
 
         
         tmp_dict.update({"internal_service": {w["value"]["name"]: w["value"]["parameters"]}})
@@ -78,8 +134,7 @@ def get_work_model(service_graph, workmodel_params):
         if request_protocol == "http":
             tmp_dict.update({"request_method": request_method})
             
-            if request_method == "post":
-                tmp_dict.update({"request_parameters": request_parameters})
+            tmp_dict.update({"request_parameters": request_parameters})
 
 
         # print(f"tmp_dict------- {tmp_dict} ************\n")
