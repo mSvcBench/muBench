@@ -47,7 +47,7 @@ class ThreadReturnedValue:
         num_chars = max(1, 1000 * bandwidth_load)  # Response in kB
 
         if len(self.body) < num_chars:
-            self.body += 'm' * (body_size - len(self.body))
+            self.body += 'm' * (num_chars - len(self.body))
 
 
 def compute_pi(params):
