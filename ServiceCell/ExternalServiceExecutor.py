@@ -18,6 +18,7 @@ def init_REST(app):
     global request_function
     request_function = request_REST
 
+# TODO 
 def init_gRPC(my_service_graph, workmodel, server_port, app):
     app.logger.info("Init gRPC function")
     global service_stub, request_function
@@ -32,14 +33,16 @@ def init_gRPC(my_service_graph, workmodel, server_port, app):
             # bind the client and the server
             service_stub[service] = pb2_grpc.MicroServiceStub(channel)
 
-def build_post_request_body(params):
+
+# return the size of the body, NOT the body
+def build_post_request_body(params, trace_size_to_send=0):
     try:
-        if params["post_type"] == "const":
-            response_body = 'V' * (1000 * params["body_size"]) # Response in kB
+        if params["request_dist"] == "const":
+            response_body = 'V' * (1000 * params["request_size"] - trace_size_to_send) # Response in kB
             return response_body
-        elif params["post_type"] == "exp":
-            bandwidth_load = random.expovariate(1 / params["body_size"])
-            num_chars = int(max(1, 1000 * bandwidth_load))  # Response in kB
+        elif params["request_dist"] == "exp":
+            bandwidth_load = random.expovariate(1 / params["request_size"])
+            num_chars = int(max(1, 1000 * bandwidth_load - trace_size_to_send))  # Response in kB
             response_body = 'F' * num_chars
             return response_body
     except Exception as err:
@@ -48,8 +51,6 @@ def build_post_request_body(params):
 def request_REST(service,id,work_model,s,trace,query_string, app, jaeger_context):
     try:
         service_no_escape = service.split("__")[0]
-        # TODO Se nel workmodel il service che sto interrogando si aspetta una POST,
-        # devo aggiungere l'header per il request-type: iot e fare una POST
         if len(trace)==0 and len(query_string)==0:
             # default
             request_method = work_model[service_no_escape].get("request_method", "").lower()
@@ -65,10 +66,12 @@ def request_REST(service,id,work_model,s,trace,query_string, app, jaeger_context
                 return s.get(f'http://{work_model[service_no_escape]["url"]}{work_model[service_no_escape]["path"]}', headers=jaeger_context)
         elif len(trace)>0:
             # trace-driven request
-            headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+            headers = {'Content-type': 'application/json', 'Accept': 'text/plain', 'request-type': 'tracedriven'}
             headers.update(jaeger_context)
             json_dict = dict()
             json_dict[service] = trace[id][service]
+            request_parameters = work_model[service_no_escape]["request_parameters"]
+            json_dict["dummy"] = build_post_request_body(request_parameters, len(json_dict[service]))
             json_payload = json.dumps(json_dict)
             if  len(query_string)==0:
                 return s.post(f'http://{work_model[service_no_escape]["url"]}{work_model[service_no_escape]["path"]}',data=json_payload,headers=headers)
