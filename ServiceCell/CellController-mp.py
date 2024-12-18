@@ -21,6 +21,12 @@ from InternalServiceExecutor import run_internal_service
 import mub_pb2_grpc as pb2_grpc
 import mub_pb2 as pb2
 import grpc
+import logging
+
+### APPUNTI GPRC
+# Creazione connession eon demand alla prima connessione, se no con le tracce che succede??
+# Dummy payload in caso di trace driver, aggiungo una chiave al primo livello e la elimino quando inoltro la trace
+# La size della richiesta inoltrata è la differenza tra la traccia e qulla che devo mandare
 
 
 # Configuration of global variables
@@ -49,6 +55,9 @@ K8S_APP = os.environ["K8S_APP"]  # K8s label app
 PN = os.environ["PN"] # Number of processes
 TN = os.environ["TN"] # Number of thread per process
 traceEscapeString = "__"
+
+# TODO get debug level from environment
+app.logger.setLevel(logging.INFO)
 
 #globalDict=Manager().dict()
 globalDict=dict()
@@ -125,6 +134,7 @@ def start_worker():
         my_work_model = globalDict['work_model'][ID]
         my_service_graph = my_work_model['external_services'] 
         my_internal_service = my_work_model['internal_service']
+        my_request_parameters = my_work_model['request_parameters']
 
         # update internal service behaviour
         if behaviour_id != 'default' and "alternative_behaviors" in my_work_model.keys():
@@ -147,6 +157,10 @@ def start_worker():
             # Check if the POST request is an trace-driven request or an IoT request
             if request_type == 'tracedriven':
                 trace = request.json
+                # Remove dummy key if present
+                # dummy key -> used to increment the size of the received request
+                if "dummy" in trace.keys():
+                    trace.pop("dummy")
                 # sanity_check
                 assert len(trace.keys())==1, 'bad trace format'
                 assert ID == list(trace)[0].split(traceEscapeString)[0], "bad trace format, ID"
@@ -175,7 +189,7 @@ def start_worker():
         # Execute the internal service
         app.logger.info("*************** INTERNAL SERVICE STARTED ***************")
         start_local_processing = time.time()
-        body = run_internal_service(my_internal_service)
+        body = run_internal_service(my_internal_service, my_request_parameters)
         local_processing_latency = time.time() - start_local_processing
         INTERNAL_PROCESSING.labels(ZONE, K8S_APP, request.method, request.path).observe(local_processing_latency*1000)
         INTERNAL_PROCESSING_BUCKET.labels(ZONE, K8S_APP, request.method, request.path).observe(local_processing_latency*1000)
@@ -292,8 +306,13 @@ class gRPCThread(Thread, pb2_grpc.MicroServiceServicer):
         self.server.start()
 
 if __name__ == '__main__':
+    # TODO non va piu bene l'inizializzazione dei metodi fatta qui perchè
+    #  il 'request_protocol' definito dentro ai Servizi non identifica più il protocollo
+    #  da usare per le richieste verso gli ExternalService, ma il con cui deve essere contattato il Microservizio stesso.
+    #  Quindi bisogna inizializzare le connessioni gRPC per ogni ExternalService che richiede l'utilizzo di gRPC.
+    #  La chiamo qui, ma devo modificare la funzione per verificare quale servizio chiamerò e preparare la connessione.
     if request_protocol == "http":
-        request_method = globalDict['work_model'][ID].get("request_protocol", "get").lower()
+        request_method = globalDict['work_model'][ID].get("request_method", "get").lower()
         init_REST(app)
         # Start Gunicorn HTTP REST Server (multi-process)
         options_gunicorn = {

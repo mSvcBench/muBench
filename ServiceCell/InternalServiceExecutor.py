@@ -35,6 +35,19 @@ class ThreadReturnedValue:
 
     def set_body(self, body):
         self.body = body
+    
+    # Increment the size of the response to response_size    
+    def complete_response_body(self, request_param):
+        # Request parameters are used to define the size of the response (response_distribution and response_size)
+        if request_param["response_dist"] == "const":
+            bandwidth_load = request_param["response_size"]
+        elif request_param["response_dist"] == "exp":
+            bandwidth_load = random.expovariate(1 / request_param["response_size"])
+        
+        num_chars = max(1, 1000 * bandwidth_load)  # Response in kB
+
+        if len(self.body) < num_chars:
+            self.body += 'm' * (body_size - len(self.body))
 
 
 def compute_pi(params):
@@ -75,7 +88,7 @@ def set_internal_service_function(internal_service_params):
     internal_service_params_v = list(internal_service_params.values())[0]
     internal_service_function = eval(function_name)
 
-def run_internal_service(internal_service_params):
+def run_internal_service(internal_service_params, request_parameters):
     global internal_service_function, internal_service_params_v
     if internal_service_function == None:
         set_internal_service_function(internal_service_params)
@@ -87,4 +100,7 @@ def run_internal_service(internal_service_params):
     thread = InternalServiceExecutor(internal_service_function, internal_service_params_v, response)
     thread.start()
     thread.join()
+    
+    response.complete_response_body(request_parameters)
+    
     return response.get_body()
