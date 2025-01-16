@@ -2,7 +2,8 @@ name: Docker Image CI/CD
 
 on:
   push:
-    branches: [ "docker" ]
+    branches: 
+    - docker
 
 jobs:
 
