@@ -20,7 +20,7 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }} # Set this in your repository secrets
         password: ${{ secrets.DOCKER_PASSWORD }} # Set this in your repository secrets
     - name: Build the Docker image of µBench service cell
-      run: docker build ./ServiceCell --file Dockerfile --tag msvcbench/microservice:latest 
+      run: docker build ./ServiceCell --file ./ServiceCell/Dockerfile --tag msvcbench/microservice:latest 
     - name: Push the Docker image
       run: docker push msvcbench/microservice:latest
     - name: Build the Docker image of µBench
