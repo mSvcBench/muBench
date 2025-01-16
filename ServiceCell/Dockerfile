@@ -1,9 +1,5 @@
 FROM python:3.8-slim-buster
 
-RUN apt-get update
-RUN apt-get -y install vim iproute2 curl screen
-RUN rm -rf /var/lib/apt/lists/*
-
 COPY requirements.txt /app/
 
 WORKDIR /app
@@ -17,5 +13,5 @@ EXPOSE 51313
 COPY CellController-mp.py ExternalServiceExecutor.py InternalServiceExecutor.py mub.proto mub_pb2.py \
 mub_pb2_grpc.py gunicorn.conf.py start-mp.sh ./
 
-CMD [ "/bin/bash", "/app/start-mp.sh"]
+CMD [ "/usr/local/bin/python3", "/app/CellController-mp.py"]
 
