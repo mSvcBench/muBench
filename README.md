@@ -30,20 +30,16 @@ You can learn how to use µBench to create and monitor your application by readi
 ## Quick Start
 For a complete install guide, head over to the [manual](Docs/Manual.md#installation-and-getting-started). Instead, for a quick hands-on with µBench the following commands will deploy a microservice application composed of 10 services with a star topology service graph. Clients send requests to s0 and s0 sequentially calls all other services before sending the result to clients. Each service equally stresses the CPU. 
 
-We assume that on your host, you have Docker and access to a Kubernetes cluster with `kubectl` tool. If you need to configure a Kubernetes cluster (e.g., with Minikube) or for other configurations read the [manual](Docs/Manual.md#installation-and-getting-started).
+We assume that on your host, you have Docker and access to a Kubernetes cluster with `kubectl` tool whose file is `.kube/config`. If you need to configure a Kubernetes cluster (e.g., with Minikube) or for other configurations read the [manual](Docs/Manual.md#installation-and-getting-started).
 
 We will use the Docker µBench container that contains all the necessary software.
 
 Run the µBench container
 ```zsh
-docker run -d --name mubench msvcbench/mubench
+```zsh
+docker run -it -id --name mubench -v ~/.kube/config:/root/.kube/config msvcbench/mubench
 ```
 
-Copy the `.kube/config ` file you use in your host to access the Kubernetes cluster in the container
-```zsh
-kubectl config view --flatten > config
-docker cp config mubench:/root/.kube/config
-```
 In case update the `server:` key of `config` file with the correct IP address of the master node of the cluster. Verify that the µBench container can access your cluster, e.g., by using the next command from your host
 ```zsh
 docker exec mubench kubectl get nodes
