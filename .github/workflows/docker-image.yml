@@ -1,0 +1,28 @@
+name: Docker Image CI/CD
+
+on:
+  push:
+    branches: [ "docker" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }} # Set this in your repository secrets
+        password: ${{ secrets.DOCKER_PASSWORD }} # Set this in your repository secrets
+    - name: Build the Docker image of µBench service cell
+      run: docker build ./ServiceCell --file Dockerfile --tag msvcbench/microservice:latest 
+    - name: Push the Docker image
+      run: docker push msvcbench/microservice:latest
+    - name: Build the Docker image of µBench
+      run: docker build . --file Dockerfile --tag msvcbench/msvcbench:latest
+    - name: Push the Docker image
+      run: docker push msvcbench/msvcbench:latest
