@@ -226,7 +226,7 @@
             <collectionProp name="Arguments.arguments">
               <elementProp name="" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                <stringProp name="Argument.value">${__FileToString(/home/root/muBench/examples/Alibaba/traces-mbench/seq/app${app_num}/trace${__eval(${file_number})}.json)}&#xd;
+                <stringProp name="Argument.value">${__FileToString(/home/root/muBench/ExamplesAlibaba/traces-mbench/seq/app${app_num}/trace${__eval(${file_number})}.json)}&#xd;
 </stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
