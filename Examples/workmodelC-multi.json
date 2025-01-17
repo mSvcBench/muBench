@@ -1,0 +1,818 @@
+{
+  "s0": {
+    "external_services": [
+      {
+        "seq_len": 100,
+        "services": [
+          "s1",
+          "s3",
+          "s7",
+          "s16"
+        ],
+        "probabilities": {
+          "s1": 0.5,
+          "s2": 0.5,
+          "s3": 1,
+          "s7": 0.5,
+          "s16": 0.5
+        }
+      }
+    ],
+    "internal_service": {
+      "loader": {
+        "cpu_stress": {
+          "run": false,
+          "range_complexity": [
+            1000,
+            1000
+          ],
+          "thread_pool_size": 1,
+          "trials": 1
+        },
+        "memory_stress": {
+          "run": false,
+          "memory_size": 10000,
+          "memory_io": 1000
+        },
+        "disk_stress": {
+          "run": false,
+          "tmp_file_name": "mubtestfile.txt",
+          "disk_write_block_count": 1000,
+          "disk_write_block_size": 1024
+        },
+        "sleep_stress": {
+          "run": false,
+          "sleep_time": 0.01
+        },
+        "mean_response_size": 11,
+        "function_id": "f4"
+      }
+    },
+    "request_method": "rest",
+    "workers": 4,
+    "threads": 128
+  },
+  "s1": {
+    "external_services": [
+      {
+        "seq_len": 100,
+        "services": [
+          "s2",
+          "s4",
+          "s13",
+          "s15"
+        ],
+        "probabilities": {
+          "s2": 0.5,
+          "s4": 0.5,
+          "s13": 0.5,
+          "s15": 0.5
+        }
+      }
+    ],
+    "internal_service": {
+      "loader": {
+        "cpu_stress": {
+          "run": false,
+          "range_complexity": [
+            500,
+            500
+          ],
+          "thread_pool_size": 1,
+          "trials": 1
+        },
+        "memory_stress": {
+          "run": true,
+          "memory_size": 50,
+          "memory_io": 50
+        },
+        "disk_stress": {
+          "run": false,
+          "tmp_file_name": "mubtestfile.txt",
+          "disk_write_block_count": 1000,
+          "disk_write_block_size": 1024
+        },
+        "sleep_stress": {
+          "run": false,
+          "sleep_time": 0.01
+        },
+        "mean_response_size": 11,
+        "function_id": "f3"
+      }
+    },
+    "request_method": "rest",
+    "workers": 4,
+    "threads": 128
+  },
+  "s2": {
+    "external_services": [],
+    "internal_service": {
+      "loader": {
+        "cpu_stress": {
+          "run": false,
+          "range_complexity": [
+            500,
+            500
+          ],
+          "thread_pool_size": 1,
+          "trials": 1
+        },
+        "memory_stress": {
+          "run": true,
+          "memory_size": 50,
+          "memory_io": 50
+        },
+        "disk_stress": {
+          "run": false,
+          "tmp_file_name": "mubtestfile.txt",
+          "disk_write_block_count": 1000,
+          "disk_write_block_size": 1024
+        },
+        "sleep_stress": {
+          "run": false,
+          "sleep_time": 0.01
+        },
+        "mean_response_size": 11,
+        "function_id": "f3"
+      }
+    },
+    "request_method": "rest",
+    "workers": 4,
+    "threads": 128
+  },
+  "s3": {
+    "external_services": [
+      {
+        "seq_len": 100,
+        "services": [
+          "s5",
+          "s6",
+          "s8",
+          "s9",
+          "s12"
+        ]
+      }
+    ],
+    "internal_service": {
+      "loader": {
+        "cpu_stress": {
+          "run": false,
+          "range_complexity": [
+            1000,
+            1000
+          ],
+          "thread_pool_size": 1,
+          "trials": 1
+        },
+        "memory_stress": {
+          "run": false,
+          "memory_size": 10000,
+          "memory_io": 1000
+        },
+        "disk_stress": {
+          "run": true,
+          "tmp_file_name": "mubtestfile.txt",
+          "disk_write_block_count": 50,
+          "disk_write_block_size": 512
+        },
+        "sleep_stress": {
+          "run": false,
+          "sleep_time": 0.01
+        },
+        "mean_response_size": 11,
+        "function_id": "f4"
+      }
+    },
+    "request_method": "rest",
+    "workers": 4,
+    "threads": 128
+  },
+  "s4": {
+    "external_services": [],
+    "internal_service": {
+      "loader": {
+        "cpu_stress": {
+          "run": false,
+          "range_complexity": [
+            1000,
+            1000
+          ],
+          "thread_pool_size": 1,
+          "trials": 1
+        },
+        "memory_stress": {
+          "run": false,
+          "memory_size": 10000,
+          "memory_io": 1000
+        },
+        "disk_stress": {
+          "run": true,
+          "tmp_file_name": "mubtestfile.txt",
+          "disk_write_block_count": 50,
+          "disk_write_block_size": 512
+        },
+        "sleep_stress": {
+          "run": false,
+          "sleep_time": 0.01
+        },
+        "mean_response_size": 11,
+        "function_id": "f4"
+      }
+    },
+    "request_method": "rest",
+    "workers": 4,
+    "threads": 128
+  },
+  "s5": {
+    "external_services": [
+      {
+        "seq_len": 100,
+        "services": [
+          "s14"
+        ],
+        "probabilities": {
+          "s14": 0.5
+        }
+      }
+    ],
+    "internal_service": {
+      "loader": {
+        "cpu_stress": {
+          "run": false,
+          "range_complexity": [
+            1000,
+            1000
+          ],
+          "thread_pool_size": 1,
+          "trials": 1
+        },
+        "memory_stress": {
+          "run": false,
+          "memory_size": 10000,
+          "memory_io": 1000
+        },
+        "disk_stress": {
+          "run": true,
+          "tmp_file_name": "mubtestfile.txt",
+          "disk_write_block_count": 50,
+          "disk_write_block_size": 512
+        },
+        "sleep_stress": {
+          "run": false,
+          "sleep_time": 0.01
+        },
+        "mean_response_size": 11,
+        "function_id": "f4"
+      }
+    },
+    "request_method": "rest",
+    "workers": 4,
+    "threads": 128
+  },
+  "s6": {
+    "external_services": [
+      {
+        "seq_len": 100,
+        "services": [
+          "s10",
+          "s17"
+        ],
+        "probabilities": {
+          "s10": 0.5,
+          "s17": 0.5
+        }
+      }
+    ],
+    "internal_service": {
+      "loader": {
+        "cpu_stress": {
+          "run": false,
+          "range_complexity": [
+            500,
+            500
+          ],
+          "thread_pool_size": 1,
+          "trials": 1
+        },
+        "memory_stress": {
+          "run": true,
+          "memory_size": 50,
+          "memory_io": 50
+        },
+        "disk_stress": {
+          "run": false,
+          "tmp_file_name": "mubtestfile.txt",
+          "disk_write_block_count": 1000,
+          "disk_write_block_size": 1024
+        },
+        "sleep_stress": {
+          "run": false,
+          "sleep_time": 0.01
+        },
+        "mean_response_size": 11,
+        "function_id": "f3"
+      }
+    },
+    "request_method": "rest",
+    "workers": 4,
+    "threads": 128
+  },
+  "s7": {
+    "external_services": [
+      {
+        "seq_len": 100,
+        "services": [
+          "s19"
+        ],
+        "probabilities": {
+          "s19": 0.5
+        }
+      }
+    ],
+    "internal_service": {
+      "loader": {
+        "cpu_stress": {
+          "run": false,
+          "range_complexity": [
+            1000,
+            1000
+          ],
+          "thread_pool_size": 1,
+          "trials": 1
+        },
+        "memory_stress": {
+          "run": false,
+          "memory_size": 10000,
+          "memory_io": 1000
+        },
+        "disk_stress": {
+          "run": true,
+          "tmp_file_name": "mubtestfile.txt",
+          "disk_write_block_count": 50,
+          "disk_write_block_size": 512
+        },
+        "sleep_stress": {
+          "run": false,
+          "sleep_time": 0.01
+        },
+        "mean_response_size": 11,
+        "function_id": "f4"
+      }
+    },
+    "request_method": "rest",
+    "workers": 4,
+    "threads": 128
+  },
+  "s8": {
+    "external_services": [],
+    "internal_service": {
+      "loader": {
+        "cpu_stress": {
+          "run": true,
+          "range_complexity": [
+            800,
+            800
+          ],
+          "thread_pool_size": 1,
+          "trials": 2
+        },
+        "memory_stress": {
+          "run": false,
+          "memory_size": 10000,
+          "memory_io": 1000
+        },
+        "disk_stress": {
+          "run": false,
+          "tmp_file_name": "mubtestfile.txt",
+          "disk_write_block_count": 1000,
+          "disk_write_block_size": 1024
+        },
+        "sleep_stress": {
+          "run": false,
+          "sleep_time": 0.01
+        },
+        "mean_response_size": 11,
+        "function_id": "f2"
+      }
+    },
+    "request_method": "rest",
+    "workers": 8,
+    "threads": 128
+  },
+  "s9": {
+    "external_services": [
+      {
+        "seq_len": 100,
+        "services": [
+          "s11"
+        ],
+        "probabilities": {
+          "s11": 0.5
+        }
+      }
+    ],
+    "internal_service": {
+      "loader": {
+        "cpu_stress": {
+          "run": false,
+          "range_complexity": [
+            500,
+            500
+          ],
+          "thread_pool_size": 1,
+          "trials": 1
+        },
+        "memory_stress": {
+          "run": true,
+          "memory_size": 50,
+          "memory_io": 50
+        },
+        "disk_stress": {
+          "run": false,
+          "tmp_file_name": "mubtestfile.txt",
+          "disk_write_block_count": 1000,
+          "disk_write_block_size": 1024
+        },
+        "sleep_stress": {
+          "run": false,
+          "sleep_time": 0.01
+        },
+        "mean_response_size": 11,
+        "function_id": "f3"
+      }
+    },
+    "request_method": "rest",
+    "workers": 4,
+    "threads": 128
+  },
+  "s10": {
+    "external_services": [],
+    "internal_service": {
+      "loader": {
+        "cpu_stress": {
+          "run": false,
+          "range_complexity": [
+            1000,
+            1000
+          ],
+          "thread_pool_size": 1,
+          "trials": 1
+        },
+        "memory_stress": {
+          "run": false,
+          "memory_size": 10000,
+          "memory_io": 1000
+        },
+        "disk_stress": {
+          "run": true,
+          "tmp_file_name": "mubtestfile.txt",
+          "disk_write_block_count": 50,
+          "disk_write_block_size": 512
+        },
+        "sleep_stress": {
+          "run": false,
+          "sleep_time": 0.01
+        },
+        "mean_response_size": 11,
+        "function_id": "f4"
+      }
+    },
+    "request_method": "rest",
+    "workers": 4,
+    "threads": 128
+  },
+  "s11": {
+    "external_services": [],
+    "internal_service": {
+      "loader": {
+        "cpu_stress": {
+          "run": false,
+          "range_complexity": [
+            1000,
+            1000
+          ],
+          "thread_pool_size": 1,
+          "trials": 1
+        },
+        "memory_stress": {
+          "run": false,
+          "memory_size": 10000,
+          "memory_io": 1000
+        },
+        "disk_stress": {
+          "run": true,
+          "tmp_file_name": "mubtestfile.txt",
+          "disk_write_block_count": 50,
+          "disk_write_block_size": 512
+        },
+        "sleep_stress": {
+          "run": false,
+          "sleep_time": 0.01
+        },
+        "mean_response_size": 11,
+        "function_id": "f4"
+      }
+    },
+    "request_method": "rest",
+    "workers": 4,
+    "threads": 128
+  },
+  "s12": {
+    "external_services": [],
+    "internal_service": {
+      "loader": {
+        "cpu_stress": {
+          "run": false,
+          "range_complexity": [
+            800,
+            800
+          ],
+          "thread_pool_size": 1,
+          "trials": 1
+        },
+        "memory_stress": {
+          "run": true,
+          "memory_size": 50,
+          "memory_io": 50
+        },
+        "disk_stress": {
+          "run": false,
+          "tmp_file_name": "mubtestfile.txt",
+          "disk_write_block_count": 1000,
+          "disk_write_block_size": 1024
+        },
+        "sleep_stress": {
+          "run": false,
+          "sleep_time": 0.01
+        },
+        "mean_response_size": 11,
+        "function_id": "f2"
+      }
+    },
+    "request_method": "rest",
+    "workers": 4,
+    "threads": 128
+  },
+  "s13": {
+    "external_services": [],
+    "internal_service": {
+      "loader": {
+        "cpu_stress": {
+          "run": false,
+          "range_complexity": [
+            800,
+            800
+          ],
+          "thread_pool_size": 1,
+          "trials": 1
+        },
+        "memory_stress": {
+          "run": true,
+          "memory_size": 50,
+          "memory_io": 50
+        },
+        "disk_stress": {
+          "run": false,
+          "tmp_file_name": "mubtestfile.txt",
+          "disk_write_block_count": 1000,
+          "disk_write_block_size": 1024
+        },
+        "sleep_stress": {
+          "run": false,
+          "sleep_time": 0.01
+        },
+        "mean_response_size": 11,
+        "function_id": "f2"
+      }
+    },
+    "request_method": "rest",
+    "workers": 4,
+    "threads": 128
+  },
+  "s14": {
+    "external_services": [],
+    "internal_service": {
+      "loader": {
+        "cpu_stress": {
+          "run": false,
+          "range_complexity": [
+            1000,
+            1000
+          ],
+          "thread_pool_size": 1,
+          "trials": 1
+        },
+        "memory_stress": {
+          "run": false,
+          "memory_size": 10000,
+          "memory_io": 1000
+        },
+        "disk_stress": {
+          "run": true,
+          "tmp_file_name": "mubtestfile.txt",
+          "disk_write_block_count": 50,
+          "disk_write_block_size": 512
+        },
+        "sleep_stress": {
+          "run": false,
+          "sleep_time": 0.01
+        },
+        "mean_response_size": 11,
+        "function_id": "f4"
+      }
+    },
+    "request_method": "rest",
+    "workers": 4,
+    "threads": 128
+  },
+  "s15": {
+    "external_services": [
+      {
+        "seq_len": 100,
+        "services": [
+          "s18"
+        ],
+        "probabilities": {
+          "s18": 0.5
+        }
+      }
+    ],
+    "internal_service": {
+      "loader": {
+        "cpu_stress": {
+          "run": false,
+          "range_complexity": [
+            1000,
+            1000
+          ],
+          "thread_pool_size": 1,
+          "trials": 1
+        },
+        "memory_stress": {
+          "run": false,
+          "memory_size": 10000,
+          "memory_io": 1000
+        },
+        "disk_stress": {
+          "run": true,
+          "tmp_file_name": "mubtestfile.txt",
+          "disk_write_block_count": 50,
+          "disk_write_block_size": 512
+        },
+        "sleep_stress": {
+          "run": false,
+          "sleep_time": 0.01
+        },
+        "mean_response_size": 11,
+        "function_id": "f4"
+      }
+    },
+    "request_method": "rest",
+    "workers": 4,
+    "threads": 128
+  },
+  "s16": {
+    "external_services": [],
+    "internal_service": {
+      "loader": {
+        "cpu_stress": {
+          "run": false,
+          "range_complexity": [
+            1000,
+            1000
+          ],
+          "thread_pool_size": 1,
+          "trials": 5
+        },
+        "memory_stress": {
+          "run": false,
+          "memory_size": 10000,
+          "memory_io": 1000
+        },
+        "disk_stress": {
+          "run": true,
+          "tmp_file_name": "mubtestfile.txt",
+          "disk_write_block_count": 50,
+          "disk_write_block_size": 512
+        },
+        "sleep_stress": {
+          "run": false,
+          "sleep_time": 0.01
+        },
+        "mean_response_size": 11,
+        "function_id": "f2"
+      }
+    },
+    "request_method": "rest",
+    "workers": 4,
+    "threads": 128
+  },
+  "s17": {
+    "external_services": [],
+    "internal_service": {
+      "loader": {
+        "cpu_stress": {
+          "run": false,
+          "range_complexity": [
+            1000,
+            1000
+          ],
+          "thread_pool_size": 1,
+          "trials": 1
+        },
+        "memory_stress": {
+          "run": false,
+          "memory_size": 10000,
+          "memory_io": 1000
+        },
+        "disk_stress": {
+          "run": true,
+          "tmp_file_name": "mubtestfile.txt",
+          "disk_write_block_count": 50,
+          "disk_write_block_size": 512
+        },
+        "sleep_stress": {
+          "run": false,
+          "sleep_time": 0.01
+        },
+        "mean_response_size": 11,
+        "function_id": "f4"
+      }
+    },
+    "request_method": "rest",
+    "workers": 4,
+    "threads": 128
+  },
+  "s18": {
+    "external_services": [],
+    "internal_service": {
+      "loader": {
+        "cpu_stress": {
+          "run": false,
+          "range_complexity": [
+            1000,
+            1000
+          ],
+          "thread_pool_size": 1,
+          "trials": 1
+        },
+        "memory_stress": {
+          "run": false,
+          "memory_size": 10000,
+          "memory_io": 1000
+        },
+        "disk_stress": {
+          "run": true,
+          "tmp_file_name": "mubtestfile.txt",
+          "disk_write_block_count": 50,
+          "disk_write_block_size": 512
+        },
+        "sleep_stress": {
+          "run": false,
+          "sleep_time": 0.01
+        },
+        "mean_response_size": 11,
+        "function_id": "f4"
+      }
+    },
+    "request_method": "rest",
+    "workers": 4,
+    "threads": 128
+  },
+  "s19": {
+    "external_services": [],
+    "internal_service": {
+      "loader": {
+        "cpu_stress": {
+          "run": false,
+          "range_complexity": [
+            1000,
+            1000
+          ],
+          "thread_pool_size": 1,
+          "trials": 1
+        },
+        "memory_stress": {
+          "run": false,
+          "memory_size": 10000,
+          "memory_io": 1000
+        },
+        "disk_stress": {
+          "run": true,
+          "tmp_file_name": "mubtestfile.txt",
+          "disk_write_block_count": 50,
+          "disk_write_block_size": 512
+        },
+        "sleep_stress": {
+          "run": false,
+          "sleep_time": 0.01
+        },
+        "mean_response_size": 11,
+        "function_id": "f4"
+      }
+    },
+    "request_method": "rest",
+    "workers": 4,
+    "threads": 128
+  }
+}
