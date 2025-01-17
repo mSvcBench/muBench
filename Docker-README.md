@@ -31,4 +31,4 @@ docker exec -it mubench /bin/bash
 
 Be careful to use the correct K8s DNS in use in your cluster (kube-dns, coredns) service url in `Configs/K8sParameters.json`
 
-From the docker container you can run the µbench command 
+>__**Note**__: This Dockerfile doen't build the ServiceCell software. To build the ServiceCell software, use the Dockerfile in the ServiceCell folder.
