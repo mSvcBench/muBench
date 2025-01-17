@@ -1275,7 +1275,7 @@ python3 WorkModelGenerator/RunWorkModelGen.py -c Configs/WorkModelParameters.jso
 
 To deploy your µBench application in the Kubernetes cluster, you have to edit the `Configs/K8sParameters.json` inserting the correct path of your workmodel file, e.g.,
 ```json
-`"WorkModelPath": "SimulationWorkspace/workmodel.json"
+"WorkModelPath": "SimulationWorkspace/workmodel.json"
 ```
 
 Then you have to run the `K8sDeployer` and monitor the deployment status of your pod and services with `kubectl`
