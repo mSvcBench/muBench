@@ -1,55 +1,73 @@
+Here is the revised full manual for µBench:
+
 # µBench Manual
 
 - [µBench Manual](#µbench-manual)
   - [Microservice Model](#microservice-model)
   - [Service-Cell](#service-cell)
   - [Work Model](#work-model)
-  - [Internal-Service functions](#internal-service-functions)
+  - [Internal-Service Functions](#internal-service-functions)
+    - [How to Write Your Own Custom Function](#how-to-write-your-own-custom-function)
+    - [compute\_pi](#compute_pi)
+    - [Real Internal-Service Functions](#real-internal-service-functions)
   - [Run a µBench Application](#run-a-µbench-application)
-    - [Execute a µBench application in a Kubernetes cluster](#execute-a-µbench-application-in-a-kubernetes-cluster)
+    - [Execute a µBench Application in a Kubernetes Cluster](#execute-a-µbench-application-in-a-kubernetes-cluster)
   - [Toolchain](#toolchain)
     - [Service Graph Generator](#service-graph-generator)
+      - [Concepts](#concepts)
+      - [Execution of the ServiceGraphGenerator](#execution-of-the-servicegraphgenerator)
+      - [Examples](#examples)
+        - [An Highly Centralized Hierarchical Architecture with Most of the Services Linked to One Service (Excluding the DB Services):](#an-highly-centralized-hierarchical-architecture-with-most-of-the-services-linked-to-one-service-excluding-the-db-services)
+        - [An Application that Relies on a Common Logging Service:](#an-application-that-relies-on-a-common-logging-service)
+        - [An Application with Several Auxiliary Services:](#an-application-with-several-auxiliary-services)
+        - [An Application Organized in the Conventional Multi-Tier Fashion:](#an-application-organized-in-the-conventional-multi-tier-fashion)
     - [Work Model Generator](#work-model-generator)
     - [Autopilots](#autopilots)
-  - [Benchmarks strategies](#benchmarks-strategies)
-    - [Stochastic-driven benchmarks](#stochastic-driven-benchmarks)
-    - [Trace-driven benchmarks](#trace-driven-benchmarks)
-      - [Alibaba-derived traces](#alibaba-derived-traces)
-  - [Benchmarks tools](#benchmarks-tools)
+      - [K8sAutopilot](#k8sautopilot)
+  - [Benchmark Strategies](#benchmark-strategies)
+    - [Stochastic-Driven Benchmarks](#stochastic-driven-benchmarks)
+    - [Trace-Driven Benchmarks](#trace-driven-benchmarks)
+      - [Alibaba-Derived Traces](#alibaba-derived-traces)
+  - [Benchmark Tools](#benchmark-tools)
+    - [Traffic Generator and Runner](#traffic-generator-and-runner)
+      - [Runner](#runner)
+      - [TrafficGenerator](#trafficgenerator)
   - [Monitoring and Tracing](#monitoring-and-tracing)
   - [Installation and Getting Started](#installation-and-getting-started)
-    - [Create and get access to a Kubernetes cluster](#create-and-get-access-to-a-kubernetes-cluster)
+    - [Create and Access a Kubernetes Cluster](#create-and-access-a-kubernetes-cluster)
       - [Minikube](#minikube)
-      - [Production environment](#production-environment)
-    - [Install µBench software](#install-µbench-software)
+      - [Production Environment](#production-environment)
+    - [Install µBench Software](#install-µbench-software)
       - [µBench in a Docker Container](#µbench-in-a-docker-container)
       - [µBench in the Host](#µbench-in-the-host)
-    - [Install and access the monitoring framework](#install-and-access-the-monitoring-framework)
-    - [My first µBench application](#my-first-µbench-application)
-    - [µBench custom applications](#µbench-custom-applications)
-      - [Service graph generation](#service-graph-generation)
-      - [Work model generation](#work-model-generation)
+    - [Install and Access the Monitoring Framework](#install-and-access-the-monitoring-framework)
+    - [My First µBench Application](#my-first-µbench-application)
+    - [µBench Custom Applications](#µbench-custom-applications)
+      - [Service Graph Generation](#service-graph-generation)
+      - [Work Model Generation](#work-model-generation)
       - [Execution on Kubernetes](#execution-on-kubernetes)
+    - [Test Service Response](#test-service-response)
 
 ## Microservice Model
 
 ![service-cell-rest-grpc](microservices-rest-grpc.png)
 
-µBench generates dummy microservice applications consisting of a set of (micro) services that call each other to satisfy a client request. Each service has a different ID (e.g., *s0, s1, s2, sdb1*) and performs the following tasks
+µBench generates dummy microservice applications consisting of a set of (micro) services that call each other to satisfy a client request. Each service has a different ID (e.g., *s0, s1, s2, sdb1*) and performs the following tasks:
 
-- executing an *internal-service*, i.e. a function, that stresses specific *computing* resources (CPU, disk, memory, etc.) and produces some dummy bytes to stress *network* resources
-- calling a set of *external-services*, i.e.  the services of other service-cells, and waiting for their results
-- sending back the number of dummy bytes produced by the internal-service to the callers
+- Executing an *internal-service*, i.e., a function, that stresses specific *computing* resources (CPU, disk, memory, etc.) and produces some dummy bytes to stress *network* resources.
+- Calling a set of *external-services*, i.e., the services of other service-cells, and waiting for their results.
+- Sending back the number of dummy bytes produced by the internal-service to the callers.
 
-Services communicate with each other using either HTTP REST request/response mechanisms or gRPC. Users can access the µBench microservice application through an API gateway, an NGINX server, that exposes an HTTP endpoint per service, e.g. *NGINX_ip:port/s0*, *NGINX_ip:port/s1*, etc. These endpoints can be used by software for performance evaluation that loads the system with service requests, such as our [Runner](Manual.md#benchmark-tools), [ApacheBench](https://httpd.apache.org/docs/2.4/programs/ab.html), [JMeter](https://jmeter.apache.org/).
-µBench services report their observed performance to a global [Prometheus](/Monitoring/kubernetes-prometheus/README.md#Prometheus) monitoring system. The underlying platform (e.g. Kubernetes) running the µBench microservice application can report its metrics to Prometheus too.
+Services communicate with each other using either HTTP REST request/response mechanisms or gRPC. Users can access the µBench microservice application through an API gateway, an NGINX server, that exposes an HTTP endpoint per service, e.g., *NGINX_ip:port/s0*, *NGINX_ip:port/s1*, etc. These endpoints can be used by software for performance evaluation that loads the system with service requests, such as our [Runner](Manual.md#benchmark-tools), [ApacheBench](https://httpd.apache.org/docs/2.4/programs/ab.html), [JMeter](https://jmeter.apache.org/).
+µBench services report their observed performance to a global [Prometheus](/Monitoring/kubernetes-prometheus/README.md#Prometheus) monitoring system. The underlying platform (e.g., Kubernetes) running the µBench microservice application can report its metrics to Prometheus too.
 
 ---
 
 ## Service-Cell
 
 ![service-cell-abstraction](service-cell-abstraction.png)
-Each service is implemented by a main software unit that we call *service-cell*. A service-cell is a [Docker container](/ServiceCell/README.md) that contains a Python program executing the internal and external services that the user has chosen for the specific service. After the execution of internal and external services, it returns a amount of dummy kBytes.
+
+Each service is implemented by a main software unit that we call *service-cell*. A service-cell is a [Docker container](/ServiceCell/README.md) that contains a Python program executing the internal and external services that the user has chosen for the specific service. After the execution of internal and external services, it returns a number of dummy kBytes.
 
 When a service-cell is executed, it has an identifier (e.g., *Sx*) collected from environment variables. It imports the Python files with the code of the *custom functions* (custom internal-services) possibly defined by the user. Then, it reads the `workmodel.json` file to figure out based on its identifier which internal and external services it should execute when serving a request. As described later, the `workmodel.json` file is a kind of "DNA" of a µBench application that describes for each service what local job (internal-service) it must do and what other downstream services it must call (external-services) before sending back a response.
 
@@ -57,13 +75,13 @@ The `workmodel.json` file and the portfolio of Python files with the code of the
 
 For performance monitoring, a service-cell exposes a set of [metrics](#monitoring-and-tracing) to a Prometheus server.
 
-Optionally, a µBench service (i.e. a POD) can be associated with a sidecar container that runs a real software, e.g. a database, that interacts with the main container of the service-cell. This way, µBench can be used to evaluate the performance of real software in a microservice architecture.
+Optionally, a µBench service (i.e., a POD) can be associated with a sidecar container that runs a real software, e.g., a database, that interacts with the main container of the service-cell. This way, µBench can be used to evaluate the performance of real software in a microservice architecture.
 
 ---
 
 ## Work Model
 
-The description of a µBench application, i.e. the set of internal and external-services run by service-cells, is contained in a global file named `workmodel.json`, which all service-cells access via a k8s ConfigMap (named `mub-workmodel`). The `workmodel.json` file is made by a key per service as shown below.
+The description of a µBench application, i.e., the set of internal and external-services run by service-cells, is contained in a global file named `workmodel.json`, which all service-cells access via a K8s ConfigMap (named `mub-workmodel`). The `workmodel.json` file is made by a key per service as shown below.
 
 ```json
 {
@@ -176,36 +194,36 @@ The description of a µBench application, i.e. the set of internal and external-
 }
 ```
 
-In this example, the µBench application is made by four services: *s0*, *s1*, *s2*, and *sdb1* (that mimics a database). The internal-service of s0 is the function  *compute_pi* with parameters `range_complexity` (uniform random interval of the number of pigreco digits to generate; the higher this number the higher the CPU stress) and `mean_response_size` (average value of an expneg distribution used to generate the number of bytes to return to the caller).
+In this example, the µBench application is made by four services: *s0*, *s1*, *s2*, and *sdb1* (that mimics a database). The internal-service of s0 is the function *compute_pi* with parameters `range_complexity` (uniform random interval of the number of pi digits to generate; the higher this number the higher the CPU stress) and `mean_response_size` (average value of an expneg distribution used to generate the number of bytes to return to the caller).
 
-The external-services called by s0 are organized into two *external-service-groups* described by JSON objects contained in an array. The first group contains only the external-service *s1*. The second group contains only the external-service *sdb1*. External-services belonging to the same group are called sequentially, while those in different groups are called in parallel. Specifically, upon receiving a request, a different per-group thread is executed for each external-service-group. Each per-group thread randomly selects a number of `seq_len` external-services in its group and invokes them (e.g., an HTTP call) sequentially, according to a given calling `probability`. If `seq_len` is greater than the size of the external-services-group, the involvement of the external-services of the group is controlled exclusively by the calling probabilities.  
+The external-services called by s0 are organized into two *external-service-groups* described by JSON objects contained in an array. The first group contains only the external-service *s1*. The second group contains only the external-service *sdb1*. External-services belonging to the same group are called sequentially, while those in different groups are called in parallel. Specifically, upon receiving a request, a different per-group thread is executed for each external-service-group. Each per-group thread randomly selects a number of `seq_len` external-services in its group and invokes them (e.g., an HTTP call) sequentially, according to a given calling `probability`. If `seq_len` is greater than the size of the external-services-group, the involvement of the external-services of the group is controlled exclusively by the calling probabilities.
 
 In the considered example, the service *s0* surely calls *s1* because seq_len is greater than the size of the external-service-group and probability of s1 = 1, and for the same reason it surely calls *sdb1* in parallel, because *s1* and *sdb1* belong to different external-service-groups of *s0*. Consequently, *s1* surely calls *s2* and *s2* surely calls *sdb1*.
 
-This way of involving microservices per request is called *stochastic-driven*. µBench also offers a *trace-driven* approach, see [Benchmark Strategies](#benchmarks-strategies).   
+This way of involving microservices per request is called *stochastic-driven*. µBench also offers a *trace-driven* approach, see [Benchmark Strategies](#benchmark-strategies).
 
 Additional information includes the number of parallel processes (`workers`) and `threads` per process used by the service-cell to serve client requests, the `request_method` it uses to call other services (can be `gRPC` or `rest`, and, currently, must be equal for all), optional specification of CPU and memory resources needed by service-cell containers, namely `cpu-requests`, `cpu-limits`, `memory-requests`, `memory-limits` (see k8s [documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)), the number of `replicas` of the related POD, the `pod_antiaffinity` (true, false) property to enforce pods spreading on different nodes.
 
 ---
 
-## Internal-Service functions
+## Internal-Service Functions
 
-An internal-service is a function that users can define as a Python function. The Docker image of the service-cell provides a default function named `compute_pi` that computes a configurable number of decimals of pigreco to keep the CPU busy. 
-To stress other aspects (e.g. memory, storage, etc.), the user can develop his *custom functions* and save them into the subfolder `CustomFunctions`. In this way, µBench supports the continuous integration of new benchmark functions without the need to change the remaining code.
+An internal-service is a function that users can define as a Python function. The Docker image of the service-cell provides a default function named `compute_pi` that computes a configurable number of decimals of pi to keep the CPU busy.
+To stress other aspects (e.g., memory, storage, etc.), the user can develop his *custom functions* and save them into the subfolder `CustomFunctions`. In this way, µBench supports the continuous integration of new benchmark functions without the need to change the remaining code.
 
-### How to write your own custom function <!-- omit in toc -->
+### How to Write Your Own Custom Function
 
 As **input**, your function receives a dictionary with the parameters specified in the `workmodel.json` file.
 
 As **output**, your function must return a string used as the body for the response given back by a service.
 
-> Note1: each custom function must have a **unique name**, otherwise conflicts will occur.
+> Note1: Each custom function must have a **unique name**, otherwise conflicts will occur.
 Also, you can specify more than one custom function inside the same Python file.
-> Note2: The Python libraries (imports) needed for the custom function must be included in the service-cell container. If necessary edit the `requirement.txt` file of `ServiceCell` and rebuild the container. Then, push it to your own repository, and use this new image in `Configs/K8sParameters.json`. 
+> Note2: The Python libraries (imports) needed for the custom function must be included in the service-cell container. If necessary, edit the `requirement.txt` file of `ServiceCell` and rebuild the container. Then, push it to your own repository, and use this new image in `Configs/K8sParameters.json`.
 
 ```python
 def custom_function(params):
-    
+
     ## your code here
 
     ## the response of the function must be a string
@@ -214,20 +232,20 @@ def custom_function(params):
     return response_body
 ```
 
-### compute_pi <!-- omit in toc -->
+### compute_pi
 
 The built-in function `compute_pi` computes an `N` number of decimals of the *π*, where `N` is an integer, randomly chosen in an interval [`X`,`Y`] for each execution. The larger the interval, the greater the complexity and the stress on the CPU. After the computation, the `compute_pi` function returns a dummy string made of `B` kBytes, where `B` is a sample of an exponential random variable whose average is the `mean_response_size` parameter.
 
 So the input parameters of `compute_pi` are:
 
-- `"range_complexity": [X, Y]`  
+- `"range_complexity": [X, Y]`
 - `"mean_response_size": value`
 
-Some custom functions are already available in the `CustomFunction` folder that contains also related [Readme](CustomFunctions/README.md) documentation. 
+Some custom functions are already available in the `CustomFunction` folder that contains also related [Readme](CustomFunctions/README.md) documentation.
 
-### Real Internal-Service functions <!-- omit in toc -->
+### Real Internal-Service Functions
 
-µBench can support the execution of real software within a service-cell by using *sidecar* containers that share the namespaces with the main container of the service-cell. For instance, a user can include a MongoDB database in the _sdb1_ service by changing the `workmodel.json` as follows:
+µBench can support the execution of real software within a service-cell by using *sidecar* containers that share the namespaces with the main container of the service-cell. For instance, a user can include a MongoDB database in the *sdb1* service by changing the `workmodel.json` as follows:
 
 ```json
   "sdb1": {
@@ -241,7 +259,7 @@ Some custom functions are already available in the `CustomFunction` folder that 
     }
 ```
 
-Where `sidecar` is the name of the docker image to be used as sidecar and `mongo_fun` is a possible (TODO) function executed by the service-cell as internal-service, which interacts with the sidecar MongoDB by executing a random number of reading and writing operations within the uniform interval 10,20. However, any internal-service function can be used.  
+Where `sidecar` is the name of the docker image to be used as sidecar and `mongo_fun` is a possible (TODO) function executed by the service-cell as internal-service, which interacts with the sidecar MongoDB by executing a random number of reading and writing operations within the uniform interval 10,20. However, any internal-service function can be used.
 
 ---
 
@@ -253,9 +271,9 @@ Where `sidecar` is the name of the docker image to be used as sidecar and `mongo
 
 µBench exploits an underlying container orchestration platform to deploy the service-cells forming a µBench application. The deployment task is done by a per-platform deployment tool that takes as input the `workmodel.json`, and possible platform configuration files, and eventually uses the platform API to carry out the final deployment. Currently, µBench software uses Kubernetes platform only and includes a Kubernetes deployment tool, named K8sDeployer, that must run on a host that has access to a Kubernetes cluster through `kubectl` tool.
 
-### Execute a µBench application in a Kubernetes cluster
+### Execute a µBench Application in a Kubernetes Cluster
 
-The K8sDeployer uses the `workmodel.json` file and other config files to create the  Kubernetes resources used to run the µBench microservice application. In particular, the K8sDeployer runs the following Kubernetes resources:
+The K8sDeployer uses the `workmodel.json` file and other config files to create the Kubernetes resources used to run the µBench microservice application. In particular, the K8sDeployer runs the following Kubernetes resources:
 
 | **Type**             | **Name**          | **Description**                                           |
 |----------------------|-------------------|-----------------------------------------------------------|
@@ -269,9 +287,9 @@ The K8sDeployer uses the `workmodel.json` file and other config files to create 
 | ConfigMap            | internal-services | ConfigMap including custom functions of internal-services  |
 | ConfigMap            | workmodel         | ConfigMap including workmodel.json                         |
 
-The K8sDeployer takes as input a JSON file, like the following one, which contains information about the path of the `workmodel.json` file (`WorkModelPath`) and custom functions (`InternalServiceFilePath`) to be stored in the related ConfigMaps, and Kubernetes parameters. The Kubernetes parameters are the Docker `image` of the service-cell, the `namespace` of the deployment, as well as the K8s `cluster_domain` and the URL `path` used to trigger the service of service-cells. Between the deployment of a service-cell and the next one, there is a waiting period equal to `sleep` seconds to avoid K8s API server overload. 
+The K8sDeployer takes as input a JSON file, like the following one, which contains information about the path of the `workmodel.json` file (`WorkModelPath`) and custom functions (`InternalServiceFilePath`) to be stored in the related ConfigMaps, and Kubernetes parameters. The Kubernetes parameters are the Docker `image` of the service-cell, the `namespace` of the deployment, as well as the K8s `cluster_domain` and the URL `path` used to trigger the service of service-cells. Between the deployment of a service-cell and the next one, there is a waiting period equal to `sleep` seconds to avoid K8s API server overload.
 The user can change the name of the output YAML files of µBench microservices by specifying the `prefix_yaml_file`. NGINX gateway needs the name of the K8s DNS service and this value is stored in `dns-resolver` (be careful that some K8s clusters can use `coredns` instead of the default `kube-dns`). Deployment of NGINX can be avoided by changing `nginx-gw` to false. The K8s NGINX service type is those reported in `nginx-svc-type`. It is possible to change the K8s scheduler used for the deployment of the µBench application by changing the key `scheduler-name`.
-Using this information, K8sDeployer generates YAML files for running the µBench app, puts them in the `OutputPath/yaml` folder, and then applies them on Kubernetes, unless `no-apply` is true. To move the µBench application to another cluster, simply transport these YAML files. Similarly, these YAML files can be used to remove the µBench application from the cluster, with the exclusion of the generated namespace that should be manually removed. 
+Using this information, K8sDeployer generates YAML files for running the µBench app, puts them in the `OutputPath/yaml` folder, and then applies them on Kubernetes, unless `no-apply` is true. To move the µBench application to another cluster, simply transport these YAML files. Similarly, these YAML files can be used to remove the µBench application from the cluster, with the exclusion of the generated namespace that should be manually removed.
 
 ```json
 {
@@ -300,11 +318,11 @@ Run `RunK8sDeployer.py` from the K8s Master node as follows
 python3 Deployers/K8sDeployer/RunK8sDeployer.py -c Configs/K8sParameters.json
 ```
 
-If the K8sDeployer finds YAML files in the YAML folder, it will ask whether the user prefers to undeploy them before proceeding. The undeploy operation iremove all files YAML files and, if `no-apply` is false, remove also the related Kubernetes resources.
+If the K8sDeployer finds YAML files in the YAML folder, it will ask whether the user prefers to undeploy them before proceeding. The undeploy operation removes all files YAML files and, if `no-apply` is false, removes also the related Kubernetes resources.
 
 Take care of controlling the eventual completion of the deployment/undeployment operation with `kubectl get pods` command.
 
-> *NOTE* :  `K8sParameters` can contain the keys `replicas`, `cpu-requests`, `cpu-limits`, `memory-requests` ,`memory-limits` to enforce these properties for all Pods of the µBench application, overriding possible values in `workmodel.json `. For instance, `"replicas": 2` implies that every service will have 2 replicas.
+> *NOTE*: `K8sParameters` can contain the keys `replicas`, `cpu-requests`, `cpu-limits`, `memory-requests`, `memory-limits` to enforce these properties for all Pods of the µBench application, overriding possible values in `workmodel.json`. For instance, `"replicas": 2` implies that every service will have 2 replicas.
 
 ---
 
@@ -323,13 +341,11 @@ The ServiceGraphGenerator can be used to randomly generate the *dependency graph
 
 The ServiceGraphGenerator creates a `servicegraph.json` file that includes this graph information, which will be eventually included in the `workmodel.json` file describing the µBench application.
 
-
-
-#### Concepts <!-- omit in toc -->
+#### Concepts
 
 Literature [studies](https://researchcommons.waikato.ac.nz/bitstream/handle/10289/13981/EVOKE_CASCON_2020_paper_37_WeakestLink.pdf?sequence=11&isAllowed=y) show that the building of a realistic dependency graph can be done by using the Barabási-Albert (BA) algorithm, which uses a power-law distribution and results in a topology that follows a preferential-attachment model. For this reason, the ServiceGraphGenerator creates random dependency graphs following the BA model.
 
-The BA algorithm builds the graph topology as follows: at each step, a new service is added as a vertex of a directed tree. This new service is connected with an edge to a single *parent* service already present in the topology. The edge direction is from the parent service to the new *child* service, this means that the parent service includes the new service in its external-services.  
+The BA algorithm builds the graph topology as follows: at each step, a new service is added as a vertex of a directed tree. This new service is connected with an edge to a single *parent* service already present in the topology. The edge direction is from the parent service to the new *child* service, this means that the parent service includes the new service in its external-services.
 The parent service is chosen according to a preferred attachment strategy using a *power-law* distribution. Specifically, vertex *i* is chosen as a parent with a (non-normalized) probability equal to *P<sub>i</sub> = d<sub>i</sub><sup>&alpha;</sup> + a*, where *d<sub>i* is the number of services that have already chosen the service *i* as a parent, *&alpha;* is the power-law exponent, and *a* is the zero-appeal parameters i.e., the probability of a service being chosen as a parent when no other service has yet chosen it.
 
 As previously mentioned, to simulate parallel and sequential calls of external-services, the whole set of external-services of a microservice is organized in external-service-groups. The ServiceGraphGenerator creates a configurable number of equal external service groups for each microservice and inserts external-services into these groups according to a water-filling algorithm.
@@ -338,9 +354,9 @@ The ServiceGraphGenerator configures the probability of calling external-service
 
 To simulate the presence of databases in a µBench microservice application, the ServiceGraphGenerator adds to the dependency graph some database-services that only execute their internal-service. The other services select one of these databases as external-service with a configurable probability.
 
-#### Execution of the ServicGraphGenrator <!-- omit in toc -->
+#### Execution of the ServiceGraphGenerator
 
-The ServicGraphGenrator takes as input a JSON configuration file (`ServiceGraphParameters.json`) as the following:
+The ServiceGraphGenerator takes as input a JSON configuration file (`ServiceGraphParameters.json`) as the following:
 
 ```json
 {
@@ -362,7 +378,7 @@ The ServicGraphGenrator takes as input a JSON configuration file (`ServiceGraphP
 }
 ```
 
-There are two services (`vertices = 2`), and each service has a single external_service_groups (`external_service_groups=1`). For each group, 100 external-services are sequentially called (`seq_len=100`). When `seq_len` > `vertices` all external-service of a service group are sequentially called. Regarding the weights of the link of the dependency graph, i.e. the calling probabilities, the ServiceGraphGenerator allows using a random (`"model":"random"`) distribution in the range (0,1) for extracting the value of such probabilities or using a constant value for all, as in the example. In any, case these probabilities can be fine-tuned a posteriori by editing the produced `servicegraph.json` file. 
+There are two services (`vertices = 2`), and each service has a single external_service_groups (`external_service_groups=1`). For each group, 100 external-services are sequentially called (`seq_len=100`). When `seq_len` > `vertices` all external-service of a service group are sequentially called. Regarding the weights of the link of the dependency graph, i.e. the calling probabilities, the ServiceGraphGenerator allows using a random (`"model":"random"`) distribution in the range (0,1) for extracting the value of such probabilities or using a constant value for all, as in the example. In any case, these probabilities can be fine-tuned a posteriori by editing the produced `servicegraph.json` file.
 
 The configuration in the example provides also the presence of two databases, `sdb1` and `sdb2`. `sdb1` is used by a service with a probability of 0.79, `sdb2` with a probability of 0.01, and in the remaining cases, the service does not use any database.
 
@@ -419,11 +435,11 @@ To run `ServiceGraphGenerator` execute
 python3 ServiceGraphGenerator/RunServiceGraphGen.py -c Configs/ServiceGraphParameters.json
 ```
 
-#### Examples <!-- omit in toc -->
+#### Examples
 
 We illustrate four examples of ServiceGraphParameters.json files that can be used to create dependency graphs with different topological properties:
 
-##### An highly centralized hierarchical architecture with most of the services linked to one service (excluding the db services): <!-- omit in toc -->
+##### An Highly Centralized Hierarchical Architecture with Most of the Services Linked to One Service (Excluding the DB Services):
 
 ```json
 {
@@ -449,7 +465,7 @@ We illustrate four examples of ServiceGraphParameters.json files that can be use
 <img width="400" src="../Docs/service_graph_example_1.png">
 </p>
 
-##### An application that relies on a common logging service <!-- omit in toc -->
+##### An Application that Relies on a Common Logging Service:
 
 ```json
 {
@@ -475,7 +491,7 @@ We illustrate four examples of ServiceGraphParameters.json files that can be use
 <img width="400" src="../Docs/service_graph_example_2.png">
 </p>
 
-##### An application with several auxiliary services: <!-- omit in toc -->
+##### An Application with Several Auxiliary Services:
 
 ```json
 {
@@ -501,7 +517,7 @@ We illustrate four examples of ServiceGraphParameters.json files that can be use
 <img width="400" src="../Docs/service_graph_example_3.png">
 </p>
 
-##### An application organized in the conventional multi-tier fashion: <!-- omit in toc -->
+##### An Application Organized in the Conventional Multi-Tier Fashion:
 
 ```json
 {
@@ -529,8 +545,8 @@ We illustrate four examples of ServiceGraphParameters.json files that can be use
 
 ### Work Model Generator
 
-The WorkModelGenerator generates the `workmodel.json` describing internal and external-services of service-cells and that is used by deployers to eventually run the microservice application. For the configuration of external-services, the WorkModelGenerator imports those specified in a `servicegraph.json` file manually edited or automatically generated by the ServiceGraphGenerator. For the selection of functions to be associated with internal-services of service-cells, the WorkModelGenerator singles out these functions at random and according to configurable probabilities. 
-The [examples](/Examples/) directory contains some examples of workmodels that can be used for testing purposes.
+The WorkModelGenerator generates the `workmodel.json` describing internal and external-services of service-cells and that is used by deployers to eventually run the microservice application. For the configuration of external-services, the WorkModelGenerator imports those specified in a `servicegraph.json` file manually edited or automatically generated by the ServiceGraphGenerator. For the selection of functions to be associated with internal-services of service-cells, the WorkModelGenerator singles out these functions at random and according to configurable probabilities.
+The `Examples` directory contains some examples of workmodels that can be used for testing purposes.
 
 The WorkModelGenerator takes as input a configuration file (`WorkModelParameters.json`) as the following one
 
@@ -620,7 +636,7 @@ The WorkModelGenerator takes as input a configuration file (`WorkModelParameters
          }
       },
       "ServiceGraphFilePath": {
-         "type": "metadata", 
+         "type": "metadata",
          "value":"SimulationWorkspace/servicegraph.json"
       },
       "OutputPath": {
@@ -631,19 +647,19 @@ The WorkModelGenerator takes as input a configuration file (`WorkModelParameters
 }
 ```
 
-This file includes a set of *function-flavor* that are possible internal-service functions. For each service-cell, a function-flavour will be used as internal-service according to a configurable flavor probability. 
+This file includes a set of *function-flavor* that are possible internal-service functions. For each service-cell, a function-flavor will be used as internal-service according to a configurable flavor probability.
 
-Many *function-flavors* (`f0`, `f1`, `f2`,`f3`) can use the same python base-function (e.g. `loader` is used by `f2` and `f3` ) but with different parameters. 
+Many *function-flavors* (`f0`, `f1`, `f2`,`f3`) can use the same python base-function (e.g., `loader` is used by `f2` and `f3`) but with different parameters.
 
-Each function-flavor is represented as JSON object with a unique ID key (`f0`, `f1`, `f2`, `f3`) and whose values are: the `parameters` taken as input by the function, e.g., the `compute_pi` function uses `mean_response_size` and `range_complexity`. 
+Each function-flavor is represented as JSON object with a unique ID key (`f0`, `f1`, `f2`, `f3`) and whose values are: the `parameters` taken as input by the function, e.g., the `compute_pi` function uses `mean_response_size` and `range_complexity`.
 
-Other keys are the `recipient` of the function-flavor (`database` or plain `service`);  the `name` of the base-function to be executed; the `probability` to be associated to a service-cell; the optional keys `workers` and `threads` that are the number of processes and threads per process used by service-cells that run the function-flavor to serve client requests; the optional key `replicas` for choosing the number of replicas of service-cells that run the function-flavor; the optional keys  `cpu-requests`,`cpu-limits`,`memory-requests`,`memory-limits` to control the cpu/memory resources associated to the service-cells running the function-flavor (see k8s [documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/))
+Other keys are the `recipient` of the function-flavor (`database` or plain `service`); the `name` of the base-function to be executed; the `probability` to be associated to a service-cell; the optional keys `workers` and `threads` that are the number of processes and threads per process used by service-cells that run the function-flavor to serve client requests; the optional key `replicas` for choosing the number of replicas of service-cells that run the function-flavor; the optional keys `cpu-requests`,`cpu-limits`,`memory-requests`,`memory-limits` to control the cpu/memory resources associated to the service-cells running the function-flavor (see k8s [documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)).
 
-The description of external-services is imported through a `servicegraph.json` file located in `ServiceGraphFilePath` metadata that can be manually made or automatically generated by the ServiceGraphGenerator. 
+The description of external-services is imported through a `servicegraph.json` file located in `ServiceGraphFilePath` metadata that can be manually made or automatically generated by the ServiceGraphGenerator.
 
 The method used to carry out external-service calls is specified in `request_method` metadata ("rest" or "gRPC"). Prefix to identify databases is in `databases_prefix` metadata.
 
-The `override` metadata can be used to enforce the use of a specific function for a service avoiding the random selection and to assign sidecar containers to a service-cell. In the above example, the service-cell that implements the database identified as `sdb1` has a mongo sidecar container. Moreover, the service-cell that implements the service `s0` uses the function with ID `f1`.  
+The `override` metadata can be used to enforce the use of a specific function for a service avoiding the random selection and to assign sidecar containers to a service-cell. In the above example, the service-cell that implements the database identified as `sdb1` has a mongo sidecar container. Moreover, the service-cell that implements the service `s0` uses the function with ID `f1`.
 
 The final `workmodel.json` file produced by the tool will be saved in the `OutputPath`. The filename `workmodel.json` can be changed with the key `OutputFileName`
 
@@ -657,7 +673,7 @@ python3 WorkModelGenerator/RunWorkModelGen.py -c Configs/WorkModelParameters.jso
 
 Autopilots are sequential executors of the toolchain. An autopilot sequentially runs the `ServiceGraphGenerator`, the `WorkModelGenerator`, and the `Deployer`.
 
-#### K8sAutopilot <!-- omit in toc -->
+#### K8sAutopilot
 
 Currently, the `Autopilots` folder contains an Autopilot tool for Kubernetes in the subfolder `K8sAutopilot`. It uses the following configuration `K8sAutopilotConf.json` file, whose keys specify the paths of the run tools and their configuration files.
 
@@ -680,13 +696,15 @@ python3 Autopilots/K8sAutopilot/K8sAutopilot.py -c Configs/K8sAutopilotConf.json
 
 ---
 
-## Benchmarks strategies
+## Benchmark Strategies
 
-### Stochastic-driven benchmarks
+### Stochastic-Driven Benchmarks
+
 For stochastic benchmarks, a user sends an HTTP GET to service `s0` and this request will span a random set of services according to the calling probabilities specified in the `workmodel.json` file.
 
-### Trace-driven benchmarks
-For trace-driven benchmarks, a user sends an HTTP POST request to the gateway and includes, as body, a JSON object that represents a `trace`, i.e. the exact sequences of the services to be span for serving the request. An example of the structure of a trace is given below:
+### Trace-Driven Benchmarks
+
+For trace-driven benchmarks, a user sends an HTTP POST request to the gateway and includes, as body, a JSON object that represents a `trace`, i.e., the exact sequences of the services to be spanned for serving the request. An example of the structure of a trace is given below:
 
 ```json
 {
@@ -699,7 +717,9 @@ For trace-driven benchmarks, a user sends an HTTP POST request to the gateway an
    }]
 }
 ```
-The key is the service executing the requests, while the value is a list of external-service groups to be contacted in parallel. Microservices in an external-service group are requested sequentially. Since in microservice applications the same services are often requested multiple times and the structure of a JSON object does not allow duplicate keys, we have encoded a specific service with its name (e.g. `s0`) followed by a *escape* sequence (`__`) and a random number. This is not mandatory, but necessary when you need to have the same microservice repeated at the same JSON level.     
+
+The key is the service executing the requests, while the value is a list of external-service groups to be contacted in parallel. Microservices in an external-service group are requested sequentially. Since in microservice applications the same services are often requested multiple times and the structure of a JSON object does not allow duplicate keys, we have encoded a specific service with its name (e.g., `s0`) followed by a *escape* sequence (`__`) and a random number. This is not mandatory, but necessary when you need to have the same microservice repeated at the same JSON level.
+
 In the example trace, microservice `s0` has a single external-service group consisting of microservices `s24` and `s28`, which are called sequentially. In turn, `s28` has a single group of external-services consisting of the microservices `s6` and `s20`. Consequently, the sequence of the called microservices is: `s0`-->`s24`, then `s0`-->`s28`, then `s28`-->`s6`, then `s28`-->`s20`.
 
 To change the sequence of calls from sequential to parallel the JSON trace should be the following:
@@ -716,13 +736,13 @@ To change the sequence of calls from sequential to parallel the JSON trace shoul
    ]
 }
 ```
+
 In this case, microservice `s0` has two groups of external-services consisting of microservices `s24` and `s28` that are called in parallel. In turn, `s28` has two groups of external-services consisting of the microservices `s6` and `s20`. Consequently, the sequence of the called microservices is: `s0`-->`s24,s28`, then `s28`-->`s6,s20`.
 
-#### Alibaba-derived traces
+#### Alibaba-Derived Traces
 
-In the `examples` directory, there is the `Alibaba` folder with a collection of applications obtained from processing the real Alibaba [traces](https://github.com/alibaba/clusterdata/tree/master/cluster-trace-microservices-v2021), in the same directory we can find the Matlab scripts used for the processing of the traces.
-To use these applications, first, we need to unzip the [trace-mbench.zip](#ExamplesAlibaba/trace-mbench.zip) file inside the `ExamplesAlibaba` directory. As a result of this operation, we obtain the `trace-mbench` directory within two folders: `par` and `seq`. 
-
+In the `Examples` directory, there is the `Alibaba` folder with a collection of applications obtained from processing the real Alibaba [traces](https://github.com/alibaba/clusterdata/tree/master/cluster-trace-microservices-v2021), in the same directory we can find the Matlab scripts used for the processing of the traces.
+To use these applications, first, we need to unzip the [trace-mbench.zip](../Examples/Alibaba/trace-mbench.zip) file inside the `Examples/Alibaba` directory. As a result of this operation, we obtain the `trace-mbench` directory within two folders: `par` and `seq`.
 
 ```zsh
 muBench/
@@ -740,8 +760,9 @@ muBench/
 │  │  │  │  ├─ ...
 
 ```
-Each folder contains 29 applications, each one with a set of traces. The difference between the traces in the two folders is that traces in the `par` directory execute downstream requests in parallel, whereas the traces in the `seq` directory execute requests in sequence. 
-In each app folder, you will find a `service_graph.json` file that represents the app's service graph and its traces. The `service_graph.json` does not contain any external services, because the sequence of external services to be called is specified by the trace sent via HTTP POST. 
+
+Each folder contains 29 applications, each one with a set of traces. The difference between the traces in the two folders is that traces in the `par` directory execute downstream requests in parallel, whereas the traces in the `seq` directory execute requests in sequence.
+In each app folder, you will find a `service_graph.json` file that represents the app's service graph and its traces. The `service_graph.json` does not contain any external services, because the sequence of external services to be called is specified by the trace sent via HTTP POST.
 
 To benchmark an app generated from Alibaba trace, the following steps must be performed:
 
@@ -778,7 +799,7 @@ To benchmark an app generated from Alibaba trace, the following steps must be pe
          },
          "override": {},
          "ServiceGraphFilePath": {
-            "type": "metadata", 
+            "type": "metadata",
             "value":"Examples/Alibaba/traces-mbench/seq/app18/service_graph.json"
          },
          "OutputPath": {
@@ -788,27 +809,28 @@ To benchmark an app generated from Alibaba trace, the following steps must be pe
       }
    }
    ```
+
 - Generate the `workmodel.json` file with the `WorkModelGenerator` by running the following command:
 
    ```zsh
    python3 WorkModelGenerator/RunWorkModelGen.py -c Configs/WorkModelParameters.json
    ```
 
-- Deploy the application with `K8sDeployer` by providing as input the `workmodel.json` file created in the previous step ad by using the following command. If necessary update properly the `Configs/K8sParameters.json`
+- Deploy the application with `K8sDeployer` by providing as input the `workmodel.json` file created in the previous step and by using the following command. If necessary update properly the `Configs/K8sParameters.json`
 
    ```zsh
    python3 Deployers/K8sDeployer/RunK8sDeployer.py -c Configs/K8sParameters.json
    ```
 
 - To send a trace-driven request, we can send an HTTP POST to the NGINX access gateway with the JSON file of the trace as the body. For example, we can use the bash command `curl` to send the first trace of sequential application n. 18.
-  
+
    ```zsh
    curl -X POST -H "Content-Type: application/json" http://<access-gateway-ip>:31113/s0 -d @Examples/Alibaba/traces-mbench/seq/app18/trace00001.json
    ```
 
-## Benchmarks tools 
+## Benchmark Tools
 
-µBench provides simple benchmark tools in the `Benchmarks` directory, for stochastic-driven benchmarks only. Besides this tool, you can use other open-souce tools, e.g. *ab - Apache HTTP server benchmarking tool* as it follows, where `<access-gateway-ip>:31113` is the IP address (e.g., that of K8s master node) and port through which it is possible to contact the NGINX API gateway:
+µBench provides simple benchmark tools in the `Benchmarks` directory, for stochastic-driven benchmarks only. Besides this tool, you can use other open-source tools, e.g., *ab - Apache HTTP server benchmarking tool* as it follows, where `<access-gateway-ip>:31113` is the IP address (e.g., that of K8s master node) and port through which it is possible to contact the NGINX API gateway:
 
 ```zsh
 ab -n 100 -c 2 http://<access-gateway-ip>:31113/s0
@@ -816,11 +838,11 @@ ab -n 100 -c 2 http://<access-gateway-ip>:31113/s0
 
 Another benchmarking tool we have used successfully is *Apache JMeter* through which both stochastic and trace-driven benchmarks can be run.
 
-### Traffic Generator and Runner <!-- omit in toc -->
+### Traffic Generator and Runner
 
-`TrafficGenerator` and `Runner` are two tools used to load a µBench microservice application with a sequence of HTTP requests and observe its performance both through simple metrics offered by the Runner and by Prometheus metrics.  
+`TrafficGenerator` and `Runner` are two tools used to load a µBench microservice application with a sequence of HTTP requests and observe its performance both through simple metrics offered by the Runner and by Prometheus metrics.
 
-#### Runner <!-- omit in toc -->
+#### Runner
 
 The `Runner` is the tool that loads the application with HTTP requests sent to the NGINX access gateway. It can use different `workload_type`, namely: `file`, `greedy`, and `periodic` (see later).
 The Runner takes as input a `RunnerParameters.json` file as the following one.
@@ -876,19 +898,20 @@ The `Runner` sequentially executes one by one these files and saves a test resul
 
 *Greedy mode*
 
-In `greedy` mode, the `Runner` allocates a pool of threads. Each thread makes an HTTP request to a service defined in the key `ingress_service` (e.g. s0); when the response is received, the thread immediately sends another request. 
-Overall, the number of sent requests is the value of `workload_events`. The paramenters `workload_files_path_list`, `workload_rounds` and `rate` are not used for greedy mode. 
+In `greedy` mode, the `Runner` allocates a pool of threads. Each thread makes an HTTP request to a service defined in the key `ingress_service` (e.g., s0); when the response is received, the thread immediately sends another request.
+Overall, the number of sent requests is the value of `workload_events`. The parameters `workload_files_path_list`, `workload_rounds` and `rate` are not used for greedy mode.
 
 *Periodic mode*
-In `periodic` mode, the `Runner` periodically sends HTTP requests at a constant `rate` to a service defined in the key `ingress_service` (e.g. s0). To manage concurrent requests, the Runner uses a thread pool. The paramenters `workload_files_path_list` and `workload_rounds` are not used for periodic mode.
+
+In `periodic` mode, the `Runner` periodically sends HTTP requests at a constant `rate` to a service defined in the key `ingress_service` (e.g., s0). To manage concurrent requests, the Runner uses a thread pool. The parameters `workload_files_path_list` and `workload_rounds` are not used for periodic mode.
 
 *AfterWorkloadFunction*
 
-After each test, the `Runner` can execute a custom python function (e.g. to fetch monitoring data from Prometheus) specified in the key `file_name`, which is defined by the user in a file specified in the `file_path` key.
+After each test, the `Runner` can execute a custom python function (e.g., to fetch monitoring data from Prometheus) specified in the key `file_name`, which is defined by the user in a file specified in the `file_path` key.
 
 *Result File*
 
-The `result_file` produced by the `Runner` contains five columns. Each row is written at the end of an HTTP request. The first column indicates the time of the execution of the request as a unix timestamp; the second column indicates the elapsed time, in *ms*, of the request; the third column reports the received HTTP status (e.g. 200 OK), the fourth and fifth columns are the number of processed and pending (on-going) requests at that time, respectively. 
+The `result_file` produced by the `Runner` contains five columns. Each row is written at the end of an HTTP request. The first column indicates the time of the execution of the request as a Unix timestamp; the second column indicates the elapsed time, in *ms*, of the request; the third column reports the received HTTP status (e.g., 200 OK), the fourth and fifth columns are the number of processed and pending (ongoing) requests at that time, respectively.
 
 ```zsh
 1637682769350   171   200   6     5
@@ -906,7 +929,7 @@ The `result_file` produced by the `Runner` contains five columns. Each row is wr
 ...
 ```
 
-#### TrafficGenerator <!-- omit in toc -->
+#### TrafficGenerator
 
 The `TrafficGenerator` is a tool for generating a `workload.json` file for the `Runner` by using an exponential distribution for requests' inter-arrival times.
 It requires as input a `TrafficGeneratorParameters.json` file as the following one:
@@ -925,7 +948,7 @@ It requires as input a `TrafficGeneratorParameters.json` file as the following o
 }
 ```
 
-The `ingress_service` parameter indicates the name of the service that acts as the ingress service of the microservice, in this example `s0`.  
+The `ingress_service` parameter indicates the name of the service that acts as the ingress service of the microservice, in this example `s0`.
 As `request_parameters`, you need to specify the mean inter-arrival times in ms (`mean_interarrival_time`) and the number of requests (`stop_event`).
 The `TrafficGenerator` will generate a file called `workload.json` and it will save it to the path specified from the `OutputPath` parameter.
 
@@ -940,14 +963,16 @@ With the following steps, you will deploy on your Kubernetes environment: [Prome
 ---
 
 ## Monitoring and Tracing
+
 µBench service-cells export some metrics to a Prometheus server running in the cluster. The exported metrics are:
-- *mub_response_size* : size of the request response in bytes;
-- *mub_request_latency_milliseconds* : request latency including the execution of internal and external services;
-- *mub_internal_processing_latency_milliseconds* : duration of the execution of the internal-service
-- *mub_external_processing_latency_milliseconds* :  duration of the execution of the external-service
-- *mub_request_latency_milliseconds_bucket* : histogram of request latency including the execution of internal and external services;
-- *mub_internal_processing_latency_milliseconds_bucket* : histogram of duration of the execution of the internal-service
-- *mub_external_processing_latency_milliseconds_bucket* :  histogram of duration of the execution of the external-service
+
+- *mub_response_size*: size of the request response in bytes;
+- *mub_request_latency_milliseconds*: request latency including the execution of internal and external services;
+- *mub_internal_processing_latency_milliseconds*: duration of the execution of the internal-service
+- *mub_external_processing_latency_milliseconds*: duration of the execution of the external-service
+- *mub_request_latency_milliseconds_bucket*: histogram of request latency including the execution of internal and external services;
+- *mub_internal_processing_latency_milliseconds_bucket*: histogram of duration of the execution of the internal-service
+- *mub_external_processing_latency_milliseconds_bucket*: histogram of duration of the execution of the external-service
 
 By using Istio and Jaeger tools the monitoring can be deeper. To install the monitoring framework into the Kubernetes cluster read this [manual](../Monitoring/kubernetes-full-monitoring/README.md).
 
@@ -959,12 +984,12 @@ In this section, we describe how to install and use µBench.
 
 The quick way is to use a µBench Docker container, even though for extending the code may be better to run µBench directly in your host.
 
-To gain initial experience with µBench, without the burden of configuring a production-grade cluster Kubernetes, you can use [minikube](https://minikube.sigs.k8s.io/docs/start/) to create the cluster. However, to carry out research activities, it is recommended to use a production-grade Kubernetes cluster. 
+To gain initial experience with µBench, without the burden of configuring a production-grade cluster Kubernetes, you can use [minikube](https://minikube.sigs.k8s.io/docs/start/) to create the cluster. However, to carry out research activities, it is recommended to use a production-grade Kubernetes cluster.
 
-### Create and get access to a Kubernetes cluster
-
+### Create and Access a Kubernetes Cluster
 
 #### Minikube
+
 A quick way to gain initial experience with Kubernetes and µBench is to create a local Kubernetes cluster with [minikube](https://minikube.sigs.k8s.io/docs/start/). It is enough to have Docker installed (and running) in your host, or any other [virtualization driver](https://minikube.sigs.k8s.io/docs/drivers/) supported by minikube.
 
 After installing minikube software, you can create a single-node Kubernetes cluster with
@@ -999,16 +1024,17 @@ MASTER_IP=$(minikube ip)
 
 Minikube automatically configures the `$HOME/.kube/config` file to access the cluster with `minikube kubectl` CLI from the host.
 
-#### Production environment 
+#### Production Environment
+
 To create a production-grade Kubernetes cluster you need a set of real or virtual machines and then you can use different tools to deploy Kubernetes software such as [kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/) or [kubespray](https://kubernetes.io/docs/setup/production-environment/tools/kubespray/).
 
 To access the cluster from a host, you must install `kubectl` into the host and configure the file `$HOME/.kube/config` to get the right of accessing the cluster. If your host is the master-node, this step is already done. Otherwise, follow the official [documentation](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/).
 
-
-### Install µBench software
+### Install µBench Software
 
 #### µBench in a Docker Container
-µBench software is packaged in a Docker image, named ``msvcbench/mubench``, which contains
+
+µBench software is packaged in a Docker image, named `msvcbench/mubench`, which contains
 - latest µBench software in `/root/muBench` folder
 - `kubectl` and `helm` tools for controlling the backend Kubernetes cluster
 - a bash script `/root/monitoring-install.sh` for installing the µBench [monitoring framework](../Monitoring/kubernetes-full-monitoring/README.md) in the cluster, which is made of Prometheus, Grafana, Istio and Jaeger.
@@ -1027,7 +1053,7 @@ For other cluster configurations, you can run the µBench container in the defau
 docker run -d --name mubench msvcbench/mubench
 ```
 
-After running the container, it is necessary to provide the container with the `.kube/config` file to allow accessing the kubernetes cluster from the container.  
+After running the container, it is necessary to provide the container with the `.kube/config` file to allow accessing the Kubernetes cluster from the container.
 
 In the case of a minikube cluster, you can get the config file from your host with
 
@@ -1035,14 +1061,14 @@ In the case of a minikube cluster, you can get the config file from your host wi
 minikube kubectl -- config view --flatten > config
 ```
 
-Otherwise you should use,
+Otherwise, you should use,
 ```zsh
 kubectl config view --flatten > config
 ```
 
-Open the produced `config` file and make sure that the `server` key  is equal to
+Open the produced `config` file and make sure that the `server` key is equal to
 ```zsh
-server : https://<MASTER_IP>:\<API_SERVER_PORT> 
+server : https://<MASTER_IP>:<API_SERVER_PORT>
 ```
 Where MASTER_IP is the IP address of the master-node of the cluster and API_SERVER_PORT is the port of the Kubernetes API server.
 - For a minikube Kubernetes cluster the API_SERVER_PORT is the 8443. Moreover, if Docker driver is used, the `server` key is `server: https://127.0.0.1:58881`. So both IP and port values have to be changed, e.g., into `server: https://192.168.49.2:8443`, assuming that 192.168.49.2 is the IP address of the master-node.
@@ -1052,12 +1078,13 @@ Next step is to copy the modified config file into the µBench container
 
 ```zsh
 docker cp config mubench:/root/.kube/config
-```  
+```
 
 Now you can enter into the µBench container with
 ```zsh
 docker exec -it mubench bash
-``` 
+```
+
 You should see the following terminal and check the ability to access Kubernetes cluster with `kubectl get pods -A`
 
 ```zsh
@@ -1076,12 +1103,12 @@ kube-system   kube-apiserver-minikube            1/1     Running   0          41
 kube-system   kube-controller-manager-minikube   1/1     Running   0          41m
 kube-system   kube-proxy-qskdb                   1/1     Running   0          41m
 kube-system   kube-scheduler-minikube            1/1     Running   0          41m
-kube-system   storage-provisioner                1/1     Running   0          41m 
-``` 
+kube-system   storage-provisioner                1/1     Running   0          41m
+```
 
 #### µBench in the Host
 
-To run µBench directly in a host, the host must have `kubectl` installed and the `$HOME/.kube/config` file properly configured to access the cluster. 
+To run µBench directly in a host, the host must have `kubectl` installed and the `$HOME/.kube/config` file properly configured to access the cluster.
 
 Moreover, the host must have the `helm` tool to install the µBench [monitoring framework](../Monitoring/kubernetes-full-monitoring/README.md)
 
@@ -1103,16 +1130,18 @@ pip3 install wheel
 pip3 install -r requirements.txt
 ```
 
-Note: if you had errors in installing the required modules may be that some of them have not been properly compiled in your device. There could be some missing `ffi` dev and `cairo` libraries that can be installed with `sudo apt-get install libffi-dev libcairo2`, or it may help to install C/C++ building tools, e.g. `sudo apt-get install build-essential`, `sudo apt-get install cmake` (or `sudo snap install cmake --classic` for latest version) on Ubuntu.
+Note: If you had errors in installing the required modules, it may be that some of them have not been properly compiled in your device. There could be some missing `ffi` dev and `cairo` libraries that can be installed with `sudo apt-get install libffi-dev libcairo2`, or it may help to install C/C++ building tools, e.g., `sudo apt-get install build-essential`, `sudo apt-get install cmake` (or `sudo snap install cmake --classic` for latest version) on Ubuntu.
 
-### Install and access the monitoring framework
-µBench uses Prometheus, Grafana, Istio, Kiali and Jaeger to get metrics and traces of generated applications as described [here](../Monitoring/kubernetes-full-monitoring/README.md) .
-The file `monitoring-install.sh` install this framework in the cluster. It can be run either from the µBench Docker bash or by the host shell with 
+### Install and Access the Monitoring Framework
+
+µBench uses Prometheus, Grafana, Istio, Kiali and Jaeger to get metrics and traces of generated applications as described [here](../Monitoring/kubernetes-full-monitoring/README.md).
+The file `monitoring-install.sh` installs this framework in the cluster. It can be run either from the µBench Docker bash or by the host shell with
 
 ```zsh
 cd $HOME/muBench/Monitoring/kubernetes-full-monitoring
 sh ./monitoring-install.sh
 ```
+
 To access the monitoring framework you can use a browser of your host and the following URLs
 
 - http://<MASTER_IP>:30000 for Prometheus
@@ -1120,7 +1149,7 @@ To access the monitoring framework you can use a browser of your host and the fo
 - http://<MASTER_IP>:30002 for Jaeger
 - http://<MASTER_IP>:30003 for Kiali
 
-In the case of a minikube Kubernetes cluster that uses Docker driver, you have to get the URL of the services by running these commands from the host. Each command requires a different terminal window as documented [here](https://minikube.sigs.k8s.io/docs/handbook/accessing/): 
+In the case of a minikube Kubernetes cluster that uses Docker driver, you have to get the URL of the services by running these commands from the host. Each command requires a different terminal window as documented [here](https://minikube.sigs.k8s.io/docs/handbook/accessing/):
 ```zsh
 minikube service -n monitoring prometheus-nodeport
 minikube service -n monitoring grafana-nodeport
@@ -1128,16 +1157,17 @@ minikube service -n istio-system jaeger-nodeport
 minikube service -n istio-system kiali-nodeport
 ```
 
-NOTE: to get the default Grafana username is `admin` and the password is `prom-operator` 
+NOTE: To get the default Grafana username is `admin` and the password is `prom-operator`
 
-### My first µBench application 
+### My First µBench Application
 
-From the µBench container or the host move into the muBench folder and run  
+From the µBench container or the host move into the muBench folder and run
 ```zsh
 cd $HOME/muBench
 python3 Deployers/K8sDeployer/RunK8sDeployer.py -c Configs/K8sParameters.json
 ```
-This command creates the µBench application described in `Configs/K8sParameters.json`. It uses the [Examplesworkmodel-serial-10services.json](../Examplesworkmodel-serial-10services.json) workmodel that specifies an application made of 10 microservices. Clients send requests to s0 and s0 sequentially calls all other services before sending the result to clients. Each service equally stresses the CPU.
+
+This command creates the µBench application described in `Configs/K8sParameters.json`. It uses the [Examples/workmodel-serial-10services.json](../Examples/workmodel-serial-10services.json) workmodel that specifies an application made of 10 microservices. Clients send requests to s0 and s0 sequentially calls all other services before sending the result to clients. Each service equally stresses the CPU.
 
 You should see an output like this
 ```zsh
@@ -1187,6 +1217,7 @@ To load the application you can use the µBench [Runner](#runner)
 cd $HOME/muBench
 python3 Benchmarks/Runner/Runner.py -c Configs/RunnerParameters.json
 ```
+
 You should see something like this
 ```zsh
 root@64ae03d1e5b8:~/muBench# python3 Benchmarks/Runner/Runner.py -c Configs/RunnerParameters.json
@@ -1194,9 +1225,9 @@ root@64ae03d1e5b8:~/muBench# python3 Benchmarks/Runner/Runner.py -c Configs/Runn
 ############   Run Forrest Run!!   ############
 ###############################################
 Start Time: 09:13:04.291510 - 23/01/2023
-Processed request 2, latency 139, pending requests 1 
-Processed request 13, latency 129, pending requests 1 
-Processed request 24, latency 139, pending requests 1 
+Processed request 2, latency 139, pending requests 1
+Processed request 13, latency 129, pending requests 1
+Processed request 24, latency 139, pending requests 1
 ....
 ```
 
@@ -1211,25 +1242,28 @@ To observe the service-graph you can access Kiali dashboard from your browser.
 <img width="70%" src="../Monitoring/kubernetes-full-monitoring/kiali.png">
 </p>
 
-> **_NOTE:_**: edit Configs/K8sParameters.json if your Kubernetes dns-resolver service is different from `kube-dns`. For instance in some cluster it is named `coredns`.
+> **_NOTE:_**: Edit Configs/K8sParameters.json if your Kubernetes dns-resolver service is different from `kube-dns`. For instance, in some clusters, it is named `coredns`.
 
-To eventually un-deploy the µBench applicaiton use the following command:
+To eventually un-deploy the µBench application use the following command:
 ```zsh
 kubectl delete -f SimulationWorkspace/yamls/
 ```
-### µBench custom applications
-#### Service graph generation
 
-To customize the application, the first task is to generate your [service graph](#service-graph-generator) and obtain two files `servicegraph.json` and `servicegraph.png` in the `SimulationWorkspace` directory. The .png is a picture of the generated graph. You can specify your service graph parameters by, e.g., editing `Configs/ServiceGraphParameters.json` and running  
+### µBench Custom Applications
+
+#### Service Graph Generation
+
+To customize the application, the first task is to generate your [service graph](#service-graph-generator) and obtain two files `servicegraph.json` and `servicegraph.png` in the `SimulationWorkspace` directory. The .png is a picture of the generated graph. You can specify your service graph parameters by, e.g., editing `Configs/ServiceGraphParameters.json` and running
 
 ```zsh
 cd $HOME/muBench
 python3 ServiceGraphGenerator/RunServiceGraphGen.py -c Configs/ServiceGraphParameters.json
 ```
 
-> Note: if you have problems with cairo library this may help on Ubuntu: `sudo apt-get install libpangocairo-1.0-0`
-  
-#### Work model generation
+> Note: If you have problems with cairo library this may help on Ubuntu: `sudo apt-get install libpangocairo-1.0-0`
+
+#### Work Model Generation
+
 Once the service graph has been created, you have to create your [work model](#work-model) that describes the internal-service performed by each service of the graph. You can specify your workmodel parameters by, e.g., editing `Configs/WorkModelParameters.json` and running the following command that produces a `workmodel.json` file in `SimulationWorkspace` directory that will be eventually used to deploy your µBench app in the Kubernetes cluster.
 
 ```zsh
@@ -1237,12 +1271,13 @@ cd $HOME/muBench
 python3 WorkModelGenerator/RunWorkModelGen.py -c Configs/WorkModelParameters.json
 ```
 
-#### Execution on Kubernetes 
+#### Execution on Kubernetes
 
-To deploy your µBench application in the Kubernetes cluster, you have to edit the `Configs/K8sParameters.json` inserting the correct path of your workmodel file, e.g., 
+To deploy your µBench application in the Kubernetes cluster, you have to edit the `Configs/K8sParameters.json` inserting the correct path of your workmodel file, e.g.,
 ```json
 `"WorkModelPath": "SimulationWorkspace/workmodel.json"
 ```
+
 Then you have to run the `K8sDeployer` and monitor the deployment status of your pod and services with `kubectl`
 
 ```zsh
@@ -1276,7 +1311,7 @@ sdb1         NodePort    10.102.58.96   <none>        80:32240/TCP,51313:31011/T
 
 > Note that steps the creation of service graph and of the workmodel and the eventual deployment of Kubernetes can be performed all at once by using the [Kubernetes Autopilot](#k8sautopilot)
 
-### Test service response <!-- omit in toc -->
+### Test Service Response
 
 Test the correct execution of the application with curl http://`$MASTER_IP`:31113/s0, where `$MASTER_IP` is the IP address of the master-node of the cluster, e.g.,
 
@@ -1309,7 +1344,7 @@ dMMMd:m+  dM   dM.  /MMo   :MMM/    sMMM+     dMMMMh    +NN:     .MMMMMMN`  :Ms 
 /Moh+ y/  hM   dM.  /MMo   :MMM/    sMMMo....-mMMMMMy++++++++++++sMMMMMMm   .M+  `M+  /m  -M- /MosMo
 `N.++ y/  hM``.mM+//yMMdsyydMMMmmmNNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMN   .M+  .M+  /m  -M. :M..Mo
 `N.+s:dhyhNMNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMN-..:Mo``.Mo  +m  -M. :M..Mo
-`NmNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNNNMmmmMhsyM+/Mo
+`NmNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNNNMmmmMhsyM+/Mo
 yMMMMMMMMMMMMMMMMNNMMMMMmdmMMMMNhyhNMMMMNyooyNMMMMNs//+hMMMMMNdmNMMMMNmmNMMMMMNNMMMMNMMMMMMMMMMMMMMm
 :MMhNhyM//NN-`yMm. .hMMh   +MMN-   `mMMm.    -MMMM:     hMMM+   `hMMh`  `hMMN/ `yMN- :MM/:mMN/yMNsMh
 .Mm do.N  mh  -Md   /MMs   .MMm     hMMd      mMMM.     oMMN     :MM+    +MMm   :Mh   dd  sMd -Mh My
@@ -1320,4 +1355,4 @@ yMMMMMMMMMMMMMMMMNNMMMMMmdmMMMMNhyhNMMMMNyooyNMMMMNs//+hMMMMMNdmNMMMMNmmNMMMMMNN
 
 Note that in this example the service s0 implements the `Colosseum.py` internal service that sends back this ASCII ART image. The `Loader.py` function sends back a sequence of random characters.
 
-For other tests refer to [Benchmarks](#benchmarks-tools) tools.
+For other tests refer to [Benchmark Tools](#benchmark-tools) tools.
