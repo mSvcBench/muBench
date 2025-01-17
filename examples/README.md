@@ -12,10 +12,10 @@ The file `workmodel-serial-xservice,json` is the workload file for the applicati
   
 
 <p align="center">
-<img width="200" src="servicegraphA.png"> 
-<img width="200" src="servicegraphB.png">
-<img width="200" src="servicegraphC.png">
-<img width="200" src="servicegraphD.png">
+<img width="200" src="Examples/servicegraphA.png"> 
+<img width="200" src="Examples/servicegraphB.png">
+<img width="200" src="Examples/servicegraphC.png">
+<img width="200" src="Examples/servicegraphD.png">
 <figcaption align = "center"><b>Fig. 1 - Different application topologies with 20 microservices, namely (from left to rigth) A, B, C and D.</b></figcaption>
 </p>
 
