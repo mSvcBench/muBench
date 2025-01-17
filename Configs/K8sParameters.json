@@ -9,12 +9,11 @@
       "dns-resolver":"kube-dns.kube-system.svc.cluster.local",
       "scheduler-name": "default-scheduler",
       "sleep": 0,
-      "dns-resolver":"kube-dns.kube-system.svc.cluster.local",
       "nginx-gw": true,
       "nginx-svc-type": "NodePort",
       "no-apply": false
    },
    "InternalServiceFilePath": "CustomFunctions",
    "OutputPath": "SimulationWorkspace",
-   "WorkModelPath": "examples/workmodel-serial-10services.json"
+   "WorkModelPath": "Examples/workmodel-serial-10services.json"
 }
