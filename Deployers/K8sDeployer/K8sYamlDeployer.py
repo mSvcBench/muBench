@@ -34,7 +34,7 @@ def deploy_items(folder,st):
                         api_response = k8s_apps_api.read_namespaced_deployment_status(name=partial_yaml['metadata']['name'], namespace=partial_yaml["metadata"]["namespace"], pretty=True)
                         while (api_response.status.ready_replicas != api_response.status.replicas):
                             print(f"\n *** Waiting deployment {dn} ready ...*** \n")
-                            time.sleep(5)
+                            time.sleep(1)
                             api_response = k8s_apps_api.read_namespaced_deployment_status(name=partial_yaml['metadata']['name'], namespace=partial_yaml["metadata"]["namespace"], pretty=True)
                         time.sleep(st) # used to avoid API server overload
                         print(f"Deployment {dn} created.")

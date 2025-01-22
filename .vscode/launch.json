@@ -17,7 +17,7 @@
             "request": "launch",
             "program": "Autopilots/K8sAutopilot/K8sAutopilot.py",
             "console": "integratedTerminal",
-            "args": ["-c", "myConfigs/K8sAutopilotConf.json"]
+            "args": ["-c", "Configs/K8sAutopilotConf.json"]
         },
         {
             "name": "ServiceGraphGen",
@@ -25,7 +25,7 @@
             "request": "launch",
             "program": "ServiceGraphGenerator/RunServiceGraphGen.py",
             "console": "integratedTerminal",
-            "args": ["-c", "myConfigs/ServiceGraphParameters.json"]
+            "args": ["-c", "Configs/ServiceGraphParameters.json"]
         },
         {
             "name": "WorkModelGenerator",
@@ -33,7 +33,7 @@
             "request": "launch",
             "program": "WorkModelGenerator/RunWorkModelGen.py",
             "console": "integratedTerminal",
-            "args": ["-c", "myConfigs/WorkModelParameters.json"]
+            "args": ["-c", "Configs/WorkModelParameters.json"]
         },
         {
             "name": "K8sDeployer",
@@ -41,7 +41,7 @@
             "request": "launch",
             "program": "Deployers/K8sDeployer/RunK8sDeployer.py",
             "console": "integratedTerminal",
-            "args": ["-c", "myConfigs/K8sParameters.json"]
+            "args": ["-c", "Configs/K8sParameters.json"]
         },
         {
             "name": "TrafficGenerator",
@@ -49,7 +49,7 @@
             "request": "launch",
             "program": "Benchmarks/TrafficGenerator/RunTrafficGen.py",
             "console": "integratedTerminal",
-            "args": ["-c", "myConfigs/TrafficParameters.json"]
+            "args": ["-c", "Configs/TrafficParameters.json"]
         },
         {
             "name": "Runner",
@@ -57,7 +57,7 @@
             "request": "launch",
             "program": "Benchmarks/Runner/Runner.py",
             "console": "integratedTerminal",
-            "args": ["-c", "myConfigs/RunnerParameters.json"]
+            "args": ["-c", "Configs/RunnerParameters.json"]
         }
     ]
 }

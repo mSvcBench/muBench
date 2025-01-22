@@ -18,11 +18,11 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 30,
+  "id": 33,
   "links": [],
-  "liveNow": false,
   "panels": [
     {
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -30,6 +30,7 @@
         "y": 0
       },
       "id": 4,
+      "panels": [],
       "title": "Row title",
       "type": "row"
     },
@@ -50,6 +51,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
@@ -89,8 +91,7 @@
               }
             ]
           },
-          "unit": "reqps",
-          "unitScale": true
+          "unit": "reqps"
         },
         "overrides": [
           {
@@ -138,6 +139,7 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
@@ -145,7 +147,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum by (destination_service_name) (rate(istio_response_bytes_count{destination_service_name=~\"s[0-9*]\",reporter=\"destination\",response_code=\"200\",namespace=~\"istio-ingress|$ns\"}[$delta]))",
+          "expr": "sum by (destination_service_name) (rate(istio_response_bytes_count{destination_service_name=~\"s[0-9*]\",reporter=\"destination\",response_code=\"200\",namespace=~\"$ns\"}[$delta]))",
           "instant": false,
           "legendFormat": "{{label_name}}",
           "range": true,
@@ -172,6 +174,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
@@ -211,8 +214,7 @@
               }
             ]
           },
-          "unit": "ms",
-          "unitScale": true
+          "unit": "ms"
         },
         "overrides": [
           {
@@ -222,7 +224,7 @@
               "options": {
                 "mode": "exclude",
                 "names": [
-                  "s0"
+                  "s1"
                 ],
                 "prefix": "All except:",
                 "readOnly": true
@@ -260,6 +262,7 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
@@ -305,6 +308,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
@@ -344,8 +348,7 @@
               }
             ]
           },
-          "unit": "Mbits",
-          "unitScale": true
+          "unit": "Mbits"
         },
         "overrides": []
       },
@@ -368,6 +371,7 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
@@ -375,7 +379,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum by (destination_workload) (rate(istio_response_bytes_sum{source_workload=~\"istio-ingress|s[0-9]*.\",destination_workload=~\"s[0-9].*\",reporter=\"destination\",response_code=\"200\",namespace=~\"istio-ingress|$ns\"}[$delta])*8/1e6)",
+          "expr": "sum by (destination_workload) (rate(istio_response_bytes_sum{source_workload=~\"$istio_ingress_prometheus_label|s[0-9]*.\",destination_workload=~\"s[0-9].*\",reporter=\"destination\",response_code=\"200\",namespace=~\"$ns\"}[$delta])*8/1e6)",
           "instant": false,
           "legendFormat": "{{label_name}}",
           "range": true,
@@ -402,6 +406,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
@@ -441,8 +446,7 @@
               }
             ]
           },
-          "unit": "ms",
-          "unitScale": true
+          "unit": "ms"
         },
         "overrides": [
           {
@@ -452,7 +456,7 @@
               "options": {
                 "mode": "exclude",
                 "names": [
-                  "s0"
+                  "s1"
                 ],
                 "prefix": "All except:",
                 "readOnly": true
@@ -490,6 +494,7 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
@@ -542,8 +547,7 @@
               }
             ]
           },
-          "unit": "percentunit",
-          "unitScale": true
+          "unit": "percentunit"
         },
         "overrides": []
       },
@@ -556,6 +560,12 @@
       "id": 16,
       "options": {
         "displayMode": "gradient",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
         "maxVizHeight": 300,
         "minVizHeight": 16,
         "minVizWidth": 8,
@@ -572,7 +582,7 @@
         "sizing": "auto",
         "valueMode": "color"
       },
-      "pluginVersion": "10.3.1",
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
@@ -614,8 +624,7 @@
               }
             ]
           },
-          "unit": "decbytes",
-          "unitScale": true
+          "unit": "decbytes"
         },
         "overrides": []
       },
@@ -628,6 +637,12 @@
       "id": 13,
       "options": {
         "displayMode": "gradient",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
         "maxVizHeight": 300,
         "minVizHeight": 16,
         "minVizWidth": 8,
@@ -644,7 +659,7 @@
         "sizing": "auto",
         "valueMode": "color"
       },
-      "pluginVersion": "10.3.1",
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
@@ -686,8 +701,7 @@
               }
             ]
           },
-          "unit": "decbytes",
-          "unitScale": true
+          "unit": "decbytes"
         },
         "overrides": []
       },
@@ -700,6 +714,12 @@
       "id": 18,
       "options": {
         "displayMode": "gradient",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
         "maxVizHeight": 300,
         "minVizHeight": 16,
         "minVizWidth": 8,
@@ -716,7 +736,7 @@
         "sizing": "auto",
         "valueMode": "color"
       },
-      "pluginVersion": "10.3.1",
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
@@ -759,8 +779,7 @@
               }
             ]
           },
-          "unit": "none",
-          "unitScale": true
+          "unit": "none"
         },
         "overrides": []
       },
@@ -773,6 +792,12 @@
       "id": 17,
       "options": {
         "displayMode": "gradient",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
         "maxVizHeight": 300,
         "minVizHeight": 16,
         "minVizWidth": 8,
@@ -789,7 +814,7 @@
         "sizing": "auto",
         "valueMode": "color"
       },
-      "pluginVersion": "10.3.1",
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
@@ -824,6 +849,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
@@ -863,8 +889,7 @@
               }
             ]
           },
-          "unit": "ms",
-          "unitScale": true
+          "unit": "ms"
         },
         "overrides": [
           {
@@ -912,6 +937,7 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
@@ -946,6 +972,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
@@ -985,8 +1012,7 @@
               }
             ]
           },
-          "unit": "ms",
-          "unitScale": true
+          "unit": "ms"
         },
         "overrides": [
           {
@@ -1034,6 +1060,7 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
@@ -1075,8 +1102,7 @@
               }
             ]
           },
-          "unit": "percentunit",
-          "unitScale": true
+          "unit": "percentunit"
         },
         "overrides": []
       },
@@ -1089,6 +1115,12 @@
       "id": 8,
       "options": {
         "displayMode": "gradient",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
         "maxVizHeight": 300,
         "minVizHeight": 16,
         "minVizWidth": 8,
@@ -1105,7 +1137,7 @@
         "sizing": "auto",
         "valueMode": "color"
       },
-      "pluginVersion": "10.3.1",
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
@@ -1124,24 +1156,45 @@
       "type": "bargauge"
     }
   ],
+  "preload": false,
   "refresh": "10s",
-  "schemaVersion": 39,
+  "schemaVersion": 40,
   "tags": [],
   "templating": {
     "list": [
       {
+        "current": {
+          "text": "1m",
+          "value": "1m"
+        },
         "hide": 2,
         "name": "delta",
         "query": "1m",
-        "skipUrlSync": false,
+        "skipUrlSync": true,
         "type": "constant"
       },
       {
+        "current": {
+          "text": "istio-ingress|default",
+          "value": "istio-ingress|default"
+        },
         "description": "namespace",
         "hide": 2,
         "name": "ns",
         "query": "istio-ingress|default",
-        "skipUrlSync": false,
+        "skipUrlSync": true,
+        "type": "constant"
+      },
+      {
+        "current": {
+          "text": "istio-ingressgateway",
+          "value": "istio-ingressgateway"
+        },
+        "description": "Label exported by Prometheus for istio ingress workload ",
+        "hide": 2,
+        "name": "istio_ingress_prometheus_label",
+        "query": "istio-ingressgateway",
+        "skipUrlSync": true,
         "type": "constant"
       }
     ]
@@ -1154,6 +1207,6 @@
   "timezone": "",
   "title": "mubench-istio",
   "uid": "caea3eea-9349-461f-b7c0-2f863a15b08f",
-  "version": 21,
+  "version": 4,
   "weekStart": ""
 }
