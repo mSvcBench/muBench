@@ -1,3 +1,10 @@
+# Full tracing and monitoring setup
+To install full tracing and monitoring setup, you can use the following commands.
+```zsh
+./monitoring-install.sh
+```
+Otherwise, you can follow the next steps for one by one installation.
+
 # Prometheus operator
 
 You can install [Prometheus operator](https://github.com/prometheus-operator/prometheus-operator) via Helm ([install Helm](https://helm.sh/docs/intro/install)): 
@@ -72,9 +79,11 @@ kubectl apply -f jaeger-nodeport.yaml
 [kiali](https://kiali.io/) can be used as Istio dashboard. To install kiali, you can hese helm as follows:
 
 ```zsh 
+#Kiali
 helm repo add kiali https://kiali.org/helm-charts
 helm repo update
 helm install \
+  -n istio-system \
   -f kiali-values.yaml \
   kiali-server \
   kiali/kiali-server
