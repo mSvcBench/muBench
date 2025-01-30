@@ -24,9 +24,8 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 28,
+  "id": 25,
   "links": [],
-  "liveNow": false,
   "panels": [
     {
       "datasource": {
@@ -40,11 +39,13 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -53,6 +54,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -83,7 +85,7 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "ms"
         },
         "overrides": []
       },
@@ -106,15 +108,16 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "sum by (app_name) (increase(mub_request_processing_latency_seconds_sum{}[2m])) / sum by (app_name) (increase(mub_request_processing_latency_seconds_count{}[2m]))",
+          "expr": "sum by (app_name) (increase(mub_request_processing_latency_milliseconds_sum{}[2m])) / sum by (app_name) (increase(mub_request_processing_latency_milliseconds_count{}[2m]))",
           "interval": "",
           "legendFormat": "{{destination_app}}",
           "range": true,
@@ -135,11 +138,13 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -148,6 +153,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -201,15 +207,16 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "sum by (app_name) (rate(mub_internal_processing_latency_seconds_count{}[2m]))",
+          "expr": "sum by (app_name) (rate(mub_internal_processing_latency_milliseconds_count{}[2m]))/1000",
           "interval": "",
           "legendFormat": "{{destination_app}}",
           "range": true,
@@ -230,11 +237,13 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -243,6 +252,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -273,7 +283,7 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "ms"
         },
         "overrides": []
       },
@@ -296,15 +306,16 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "sum by (app_name) (increase(mub_internal_processing_latency_seconds_sum{}[2m])) / sum by (app_name) (increase(mub_internal_processing_latency_seconds_count{}[2m]))",
+          "expr": "sum by (app_name) (increase(mub_internal_processing_latency_milliseconds_sum{}[2m])) / sum by (app_name) (increase(mub_internal_processing_latency_milliseconds_count{}[2m]))",
           "interval": "",
           "legendFormat": "{{app_name}}",
           "range": true,
@@ -322,11 +333,13 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -335,6 +348,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -365,7 +379,7 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "ms"
         },
         "overrides": []
       },
@@ -388,15 +402,16 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "sum by (app_name) (increase(mub_external_processing_latency_seconds_sum{}[2m])) / sum by (app_name) (increase(mub_external_processing_latency_seconds_count{}[2m]))",
+          "expr": "sum by (app_name) (increase(mub_external_processing_latency_milliseconds_sum{}[2m])) / sum by (app_name) (increase(mub_external_processing_latency_milliseconds_count{}[2m]))",
           "interval": "",
           "legendFormat": "{{app_name}}",
           "range": true,
@@ -414,6 +429,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -421,6 +437,7 @@
             "axisSoftMax": 2,
             "axisSoftMin": 0,
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -429,6 +446,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -481,15 +499,16 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "sum by (container) (increase(container_cpu_usage_seconds_total{container=~\"s.*[0-9].*\",service=\"prometheus-kube-prometheus-kubelet\"}[2m])/120)",
+          "expr": "sum by (pod) (increase(container_cpu_usage_seconds_total{pod=~\"s[0-9].*\"}[2m])/120)",
           "interval": "",
           "legendFormat": "{{container}}",
           "range": true,
@@ -510,11 +529,13 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -523,6 +544,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -576,15 +598,16 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "sum by (container) (sum_over_time(container_memory_usage_bytes{pod=~\"s[0-9].*\",service=\"prometheus-kube-prometheus-kubelet\"}[2m]) / count_over_time(container_memory_usage_bytes{pod=~\"s[0-9].*\",service=\"prometheus-kube-prometheus-kubelet\"}[2m])) / 1e6",
+          "expr": "sum by (pod) (sum_over_time(container_memory_usage_bytes{pod=~\"s[0-9].*\"}[2m]) / count_over_time(container_memory_usage_bytes{pod=~\"s[0-9].*\"}[2m])) / 1e6",
           "interval": "",
           "legendFormat": "{{container}}",
           "range": true,
@@ -602,6 +625,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -609,6 +633,7 @@
             "axisSoftMax": 2,
             "axisSoftMin": 0,
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -617,6 +642,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -669,15 +695,16 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "sum by (node) (rate(container_cpu_usage_seconds_total{container!~\"POD|\" ,namespace!=\"\",namespace=\"default\",service=\"prometheus-kube-prometheus-kubelet\"}[2m]))",
+          "expr": "sum by (node) (rate(container_cpu_usage_seconds_total[2m]))",
           "interval": "",
           "legendFormat": "{{node}}",
           "range": true,
@@ -696,6 +723,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -703,6 +731,7 @@
             "axisSoftMax": 1,
             "axisSoftMin": 0,
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -711,6 +740,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -764,15 +794,16 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "sum by (container) (increase(container_cpu_usage_seconds_total{container=~\"s.*[0-9].*\", image!~\"k8s.gcr.io/pause:3.5\",service=\"prometheus-kube-prometheus-kubelet\"}[2m])) / (120 * sum by (container) (kube_pod_container_resource_requests{container=~\"s[0-9].*\"}))",
+          "expr": "sum by (pod) (increase(container_cpu_usage_seconds_total{pod=~\"s[0-9].*\"}[2m])) / (120 * sum by (pod) (kube_pod_container_resource_requests{pod=~\"s[0-9].*\"}))",
           "interval": "",
           "legendFormat": "{{container}}",
           "range": true,
@@ -790,11 +821,13 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -803,6 +836,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -855,22 +889,23 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "sum(increase(container_cpu_usage_seconds_total{container!~\"POD|\" ,namespace!=\"\",namespace=\"default\",service=\"prometheus-kube-prometheus-kubelet\"}[2m])) by (namespace) / 120",
+          "expr": "sum(increase(container_cpu_usage_seconds_total[2m])) by (namespace) / 120",
           "interval": "",
           "legendFormat": "{{namespace}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "CPU of cluster",
+      "title": "CPU by namespace",
       "type": "timeseries"
     },
     {
@@ -881,11 +916,13 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -894,6 +931,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -947,15 +985,16 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "sum (sum_over_time(container_memory_working_set_bytes{pod=~\"s[0-9].*\",service=\"prometheus-kube-prometheus-kubelet\"}[2m]) / count_over_time(container_memory_working_set_bytes{container=~\"s[0-9].*\",service=\"prometheus-kube-prometheus-kubelet\"}[2m])) / 1e6",
+          "expr": "sum (sum_over_time(container_memory_working_set_bytes{pod=~\"s[0-9].*\"}[2m]) / count_over_time(container_memory_working_set_bytes{pod=~\"s[0-9].*\"}[2m])) / 1e6",
           "interval": "",
           "legendFormat": "Cluster Memory",
           "range": true,
@@ -968,7 +1007,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -976,6 +1015,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -983,6 +1023,7 @@
             "axisSoftMax": 2,
             "axisSoftMin": 0,
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -991,6 +1032,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -1072,14 +1114,15 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "sum by (node) (kube_pod_container_resource_requests{container=~\"s[0-9].*\"})",
+          "expr": "sum by (node) (kube_pod_container_resource_requests{pod=~\"s[0-9].*\", resource=\"cpu\"})",
           "interval": "",
           "legendFormat": "{{node}}",
           "refId": "A"
@@ -1089,9 +1132,9 @@
       "type": "timeseries"
     }
   ],
+  "preload": false,
   "refresh": "10s",
-  "schemaVersion": 37,
-  "style": "dark",
+  "schemaVersion": 40,
   "tags": [],
   "templating": {
     "list": []
@@ -1118,6 +1161,6 @@
   "timezone": "",
   "title": "µBench-dashboard",
   "uid": "6IBeJ-b7k",
-  "version": 4,
+  "version": 1,
   "weekStart": ""
 }
