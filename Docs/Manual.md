@@ -107,14 +107,18 @@ The description of a µBench application, i.e., the set of internal and external
       ],
       "internal_service": {
          "compute_pi": {
-            "mean_response_size": 10,
             "range_complexity": [
                50,
                100
             ]
          }
       },
-      "request_method": "rest",
+      "request_protocol": "http",
+      "request_method": "get",
+      "request_parameters": {
+         "response_dist": "exp",
+         "response_size": 10
+      },
       "workers": 4,
       "threads": 16,
       "cpu-requests": "1000m",
@@ -126,14 +130,18 @@ The description of a µBench application, i.e., the set of internal and external
       "external_services": [],
       "internal_service": {
          "compute_pi": {
-            "mean_response_size": 1,
             "range_complexity": [
                1,
                10
             ]
          }
       },
-      "request_method": "rest",
+      "request_protocol": "http",
+      "request_method": "get",
+      "request_parameters": {
+         "response_dist": "exp",
+         "response_size": 1
+      },
       "workers": 4,
       "threads": 16,
       "pod_antiaffinity": false,
@@ -153,10 +161,14 @@ The description of a µBench application, i.e., the set of internal and external
       }],
       "internal_service": {
          "colosseum": {
-            "mean_response_size": 10
          }
       },
-      "request_method": "rest",
+      "request_protocol": "http",
+      "request_method": "get",
+      "request_parameters": {
+         "response_dist": "exp",
+         "response_size": 10
+      },
       "workers": 4,
       "threads": 16,
       "cpu-requests": "1000m",
@@ -176,14 +188,20 @@ The description of a µBench application, i.e., the set of internal and external
       }],
       "internal_service": {
          "compute_pi": {
-            "mean_response_size": 15,
             "range_complexity": [
                10,
                20
             ]
          }
       },
-      "request_method": "rest",
+      "request_protocol": "http",
+      "request_method": "post",
+      "request_parameters": {
+         "request_dist": "const",
+         "request_size": 10,
+         "response_dist": "exp",
+         "response_size": 15
+      },
       "workers": 4,
       "threads": 16,
       "cpu-requests": "1000m",
@@ -192,9 +210,10 @@ The description of a µBench application, i.e., the set of internal and external
       "replicas": 1
    }
 }
+
 ```
 
-In this example, the µBench application is made by four services: *s0*, *s1*, *s2*, and *sdb1* (that mimics a database). The internal-service of s0 is the function *compute_pi* with parameters `range_complexity` (uniform random interval of the number of pi digits to generate; the higher this number the higher the CPU stress) and `mean_response_size` (average value of an expneg distribution used to generate the number of bytes to return to the caller).
+In this example, the µBench application is made by four services: *s0*, *s1*, *s2*, and *sdb1* (that mimics a database). The internal-service of s0 is the function *compute_pi* with parameters `range_complexity` (uniform random interval of the number of pi digits to generate; the higher this number the higher the CPU stress). Additionally, `request_protocol`, `request_method`, `request_parameters` define the protocol, method, and parameters of the expeted request received by the service. Specifically, services *s0*, *s1*, and *sdb1*  expect an HTTP GET request, while *s2* requires an HTTP POST request with a fixed request size of 10 KB.
 
 The external-services called by s0 are organized into two *external-service-groups* described by JSON objects contained in an array. The first group contains only the external-service *s1*. The second group contains only the external-service *sdb1*. External-services belonging to the same group are called sequentially, while those in different groups are called in parallel. Specifically, upon receiving a request, a different per-group thread is executed for each external-service-group. Each per-group thread randomly selects a number of `seq_len` external-services in its group and invokes them (e.g., an HTTP call) sequentially, according to a given calling `probability`. If `seq_len` is greater than the size of the external-services-group, the involvement of the external-services of the group is controlled exclusively by the calling probabilities.
 
@@ -202,7 +221,7 @@ In the considered example, the service *s0* surely calls *s1* because seq_len is
 
 This way of involving microservices per request is called *stochastic-driven*. µBench also offers a *trace-driven* approach, see [Benchmark Strategies](#benchmark-strategies).
 
-Additional information includes the number of parallel processes (`workers`) and `threads` per process used by the service-cell to serve client requests, the `request_method` it uses to call other services (can be `gRPC` or `rest`, and, currently, must be equal for all), optional specification of CPU and memory resources needed by service-cell containers, namely `cpu-requests`, `cpu-limits`, `memory-requests`, `memory-limits` (see k8s [documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)), the number of `replicas` of the related POD, the `pod_antiaffinity` (true, false) property to enforce pods spreading on different nodes.
+Additional information includes the number of parallel processes (`workers`) and `threads` per process used by the service-cell to serve client requests. The `workmodel.json` specifies, for each servies, the expected protocol and HTTP method for incoming requests using the fields `request_protocol` (e.g., HTTP) and `request_method` (GET or POST). Additionally, the `request_parameters` object defines the characteristics of both the incoming request and the service's response: `request_dist` and `request_size` determine the distribution and size of the incoming request, while `response_dist` and `response_size` define the distribution and size of the service's response. Otional specification of CPU and memory resources needed by service-cell containers, namely `cpu-requests`, `cpu-limits`, `memory-requests`, `memory-limits` (see k8s [documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)), the number of `replicas` of the related POD, the `pod_antiaffinity` (true, false) property to enforce pods spreading on different nodes.
 
 ---
 
@@ -234,12 +253,11 @@ def custom_function(params):
 
 ### compute_pi
 
-The built-in function `compute_pi` computes an `N` number of decimals of the *π*, where `N` is an integer, randomly chosen in an interval [`X`,`Y`] for each execution. The larger the interval, the greater the complexity and the stress on the CPU. After the computation, the `compute_pi` function returns a dummy string made of `B` kBytes, where `B` is a sample of an exponential random variable whose average is the `mean_response_size` parameter.
-
-So the input parameters of `compute_pi` are:
+The built-in function `compute_pi` computes an `N` number of decimals of the *π*, where `N` is an integer, randomly chosen in an interval [`X`,`Y`] for each execution. The larger the interval, the greater the complexity and the stress on the CPU. After the computation, the `compute_pi` function returns and an external function adjust the body size to match the specifications defined by `response_dist` and `response_size` in the `request_parameters`.
+ 
+So the input parameter of `compute_pi` is:
 
 - `"range_complexity": [X, Y]`
-- `"mean_response_size": value`
 
 Some custom functions are already available in the `CustomFunction` folder that contains also related [Readme](CustomFunctions/README.md) documentation.
 
@@ -579,7 +597,15 @@ The WorkModelGenerator takes as input a configuration file (`WorkModelParameters
             "workers":4,
             "threads":16,
             "cpu-requests": "1000m",
-            "cpu-limits": "1000m"
+            "cpu-limits": "1000m",
+            "request_spec": {
+               "request_protocol":"http",
+               "request_method": "get",
+               "request_parameters": {
+                  "response_dist": "const",
+                  "response_size": 10
+               }
+            }            
          }
       },
       "f2": {
@@ -591,8 +617,7 @@ The WorkModelGenerator takes as input a configuration file (`WorkModelParameters
             "parameters": {
                "cpu_stress": {"run":false,"range_complexity": [100, 100], "thread_pool_size": 1, "trials": 1},
                "memory_stress":{"run":false, "memory_size": 10000, "memory_io": 1000},
-               "disk_stress":{"run":true,"tmp_file_name":  "mubtestfile.txt", "disk_write_block_count": 1000, "disk_write_block_size": 1024},
-               "mean_response_size": 11
+               "disk_stress":{"run":true,"tmp_file_name":  "mubtestfile.txt", "disk_write_block_count": 1000, "disk_write_block_size": 1024}
             },
             "workers":4,
             "threads":16,
@@ -610,8 +635,7 @@ The WorkModelGenerator takes as input a configuration file (`WorkModelParameters
                "cpu_stress": {"run":true,"range_complexity": [1000, 1000], "thread_pool_size": 1, "trials": 1},
                "memory_stress":{"run":false, "memory_size": 10000, "memory_io": 1000},
                "disk_stress":{"run":false,"tmp_file_name":  "mubtestfile.txt", "disk_write_block_count": 1000, "disk_write_block_size": 1024},
-               "sleep_stress":{"run":false, "sleep_time":  0.01},
-               "mean_response_size": 11
+               "sleep_stress":{"run":false, "sleep_time":  0.01}
             },
             "workers":4,
             "threads":16,
@@ -620,9 +644,16 @@ The WorkModelGenerator takes as input a configuration file (`WorkModelParameters
             "replicas": 2
          }
       },
-      "request_method":{
+      "request_global_spec": {
          "type": "metadata",
-         "value":"rest"
+         "request_protocol":"http",
+         "request_method": "get",
+         "request_parameters": {
+            "request_dist": "const",
+            "request_size": 11,
+            "response_dist": "exp",
+            "response_size": 12
+         }
       },
       "databases_prefix": {
          "type":"metadata",
@@ -651,13 +682,16 @@ This file includes a set of *function-flavor* that are possible internal-service
 
 Many *function-flavors* (`f0`, `f1`, `f2`,`f3`) can use the same python base-function (e.g., `loader` is used by `f2` and `f3`) but with different parameters.
 
-Each function-flavor is represented as JSON object with a unique ID key (`f0`, `f1`, `f2`, `f3`) and whose values are: the `parameters` taken as input by the function, e.g., the `compute_pi` function uses `mean_response_size` and `range_complexity`.
+Each function-flavor is represented as JSON object with a unique ID key (`f0`, `f1`, `f2`, `f3`) and whose values are: the `parameters` taken as input by the function, e.g., the `compute_pi` function uses ~~`mean_response_size`~~ (this parameter is deprecated and will be removed, use, instead, `response_dist` and `response_size` in the `request_parameters`) and `range_complexity`.
 
 Other keys are the `recipient` of the function-flavor (`database` or plain `service`); the `name` of the base-function to be executed; the `probability` to be associated to a service-cell; the optional keys `workers` and `threads` that are the number of processes and threads per process used by service-cells that run the function-flavor to serve client requests; the optional key `replicas` for choosing the number of replicas of service-cells that run the function-flavor; the optional keys `cpu-requests`,`cpu-limits`,`memory-requests`,`memory-limits` to control the cpu/memory resources associated to the service-cells running the function-flavor (see k8s [documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)).
 
 The description of external-services is imported through a `servicegraph.json` file located in `ServiceGraphFilePath` metadata that can be manually made or automatically generated by the ServiceGraphGenerator.
 
-The method used to carry out external-service calls is specified in `request_method` metadata ("rest" or "gRPC"). Prefix to identify databases is in `databases_prefix` metadata.
+
+For each function (`f0`, `f1`, `f2`,`f3`) a `request_spec` can be defined to specify how the assigned services should be called and how they should respond. Alternatively, a `request_global_spec` can be defined to apply the same configuration to all services. ***If both parameters are present, the global setting will override the function-specific configuration.***
+The internal fields of the `request_spec` and `request_global_spec` structures are identical. The `request_protocol` field specifies the communication protocol, such as HTTP, while `request_method` determines how the request is made (e.g. GET or POST). Within `request_parameters`, additional details shape the characteristics of the interaction. The `request_dist` field specifies the distribution used to generate the number (`request_size`) of bytes sent in the request to the service. Similarly, `response_dist` determines the distribution used to generate the size (`response_size`) of the response sent back. The distribution can be `const`, the request/response size is fixed and equal to the value specified in the `[request/response]_size`;  or `exp`, the request/response size is generated by an expneg distribution with an average value equal to `[request/response]_size`.
+Prefix to identify databases is in `databases_prefix` metadata.
 
 The `override` metadata can be used to enforce the use of a specific function for a service avoiding the random selection and to assign sidecar containers to a service-cell. In the above example, the service-cell that implements the database identified as `sdb1` has a mongo sidecar container. Moreover, the service-cell that implements the service `s0` uses the function with ID `f1`.
 
@@ -766,7 +800,7 @@ In each app folder, you will find a `service_graph.json` file that represents th
 
 To benchmark an app generated from Alibaba trace, the following steps must be performed:
 
-- Create a `Config/WorkModelParameters.json` file that contains the `service_graph.json` file of the application you intend to test. As for the remaining information in the `WorkModelParameters.json` file, we were unable to derive it from Alibaba's traces, so the user must make his or her own choices. For example, a possible `WorkModelParameters.json` file for sequential application No. 18 is as follows. In this case, all microservices stress the CPU through the [loader](#CustomFunctions/README.md) function, the average size of responses is 11 kBytes, and Kubernetes' requests and CPU limits are set to 250m.
+- Create a `Config/WorkModelParameters.json` file that contains the `service_graph.json` file of the application you intend to test. As for the remaining information in the `WorkModelParameters.json` file, we were unable to derive it from Alibaba's traces, so the user must make his or her own choices. For example, a possible `WorkModelParameters.json` file for sequential application No. 18 is as follows. In this case, all microservices stress the CPU through the [loader](#CustomFunctions/README.md) function. According to the `response_dist` and `response_size` parameters, the responses size follows an expneg distribution with an average size of 11 kBytes, and Kubernetes' requests and CPU limits are set to 250m.
 
    ```json
    {
@@ -780,19 +814,24 @@ To benchmark an app generated from Alibaba trace, the following steps must be pe
                "parameters": {
                   "cpu_stress": {"run":true,"range_complexity": [100, 100], "thread_pool_size": 1, "trials": 1},
                   "memory_stress":{"run":false, "memory_size": 10000, "memory_io": 1000},
-                  "disk_stress":{"run":false,"tmp_file_name":  "mubtestfile.txt", "disk_write_block_count": 1000, "disk_write_block_size": 1024},
-                  "mean_response_size": 11
+                  "disk_stress":{"run":false,"tmp_file_name":  "mubtestfile.txt", "disk_write_block_count": 1000, "disk_write_block_size": 1024}
                },
                "workers":8,
                "threads":128,
                "cpu-requests": "250m",
-               "cpu-limits": "250m"
+               "cpu-limits": "250m",
+               "request_spec": {
+                  "request_protocol":"http",
+                  "request_method": "post",
+                  "request_parameters": {
+                     "request_dist": "const",
+                     "request_size": 1,
+                     "response_dist": "exp",
+                     "response_size": 11
+                  }
+               }
             }
-         },
-         "request_method":{
-            "type": "metadata",
-            "value":"rest"
-         },
+         },    
          "databases_prefix": {
             "type":"metadata",
             "value": "sdb"

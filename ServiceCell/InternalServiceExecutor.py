@@ -51,7 +51,7 @@ class ThreadReturnedValue:
 
 
 def compute_pi(params):
-    default_params = {"range_complexity": [50, 100], "mean_response_size": 10} 
+    default_params = {"range_complexity": [50, 100], "mean_response_size": 1} 
     params = jsonmerge.merge(default_params,params)
     if "mean_bandwidth" in params:
         # for backward compatibility
@@ -75,9 +75,12 @@ def compute_pi(params):
             q, r, t, k, m, x = q*k, (2*q+r)*x, t*x, k+1, (q*(7*k+2)+r*x)//(t*x), x+2
   
 
-    bandwidth_load = random.expovariate(1 / params["mean_response_size"])
-    num_chars = max(1, 1000 * bandwidth_load)  # Response in kB
-    response_body = 'm' * int(num_chars)
+    # bandwidth_load = random.expovariate(1 / params["mean_response_size"])
+    # num_chars = max(1, 1000 * bandwidth_load)  # Response in kB
+    # response_body = 'm' * int(num_chars)
+    
+    # A return value is expected, complete_response_body is used to complete the response
+    response_body = 'm'
 
     return response_body
 

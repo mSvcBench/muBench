@@ -36,15 +36,36 @@ def init_gRPC(my_service_graph, workmodel, server_port, app):
 
 # return the size of the body, NOT the body
 def build_post_request_body(params, trace_size_to_send=0):
+    """
+    Builds the body of a POST request based on the given parameters.
+    Args:
+        params (dict): A dictionary containing the parameters for the request.
+            - "request_dist" (str): The distribution type of the request size, either "const" or "exp".
+            - "request_size" (int): The size of the request in kB.
+        trace_size_to_send (int, optional): present if TRACEDRIVEN test -> The size of the trace to send to the next service, 
+                                                this is subtracted from the size of the generated request. Default value 0
+
+    Returns:
+        str: The body of the POST request as a string of characters. If the calculated number of characters is less than 1, returns an empty string.
+
+    Raises:
+        Exception: If there is an error during the construction of the request body.
+    """
     try:
         if params["request_dist"] == "const":
-            response_body = 'V' * (1000 * params["request_size"] - trace_size_to_send) # Response in kB
-            return response_body
-        elif params["request_dist"] == "exp":
+            num_chars = 1000 * int(params["request_size"] - trace_size_to_send) # Response in kB
+            # request_body = 'V' * num_char # Response in kB
+            # return request_body
+        elif params["request_dist"] == "exp":            
             bandwidth_load = random.expovariate(1 / params["request_size"])
             num_chars = int(max(1, 1000 * bandwidth_load - trace_size_to_send))  # Response in kB
-            response_body = 'F' * num_chars
-            return response_body
+            # request_body = 'F' * num_chars
+            # return request_body
+        
+        if num_chars < 1:
+            return ""
+        request_body = 'M' * int(num_chars) # Response in kB
+        return request_body
     except Exception as err:
         raise Exception(f"Error in 'build_post_request_body' {err}")
 

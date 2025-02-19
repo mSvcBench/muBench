@@ -203,6 +203,7 @@ def start_worker():
         
         if len(my_service_graph) > 0:
             if len(trace)>0:
+                # globalDict['work_model'] is necessary to get the request parameters
                 service_error_dict = run_external_service(my_service_graph,globalDict['work_model'],query_string,trace[ID],app, jaeger_headers)
             else:
                 service_error_dict = run_external_service(my_service_graph,globalDict['work_model'],query_string,dict(),app, jaeger_headers)
